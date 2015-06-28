@@ -14,7 +14,7 @@
     <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
 	<link rel="icon" href="img/favicon.ico" type="image/x-icon" />
 
-    <title>Login | Mentored-Research</title>
+    <title>Mentored-Research</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -109,6 +109,10 @@
         	color: #fff;
         }
 
+        p {
+            color: #fff;    
+        }
+
          /*for the smallest phones*/ 
         @media (max-width:767px){
 			
@@ -150,138 +154,6 @@
     		// for the scrolly thing.
     		$('.scrolly').scrolly();
 
-    		// for navigation of the sign up button.
-    		$('#btnSignup').on('click', function() {
-    			window.location.href = "signup.php";
-    		});
-
-    		// for the login form and login button functionality!
-			$('#formLogin').validator().on('submit', function (e) {
-				if (e.isDefaultPrevented()) {
-					alertMsg.children('p').remove();
-					alertMsg.fadeOut();
-					popup.children('p').remove();
-					popup.append("<p>Oops! Looks like you did not fill the fields correctly. Please Recheck and try again.</p>").fadeIn();
-				} 
-				else {
-					// everything looks good. Write the code for login here.
-					var email = $('#txtEmail').val().trim();
-					var pwd = $('#txtPwd').val().trim();
-
-					popup.fadeOut();
-					alertMsg.children('p').remove();
-					alertMsg.append("<p>Please wait for a moment while we log you in...</p>").fadeIn();
-					$.ajax({
-						type: "GET",
-						url: "AJAXFunctions.php",
-						data: {
-							no: "1", email: email, pwd: pwd
-						},
-						success: function(response) {
-							alert(response);
-
-							popup.fadeOut();
-							alertMsg.children('p').remove();
-							alertMsg.fadeOut();
-
-							if(response == "A") {  // go to the admin page.
-
-							}
-							else if(response == "B") {   // go to the Director page.
-								
-							}
-							else if(response == "C") {   // go to the Mentor page.
-								
-							}
-							else if(response == "D") {  // go to the Mentee page.
-								
-							}
-							else if(response == "-A" || response == "-B" || response == "-C" || response == "-D") {   // error in password or username.
-								
-							}
-							else if(response == "0") {   // email not there in the User table.
-								
-							}
-							else {   // error condition
-								popup.children('p').remove();
-								popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
-							}
-						},
-						error: function() {
-							alertMsg.children('p').remove();
-							alertMsg.fadeOut();
-							popup.children('p').remove();
-							popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-						}
-					});
-				
-				}   // end of else
-				return false;
-			});
-
-			$('#btnForgotPassword').on('click', function() {
-				$('.forgotPwdModal').modal('show');
-				return false;
-			});
-
-			// for the login form and login button functionality!
-			$('#formForgotPwd').validator().on('submit', function (e) {
-				if (e.isDefaultPrevented()) {
-					alertMsg.children('p').remove();
-					alertMsg.fadeOut();
-					popup.children('p').remove();
-					popup.append("<p>Oops! Looks like you did not fill the fields correctly. Please Recheck and try again.</p>").fadeIn();
-				} 
-				else {
-					// everything looks good. Write the code for forgot Password here.
-
-					var pwdName = $('#txtForgotPwdName').val().trim();
-					var pwdEmail = $('#txtForgotPwdEmail').val().trim();
-
-					popup.fadeOut();
-					alertMsg.children('p').remove();
-					alertMsg.append("<p>Please wait for a moment while we reset your password...</p>").fadeIn();
-					$.ajax({
-						type: "GET",
-						url: "AJAXFunctions.php",
-						data: {
-							no: "2", pwdName: pwdName, pwdEmail: pwdEmail
-						},
-						success: function(response) {
-
-							popup.fadeOut();
-							alertMsg.children('p').remove();
-							alertMsg.fadeOut();
-
-							if(response == "1") {
-								popup.children('p').remove();
-								popup.append("<p>Your Password change request has been proceeded. Please check your mailbox for further details.</p>").fadeIn();								
-							}
-							else if(response == "0") {
-								popup.children('p').remove();
-								popup.append("<p>Sorry, but we could not find this email address in our database. Please try again with the Registered Email address.</p>").fadeIn();									
-							}
-							else if(response == "2") {
-								popup.children('p').remove();
-								popup.append("<p>Apparently, we are facing difficulties with your network connection. Please try again for a successful change request.</p>").fadeIn();									
-							}
-							else {
-								popup.children('p').remove();
-								popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();									
-							}
-						},
-						error: function() {
-							alertMsg.children('p').remove();
-							alertMsg.fadeOut();
-							popup.children('p').remove();
-							popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-						}
-					});
-
-				}   // end of else
-				return false;
-			});
-
         });    // end of ready function.
 
 	</script>
@@ -320,20 +192,23 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand page-scroll" href="#page-top">Mentored-Research</a>
+                <a class="navbar-brand page-scroll" href="http://mentored-research.com">Mentored-Research</a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
                     <li class="hidden">
-                        <a class="scrolly" href="http://mentored-research.com"></a>
+                        <a class="scrolly" href="#page-top"></a>
                     </li>
                     <li>
                     	<a href="http://mentored-research.com">MR-Home</a>
                     </li>
                     <li>
                     	<a href="http://mentored-research.com/contact">Contact Us</a>
+                    </li>
+                    <li>
+                        <a href="http://mentored-research.com/login">MR-Login</a>
                     </li>
                 </ul>
             </div>
@@ -345,62 +220,20 @@
     <section id="login-section" style="padding-botton: 0px;">
     	<div class="container">
     		<h1 class="page-header text-center">
-    			Login
+    			Welcome to Mentored-Research!
     		</h1>
 
-    		<!-- table for the contact us form -->
-    		<form role="form" data-toggle="validator" id="formLogin">
-	    		<table class="table">
-	    			<tr>
-	    				<td>
-	    					<input type="email" class="form-control" placeholder="Enter Email*" id="txtEmail" required />
-	    				</td>
-	    			</tr>
-	    			<tr>
-	    				<td>
-	    					<input type="password" class="form-control" placeholder="Enter Password*" id="txtPwd" required />
-	    				</td>
-	    			</tr>
-	    			<tr>
-	    				<td>
-	    					<a href="#" id="btnForgotPassword">Forgot Password</a>		
-	    				</td>
-	    			</tr>
-	    			<tr>
-	    				<td>
-	    					<input type="submit" class="btn btn-lg btn-primary btn-block" id="btnLogin" value="Log In" />
-	    				</td>
-	    			</tr>
-	    		</table>
-    		</form>
+            <p>
+                Dear user, its a pleasure to have you on-board. You can go through our Home Page to know more about us.
+In the meanwhile, you need to be registered with the current ERI programme to be able to login. If you have already registered, and still seeing this page, please use/signup with the correct email address, or contact your mentor. He will get the problem solved.
+            </p>
 
-    		<form>
-    			<table class="table">
-	    			<tr>
-	    				<td>
-	    					<h1 class="text-center">
-	    						Sign up here
-	    					</h1>
-	    				</td>
-	    			</tr>
-    				<tr>
-    					<td>
-    						<input type="button" class="btn btn-lg btn-primary btn-block" value="Sign Up Here" id="btnSignup" />
-    					</td>
-    				</tr>
-    			</table>
-    		</form>
+            <p>
+                Thanks for visiting us. We will get back to you with more details in your mailbox. 
+            </p>
+
 		</div>
     </section>
-
-    <!-- <section id="signup-section" style="padding-top: 0px;">
-    	<div class="container">
-    		<h1 class="page-header text-center">
-    			Sign Up here
-    		</h1>
-    		<input type="button" class="btn btn-lg btn-primary btn-block" value="Sign Up Here" id="btnSignup" />
-    	</div>
-    </section> -->
 
     <footer>
         <div class="container">
@@ -409,12 +242,7 @@
                     <span class="copyright">Copyright &copy; Mentored-Research 2015</span>
                 </div>
                 <div class="col-md-4">
-                    <!-- <ul class="list-inline social-buttons">
-                        <li><a href="https://www.facebook.com/pages/Mentored-Researchs-Equity-Research-Initiative/313860081992430?ref=br_tf" target="_blank"><i class="fa fa-facebook"></i></a>
-                        </li>
-                        <li><a href="https://www.linkedin.com/company/2217419?trk=tyah&trkInfo=tarId%3A1401993298521%2Ctas%3Amentored%2Cidx%3A1-3-3" target="_blank"><i class="fa fa-linkedin"></i></a>
-                        </li>
-                    </ul> -->
+
                 </div>
                 <div class="col-md-4">   <!-- TODO -->
                     <ul class="list-inline social-buttons">
@@ -427,44 +255,6 @@
             </div>
         </div>
     </footer>
-
-	<!-- for all the modals here -->
-	<div class="modal fade forgotPwdModal">
-		<div class="modal-dialog modal-lg">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					<h4 class="modal-title forgotPwdTitle">Reset your Password</h4>
-				</div>
-				<div class="modal-body forgotPwdBody">
-
-					<form role="form" data-toggle="validator" id="formForgotPwd">
-						<table class="table">
-							<tr>
-								<td>
-									<input type="text" class="form-control" placeholder="Enter Name*" id="txtForgotPwdName" required />
-								</td>
-							</tr>
-							<tr>
-								<td>
-									<input type="email" class="form-control" placeholder="Enter Registered Email*" id="txtForgotPwdEmail" required />
-								</td>
-							</tr>
-							<tr>
-								<td>
-									<input type="submit" value="Reset Password" id="btnResetPwd" class="btn btn-lg btn-primary btn-block" />
-								</td>
-							</tr>
-						</table>
-					</form>
-
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				</div>
-			</div><!-- /.modal-content -->
-		</div><!-- /.modal-dialog -->
-	</div><!-- /.modal -->
 
     <!-- Bootstrap Core JavaScript -->
     <script src="js/bootstrap.min.js"></script>

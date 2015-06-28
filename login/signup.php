@@ -160,7 +160,63 @@
 				} 
 				else {
 
-                    alert("I look good and fine!");
+                    var email = $('#txtEmail').val().trim();
+					var pwd = $('#txtPwd').val().trim();
+					var name = $('#txtName').val().trim();
+					var contact = $('#txtContact').val().trim();
+					var profile = $('#txtProfile').val().trim();
+
+					popup.fadeOut();
+					alertMsg.children('p').remove();
+					alertMsg.append("<p>Please wait for a moment while we sign you up...</p>").fadeIn();
+					$.ajax({
+						type: "GET",
+						url: "AJAXFunctions.php",
+						data: {
+							no: "3", email: email, pwd: pwd, name: name, contact: contact, profile: profile
+						},
+						success: function(response) {
+							alert(response);
+
+							popup.fadeOut();
+							alertMsg.children('p').remove();
+							alertMsg.fadeOut();
+
+							if(response == "A" || response == "B" || response == "C" || response == "D") {
+								popup.children('p').remove();
+								popup.append("<p>Success! You have successfully Signed up. Please <a href='http://mentored-research.com/login'>Login here</a> to access your Account.</p>").fadeIn();	
+
+								// navigate to login page.
+								window.location.href = "index.php?signup=1";
+							}
+							else if(response == "-A" || response == "-B" || response == "-C" || response == "-D") {
+								popup.children('p').remove();
+								popup.append("<p>Sorry! But we could not find the Email Address Entered. Please sign up with your Registered Email Address.</p>").fadeIn();	
+							}
+							else if(response == "0") {
+								popup.children('p').remove();
+								popup.append("<p>Sorry! But we could not find the Email Address Entered. Please sign up with your Registered Email Address.</p>").fadeIn();	
+
+								// navigate to OtherUsers page after saving data to the db.
+								window.location.href = "others.php?source=not_added";
+							}
+							else if(response == "2") {
+								popup.children('p').remove();
+								popup.append("<p>Oops! Looks like there are already more than one such Email Addresses. Please try again with a different Email Addres.</p>").fadeIn();	
+							}
+							else {
+								popup.children('p').remove();
+								popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
+							}
+						},
+						error: function() {
+							alertMsg.children('p').remove();
+							alertMsg.fadeOut();
+							popup.children('p').remove();
+							popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+						}
+					});
+
 
 				}   // end of else
 				return false;
@@ -204,7 +260,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand page-scroll" href="#page-top">Mentored-Research</a>
+                <a class="navbar-brand page-scroll" href="http://mentored-research.com">Mentored-Research</a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->

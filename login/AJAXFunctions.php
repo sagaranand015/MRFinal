@@ -30,6 +30,9 @@ function Signup($email, $pwd, $name, $contact, $profile) {
 		else if($signup == "2") {
 			$res = "2";
 		}
+		else if($signup == "3") {   // user has already signed up.
+			$res = "3";
+		}
 		else {
 			$res = "-1";
 		}
@@ -44,6 +47,9 @@ function Signup($email, $pwd, $name, $contact, $profile) {
 		}
 		else if($signup == "2") {
 			$res = "2";
+		}
+		else if($signup == "3") {   // user has already signed up.
+			$res = "3";
 		}
 		else {
 			$res = "-1";
@@ -60,6 +66,9 @@ function Signup($email, $pwd, $name, $contact, $profile) {
 		else if($signup == "2") {
 			$res = "2";
 		}
+		else if($signup == "3") {   // user has already signed up.
+			$res = "3";
+		}
 		else {
 			$res = "-1";
 		}		
@@ -74,6 +83,9 @@ function Signup($email, $pwd, $name, $contact, $profile) {
 		}
 		else if($signup == "2") {
 			$res = "2";
+		}
+		else if($signup == "3") {   // user has already signed up.
+			$res = "3";
 		}
 		else {
 			$res = "-1";
@@ -90,7 +102,7 @@ function Signup($email, $pwd, $name, $contact, $profile) {
 	if($res == "A" || $res == "B" || $res == "C" || $res == "D") {
 		SignupUserMail($email, $name);
 	}
-	else if($res = "0") {   // user not in register table.
+	else if($res == "0") {   // user not in register table.
 		// add the record to the OtherUser Table here.
 		AddToOtherUser($email, $pwd, $name, $contact, $profile);
 		NotRegisteredUserMail($email, $name);
@@ -103,7 +115,8 @@ function Signup($email, $pwd, $name, $contact, $profile) {
 function ForgotPassword($name, $email) {
 	$newPwd = GenerateRandomPassword();
 	$res = "-1";
-	if(UpdatePassword($email, $newPwd) == "A" || UpdatePassword($email, $newPwd) == "B" || UpdatePassword($email, $newPwd) == "C" || UpdatePassword($email, $newPwd) == "D") {
+	$updatePwd = UpdatePassword($email, $newPwd);
+	if($updatePwd == "A" || $updatePwd == "B" || $updatePwd == "C" || $updatePwd == "D") {
 		// write the mail here.
 		if(ForgotPasswordUserMail($email, $name, $newPwd) == "1") {
 			$res = "1";
@@ -112,9 +125,12 @@ function ForgotPassword($name, $email) {
 			$res = "2";
 		}
 	}
-	else if(UpdatePassword($email, $newPwd) == "-A" || UpdatePassword($email, $newPwd) == "-B" || UpdatePassword($email, $newPwd) == "-C" || UpdatePassword($email, $newPwd) == "-D" || UpdatePassword($email, $newPwd) == "0") {
+	else if($updatePwd == "-A" || $updatePwd == "-B" || $updatePwd == "-C" || $updatePwd == "-D" || $updatePwd == "0") {
 		// could not find the email address in the database.
 		$res = "0";
+	}
+	else if($updatePwd == "2") {   // user has not signed up yet.
+		$res = "-2";
 	}
 	else {  // error condition.
 		$res = "-1";

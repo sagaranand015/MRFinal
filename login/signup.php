@@ -204,6 +204,10 @@
 								popup.children('p').remove();
 								popup.append("<p>Oops! Looks like there are already more than one such Email Addresses. Please try again with a different Email Addres.</p>").fadeIn();	
 							}
+							else if(response == "3") {
+								popup.children('p').remove();
+								popup.append("<p>Looks like this Email Address has already signed up. Please try again with a different Email Addres.</p>").fadeIn();	
+							}
 							else {
 								popup.children('p').remove();
 								popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	

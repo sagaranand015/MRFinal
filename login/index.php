@@ -261,6 +261,10 @@
 								popup.children('p').remove();
 								popup.append("<p>Sorry, but we could not find this email address in our database. Please try again with the Registered Email address.</p>").fadeIn();									
 							}
+							else if(response == "-2") {
+								popup.children('p').remove();
+								popup.append("<p>Oops! Looks like this email address has not signed up yet. Please try again with the Registered Email Address</p>").fadeIn();									
+							}
 							else if(response == "2") {
 								popup.children('p').remove();
 								popup.append("<p>Apparently, we are facing difficulties with your network connection. Please try again for a successful change request.</p>").fadeIn();									

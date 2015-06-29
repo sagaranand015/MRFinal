@@ -5,6 +5,31 @@
 //these are for the PHP Helper files
 include 'headers/databaseConn.php';
 
+// this is the function to check if the user has signed up in a table.
+// returns "" if signup is not done. else, signed up.
+function IsAlreadySignedup($email, $table) {
+	$resp = "-1";
+	$pwd = "";
+	global $connection;
+	try {
+		$query = "select * from " . $table . " where " . $table . "Email='$email'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				$pwd = $res[$table . "Pwd"];
+			}
+		}
+		return $pwd;
+	}	
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // this is the function to add the user record to the OtherUser Table. Returns 1 on success and -1 on error.
 function AddToOtherUser($email, $pwd, $name, $contact, $profile) {
 	global $connection;
@@ -31,8 +56,7 @@ function AddToOtherUser($email, $pwd, $name, $contact, $profile) {
 function NotRegisteredUserMail($toEmail, $name) {
 	$res = "-1";
 	$mailBody = "";
-	try{
-
+	try {
 		$subject = "Mentored-Research";
 
 		$headers = "MIME-Version: 1.0" . "\r\n";
@@ -67,6 +91,7 @@ function NotRegisteredUserMail($toEmail, $name) {
 		return $res;
 	}
 }
+
 
 // this is the function to send the mail to the user that signup is successful.
 // returns 1 on success and -1 on Failure.
@@ -141,9 +166,11 @@ function SignupUtility($email, $pwd, $name, $contact, $profile, $table) {
 	global $connection;
 	$resp = "-1";
 	$userNo = 0;
+	$isSignedup = "";
 	try {
 		$userNo = IsUserExistInTable($email, $table);
-		if($userNo == 1) {
+		$isSignedup = IsAlreadySignedup($email, $table);
+		if($userNo == 1 && $isSignedup == "") {
 			$query = "update " . $table . " set " . $table . "Name='$name', " . $table . "Pwd='$pwd', " . $table . "Contact='$contact', " . $table . "Profile='$profile' where " . $table . "Email='$email'";
 			$rs = mysql_query($query);
 			if(!$rs) {
@@ -152,6 +179,9 @@ function SignupUtility($email, $pwd, $name, $contact, $profile, $table) {
 			else {
 				$resp = "1";
 			}
+		}
+		else if($isSignedup != "") {    // user has already signed up.
+			$resp = "3";
 		}
 		else if($userNo == 0) {
 			$resp = "0";
@@ -236,13 +266,18 @@ function ForgotPasswordUserMail($toEmail, $name, $newPwd) {
 function UpdatePasswordUtility($email, $newPwd, $table, $emailCol, $pwdCol) {
 	$resp = "-1";
 	try {
-		$query = "update " . $table . " set " . $pwdCol . "='$newPwd' where " . $emailCol . "='$email'";
-		$rs = mysql_query($query);
-		if(!$rs) {
-			$resp = "-1";
+		if(IsAlreadySignedup($email, $table) != "") {
+			$query = "update " . $table . " set " . $pwdCol . "='$newPwd' where " . $emailCol . "='$email'";
+			$rs = mysql_query($query);
+			if(!$rs) {
+				$resp = "-1";
+			}
+			else {
+				$resp = "1";
+			}
 		}
-		else {
-			$resp = "1";
+		else {    // user has not signed up yet!
+			$resp = "2";
 		}
 		return $resp;
 	}
@@ -255,45 +290,62 @@ function UpdatePasswordUtility($email, $newPwd, $table, $emailCol, $pwdCol) {
 // this is the function to update the password of the user email
 function UpdatePassword($email, $newPwd) {
 	$res = "-1";
+	$pwd = "";
 	if(GetUserLevel($email) == "A") {  // go to admin table.
-		if(UpdatePasswordUtility($email, $newPwd, "Admin", "AdminEmail", "AdminPwd") == "1") {
+		$pwd = UpdatePasswordUtility($email, $newPwd, "Admin", "AdminEmail", "AdminPwd");
+		if($pwd == "1") {
 			$res = "A";
 		}
-		else if(UpdatePasswordUtility($email, $newPwd, "Admin", "AdminEmail", "AdminPwd") == "-1") {
+		else if($pwd == "-1") {
 			$res = "-A";
+		}
+		else if($pwd == "2") {   // user has not signed up
+			$res = "2";
 		}
 		else {
 			$res = "-1";
 		}
 	}
 	else if(GetUserLevel($email) == "B") {   // go to director table.
-		if(UpdatePasswordUtility($email, $newPwd, "Director", "DirectorEmail", "DirectorPwd") == "1") {
+		$pwd = UpdatePasswordUtility($email, $newPwd, "Director", "DirectorEmail", "DirectorPwd");
+		if($pwd == "1") {
 			$res = "B";
 		}
-		else if(UpdatePasswordUtility($email, $newPwd, "Director", "DirectorEmail", "DirectorPwd") == "-1") {
+		else if($pwd == "-1") {
 			$res = "-B";
+		}
+		else if($pwd == "2") {  // not signed up yet!
+			$res = "2";
 		}
 		else {
 			$res = "-1";
 		}	
 	}
 	else if(GetUserLevel($email) == "C") {   // go to mentor table.
-		if(UpdatePasswordUtility($email, $newPwd, "Mentor", "MentorEmail", "MentorPwd") == "1") {
+		$pwd = UpdatePasswordUtility($email, $newPwd, "Mentor", "MentorEmail", "MentorPwd");
+		if($pwd == "1") {
 			$res = "C";
 		}
-		else if(UpdatePasswordUtility($email, $newPwd, "Mentor", "MentorEmail", "MentorPwd") == "-1") {
+		else if($pwd == "-1") {
 			$res = "-C";
+		}
+		else if($pwd == "2") {
+			$res = "2";
 		}
 		else {
 			$res = "-1";
 		}		
 	}
 	else if(GetUserLevel($email) == "D") {   // go to mentee table.
-		if(UpdatePasswordUtility($email, $newPwd, "Mentee", "MenteeEmail", "MenteePwd") == "1") {
+		$pwd = UpdatePasswordUtility($email, $newPwd, "Mentee", "MenteeEmail", "MenteePwd");
+		if($pwd == "1") {
 			$res = "D";
 		}
-		else if(UpdatePasswordUtility($email, $newPwd, "Mentee", "MenteeEmail", "MenteePwd") == "-1") {
+		else if($pwd == "-1") {
 			$res = "-D";
+		}
+		else if($pwd == "2") {
+			$res = "2";
 		}
 		else {
 			$res = "-1";

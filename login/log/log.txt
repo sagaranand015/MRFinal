@@ -1,2 +1,0 @@
-2015-06-28 20:10:57 --> update Adminset AdminName='test', AdminPwd='test', AdminContact='test', AdminProfile='tt' where AdminEmail='sagar1@maildrop.cc'
-2015-06-28 20:11:38 --> update Admin set AdminName='test', AdminPwd='testtest', AdminContact='test', AdminProfile='tt' where AdminEmail='sagar1@maildrop.cc'

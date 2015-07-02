@@ -14,7 +14,7 @@
     <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
 	<link rel="icon" href="img/favicon.ico" type="image/x-icon" />
 
-    <title>Sign up | Mentored-Research</title>
+    <title>Contact Us | Mentored-Research</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -111,22 +111,65 @@
 
          /*for the smallest phones*/ 
         @media (max-width:767px){
-			
+			#contactUsTab {
+				float: left;
+			}   
+			#campusAbsTab {
+				float: left;
+			}         
+			#campusAbs {
+				padding-top: 50px;
+			}
         }   
 
         /*for the tablets and all*/
         @media (min-width:768px){
-        	
+        	#contactUsTab {
+				float: left;
+			}   
+			#campusAbsTab {
+				float: right;
+			}         
+			#campusAbs {
+				padding-top: 60px;
+			}
         }
 
         /*for medium screens and desktops*/
         @media (min-width:992px){
-            
+            #contactUsTab {
+				float: left;
+				font-size: 1.2em;
+			}   
+			#campusAbsTab {
+				float: right;
+				font-size: 1.2em;
+			}         
+			#campusAbs {
+				padding-top: 60px;
+			}
         }
 
         /*for large screens*/ 
         @media (min-width:1200px){
-            
+            #contactUsTab {
+				float: left;
+				font-size: 1.2em;
+			}   
+			#campusAbsTab {
+				float: right;
+				font-size: 1.2em;
+			}         
+			#campusAbs {
+				padding-top: 70px;
+			}
+        }
+
+        #campusAbsText h4 {
+        	color: #fff;
+        	text-align: center;
+        	font-family: writingText;
+        	text-transform: capitalize;
         }
 
     </style>
@@ -150,8 +193,19 @@
     		// for the scrolly thing.
     		$('.scrolly').scrolly();
 
-    		// for the login form and login button functionality!
-			$('#formSignup').validator().on('submit', function (e) {
+    		// for the queryStrings.
+    		if(qs["contact"] == "1") {
+    			$('#contactUsLink').trigger('click');
+    		}
+    		else if(qs["campusAbs"] == "1") {
+    			$('#campusAbsLink').trigger('click');
+    		}
+    		else {
+    			// nothing to be done here.
+    		}
+
+        	// for submission of the contact us form.
+        	$('#formContactUs').validator().on('submit', function (e) {
 				if (e.isDefaultPrevented()) {
 					alertMsg.children('p').remove();
 					alertMsg.fadeOut();
@@ -159,68 +213,109 @@
 					popup.append("<p>Oops! Looks like you did not fill the fields correctly. Please Recheck and try again.</p>").fadeIn();
 				} 
 				else {
+					// everything looks good! AJAX request to be given here.
+					var contactName = $('#txtContactName').val().trim();
+					var contactEmail = $('#txtContactEmail').val().trim();
+					var contactTel = $('#txtContactTel').val().trim();
+					var contactMsg = $('#txtContactMsg').val().trim();
 
-                    var email = $('#txtEmail').val().trim();
-					var pwd = $('#txtPwd').val().trim();
-					var name = $('#txtName').val().trim();
-					var contact = $('#txtContact').val().trim();
-					var profile = $('#txtProfile').val().trim();
-
+					// make the AJAX request for adding the data to the database here.
 					popup.fadeOut();
 					alertMsg.children('p').remove();
-					alertMsg.append("<p>Please wait for a moment while we sign you up...</p>").fadeIn();
+					alertMsg.append("<p>Please wait for a moment while we submit your message...</p>").fadeIn();
 					$.ajax({
 						type: "GET",
 						url: "AJAXFunctions.php",
 						data: {
-							no: "3", email: email, pwd: pwd, name: name, contact: contact, profile: profile
+							no: "1", contactName: contactName, contactEmail: contactEmail, contactTel: contactTel, contactMsg: contactMsg
 						},
 						success: function(response) {
-							alert(response);
-
-							popup.fadeOut();
 							alertMsg.children('p').remove();
 							alertMsg.fadeOut();
 
-							if(response == "A" || response == "B" || response == "C" || response == "D") {
-								popup.children('p').remove();
-								popup.append("<p>Success! You have successfully Signed up. Please <a href='http://mentored-research.com/login'>Login here</a> to access your Account.</p>").fadeIn();	
+							var res = response.split(" ~ ");
+							response = res[0];
+							var adminMail = res[1];
+							var userMail = res[2];
 
-								// navigate to login page.
-								window.location.href = "index.php?signup=1";
-							}
-							else if(response == "-A" || response == "-B" || response == "-C" || response == "-D") {
+							if(response == "1" && adminMail == "1" && userMail == "1") {
 								popup.children('p').remove();
-								popup.append("<p>Sorry! But we could not find the Email Address Entered. Please sign up with your Registered Email Address.</p>").fadeIn();	
+								popup.append("<p>Thank you for your Message. Please check your inbox for more details.</p>").fadeIn();
 							}
-							else if(response == "0") {
+							else if(adminMail == "-1" || userMail == "-1") {
 								popup.children('p').remove();
-								popup.append("<p>Sorry! But we could not find the Email Address Entered. Please sign up with your Registered Email Address.</p>").fadeIn();	
-
-								// navigate to OtherUsers page after saving data to the db.
-								window.location.href = "others.php?source=not_added";
-							}
-							else if(response == "2") {
-								popup.children('p').remove();
-								popup.append("<p>Oops! Looks like there are already more than one such Email Addresses. Please try again with a different Email Addres.</p>").fadeIn();	
-							}
-							else if(response == "3") {
-								popup.children('p').remove();
-								popup.append("<p>Looks like this Email Address has already signed up. Please try again with a different Email Addres.</p>").fadeIn();	
+								popup.append("<p>Oops! There seems to be a problem connecting to the Mentored-Research's server. Please try again.</p>").fadeIn();								
 							}
 							else {
 								popup.children('p').remove();
-								popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
+								popup.append("<p>Oops! There seems to be a problem connecting to the Mentored-Research's server. Please try again.</p>").fadeIn();																
 							}
 						},
-						error: function() {
+						error: function(response) {
 							alertMsg.children('p').remove();
 							alertMsg.fadeOut();
 							popup.children('p').remove();
-							popup.append("<p>Oops! We encountered an error while processing your Request. Please try again. Error in AJAX.</p>").fadeIn();
+							popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
 						}
 					});
+				}   // end of else
+				return false;
+			});
 
+			// for the campus ambassador form
+			$('#formCampusAbs').validator().on('submit', function (e) {
+				if (e.isDefaultPrevented()) {
+					alertMsg.children('p').remove();
+					alertMsg.fadeOut();
+					popup.children('p').remove();
+					popup.append("<p>Oops! Looks like you did not fill the fields correctly. Please Recheck and try again.</p>").fadeIn();
+				} 
+				else {
+					// everything looks good! AJAX request to be given here.
+					var campusAbsName = $('#txtCampusAbsName').val().trim();
+					var campusAbsEmail = $('#txtCampusAbsEmail').val().trim();
+					var campusAbsTel = $('#txtCampusAbsTel').val().trim();
+					var campusAbsCollege = $('#txtCampusAbsCollege').val().trim();
+
+					// make the AJAX request for adding the data to the database here.
+					popup.fadeOut();
+					alertMsg.children('p').remove();
+					alertMsg.append("<p>Please wait for a moment while we submit your request...</p>").fadeIn();
+					$.ajax({
+						type: "GET",
+						url: "AJAXFunctions.php",
+						data: {
+							no: "2", campusAbsName: campusAbsName, campusAbsEmail: campusAbsEmail, campusAbsTel: campusAbsTel, campusAbsCollege: campusAbsCollege
+						},
+						success: function(response) {
+							alertMsg.children('p').remove();
+							alertMsg.fadeOut();
+
+							var res = response.split(" ~ ");
+							response = res[0];
+							var adminMail = res[1];
+							var userMail = res[2];
+
+							if(response == "1" && adminMail == "1" && userMail == "1") {
+								popup.children('p').remove();
+								popup.append("<p>Thank You for applying to the Campus Ambassador programme of Mentored-Research. Please check your inbox for more details.</p>").fadeIn();
+							}
+							else if(adminMail == "-1" || userMail == "-1") {
+								popup.children('p').remove();
+								popup.append("<p>Oops! There seems to be a problem connecting to the Mentored-Research's server. Please try again.</p>").fadeIn();								
+							}
+							else {
+								popup.children('p').remove();
+								popup.append("<p>Oops! There seems to be a problem connecting to the Mentored-Research's server. Please try again.</p>").fadeIn();																
+							}
+						},
+						error: function(response) {
+							alertMsg.children('p').remove();
+							alertMsg.fadeOut();
+							popup.children('p').remove();
+							popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+						}
+					});
 
 				}   // end of else
 				return false;
@@ -264,7 +359,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand page-scroll" href="http://mentored-research.com">Mentored-Research</a>
+                <a class="navbar-brand page-scroll" href="#page-top">Mentored-Research</a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
@@ -276,12 +371,12 @@
                     <li>
                     	<a href="http://mentored-research.com">MR-Home</a>
                     </li>
-                    <li>
-                    	<a href="http://mentored-research.com/contact">Contact Us</a>
+                    <!-- <li>
+                    	<a class="scrolly" href="#contactus">Contact Us</a>
                     </li>
-                    <li>
-                        <a href="http://mentored-research.com/login">MR-Login</a>
-                    </li>
+                     <li>
+                    	<a class="scrolly" href="#campusAbs">Ambassador</a>
+                    </li> -->
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
@@ -289,45 +384,103 @@
         <!-- /.container-fluid -->
     </nav>
 
-    <section id="login-section" style="padding-botton: 0px;">
+    <div class="container" style="margin-top: 120px;">
+    	<ul class="nav nav-tabs">
+    		<li id="contactUsTab">
+    			<a href="#contactus" id="contactUsLink" class="scrolly">Contact Us</a>
+    		</li>
+    		<li id="campusAbsTab">
+    			<a href="#campusAbs" id="campusAbsLink" class="scrolly">Be our Campus Ambassador</a>
+    		</li>
+    	</ul>
+    </div>
+
+    <section id="contactus" style="padding-top: 60px;">
     	<div class="container">
-    		<h1 class="page-header text-center">
-    			Sign up
+    		<h1 class="page-header">
+    			Contact Us
     		</h1>
 
     		<!-- table for the contact us form -->
-    		<form role="form" data-toggle="validator" id="formSignup">
+    		<form role="form" data-toggle="validator" id="formContactUs">
 	    		<table class="table">
 	    			<tr>
 	    				<td>
-	    					<input type="email" class="form-control" placeholder="Enter Email*" id="txtEmail" required />
+	    					<input type="text" id="txtContactName" placeholder="Enter Name*" class="form-control" required />
 	    				</td>
 	    			</tr>
 	    			<tr>
 	    				<td>
-	    					<input type="password" class="form-control" placeholder="Enter Password*" id="txtPwd" required />
+	    					<input type="email" id="txtContactEmail" placeholder="Enter Email Address*" class="form-control" required />
 	    				</td>
 	    			</tr>
 	    			<tr>
 	    				<td>
-	    				   <input type="text" class="form-control" placeholder="Enter Name*" id="txtName" required />
+	    					<input type="tel" id="txtContactTel" placeholder="Enter Phone number*" class="form-control" required />
 	    				</td>
 	    			</tr>
 	    			<tr>
 	    				<td>
-	    					<input type="text" class="form-control" placeholder="Enter Contact Number*" id="txtContact" required />
+	    					<textarea id="txtContactMsg" placeholder="Tell us what you think..." class="form-control" rows="8" required></textarea>
 	    				</td>
 	    			</tr>
-                    <tr>
-                        <td>
-                            <input type="text" class="form-control" placeholder="LinkedIn Profile/Facebook Profile/Twitter Handle" id="txtProfile" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input type="submit" class="btn btn-lg btn-primary btn-block" value="Sign Up" id="btnSignup" />
-                        </td>
-                    </tr>
+	    			<tr>
+	    				<td>
+	    					<input type="submit" value="Submit" id="btnContactUs" class="btn btn-lg btn-primary btn-block" />
+	    				</td>
+	    			</tr>
+	    		</table>
+    		</form>
+		</div>
+    </section>
+
+    <section id="campusAbs">
+
+		<div class="container" id="campusAbsText">
+	    	<h4>
+	    		Are you interested in joining the Mentored-Research family?
+	    	</h4>
+	    	<h4>
+	    		Are you interested in making your college a Centre of Excellence in the field of finance?
+	    	</h4>
+	    	<h4>
+	    		If yes, then Apply for the Campus Ambassador position!
+	    	</h4>
+	    </div>
+
+    	<div class="container">
+    		<h1 class="page-header">
+    			Campus Ambassador
+    		</h1>
+
+    		<!-- table for the contact us form -->
+    		<form role="form" data-toggle="validator" id="formCampusAbs">
+	    		<table class="table">
+	    			<tr>
+	    				<td>
+	    					<input type="text" id="txtCampusAbsName" placeholder="Enter Name*" class="form-control" required />
+	    				</td>
+	    			</tr>
+	    			<tr>
+	    				<td>
+	    					<input type="email" id="txtCampusAbsEmail" placeholder="Enter Email Address*" class="form-control" required />
+	    				</td>
+	    			</tr>
+	    			<tr>
+	    				<td>
+	    					<input type="tel" id="txtCampusAbsTel" placeholder="Enter Phone number*" class="form-control" required />
+	    				</td>
+	    			</tr>
+	    			<tr>
+	    				<td>
+	    					<input type="text" id="txtCampusAbsCollege" placeholder="Enter College Name*" class="form-control" required />
+	    				</td>
+	    			</tr>
+	    			<tr>
+	    				<td>
+	    					<input type="submit" value="Be a Campus Ambassador" id="btnCampusAbs" class="btn btn-lg btn-primary btn-block" />
+	    				</td>
+	    			</tr>
 	    		</table>
     		</form>
 		</div>
@@ -340,7 +493,12 @@
                     <span class="copyright">Copyright &copy; Mentored-Research 2015</span>
                 </div>
                 <div class="col-md-4">
-
+                    <!-- <ul class="list-inline social-buttons">
+                        <li><a href="https://www.facebook.com/pages/Mentored-Researchs-Equity-Research-Initiative/313860081992430?ref=br_tf" target="_blank"><i class="fa fa-facebook"></i></a>
+                        </li>
+                        <li><a href="https://www.linkedin.com/company/2217419?trk=tyah&trkInfo=tarId%3A1401993298521%2Ctas%3Amentored%2Cidx%3A1-3-3" target="_blank"><i class="fa fa-linkedin"></i></a>
+                        </li>
+                    </ul> -->
                 </div>
                 <div class="col-md-4">   <!-- TODO -->
                     <ul class="list-inline social-buttons">

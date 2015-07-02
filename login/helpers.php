@@ -5,6 +5,43 @@
 //these are for the PHP Helper files
 include 'headers/databaseConn.php';
 
+require("PHPMailer/PHPMailerAutoload.php");
+
+// this is the mail function using the PHPMailer Library.
+function SendMail($toEmail, $toName, $subject, $message) {
+	$resp = "-1";
+	try {
+		$mail = new PHPMailer();
+		$mail->IsSMTP();                                                            
+		$mail->Host = "relay-hosting.secureserver.net";                                                              // this will change to godaddy smtp 
+		$mail->Port = 25;          // input port
+		//$mail->SMTPSecure = 'ssl';        // ssl or tls depends                                            
+		$mail->SMTPAuth = false;     
+		$mail->Username = "mentored.research@gmail.com";                                                               // SMTP username
+		$mail->Password = "EriMentor123";                                                                 // SMTP password
+		$mail->From = "guide@mentored-research.com";
+		$mail->FromName = "M-R Guide";                                    
+		$mail->AddAddress($toEmail, $toName);                              // your email address                                    
+		$mail->WordWrap = 50;                                
+		$mail->IsHTML(true);                                                                         // makes it slow. remove if not necessary
+		$mail->Subject = $subject;                                                           // input as per the details you wanna recieve on ur mail
+		$mail->Body = $message;
+
+		if(!$mail->Send()) {
+			$res = "-1";
+		}
+		else {
+			$res = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+	
+}
+
 // this is the function to check if the user has signed up in a table.
 // returns "" if signup is not done. else, signed up.
 function IsAlreadySignedup($email, $table) {
@@ -59,10 +96,6 @@ function NotRegisteredUserMail($toEmail, $name) {
 	try {
 		$subject = "Mentored-Research";
 
-		$headers = "MIME-Version: 1.0" . "\r\n";
-		$headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-		$headers .= "From: guide@mentored-research.com" . "\r\n";
-
 		// write the mail body here.
 		$mailBody .= "<h1>Mentored-Research</h1><br />";
 		$mailBody .= "Dear " . $name . ", <br />";
@@ -78,12 +111,7 @@ function NotRegisteredUserMail($toEmail, $name) {
 
         $mailBody .= "<br /><br />-------------------------------------------------------------------------------------------------------<br />This is an automated mail. Please do not reply to this message.";
 
-		if(mail($toEmail, $subject, $mailBody, $headers) == true) {
-			$res = "1";
-		}
-		else {
-			$res = "-1";	
-		}
+		$res = SendMail($toEmail, $name, $subject, $mailBody);
 		return $res;
 	}	
 	catch(Exception $e) {
@@ -101,10 +129,6 @@ function SignupUserMail($toEmail, $name) {
 	try{
 
 		$subject = "Mentored-Research Signup Successful";
-
-		$headers = "MIME-Version: 1.0" . "\r\n";
-		$headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-		$headers .= "From: guide@mentored-research.com" . "\r\n";
 
 		// write the mail body here.
 		$mailBody .= "<h1>Mentored-Research</h1><br />";
@@ -124,12 +148,7 @@ function SignupUserMail($toEmail, $name) {
 
         $mailBody .= "<br /><br />-------------------------------------------------------------------------------------------------------<br />This is an automated mail. Please do not reply to this message.";
 
-		if(mail($toEmail, $subject, $mailBody, $headers) == true) {
-			$res = "1";
-		}
-		else {
-			$res = "-1";	
-		}
+		$res = SendMail($toEmail, $name, $subject, $mailBody);
 		return $res;
 	}	
 	catch(Exception $e) {
@@ -232,10 +251,6 @@ function ForgotPasswordUserMail($toEmail, $name, $newPwd) {
 
 		$subject = "Mentored-Research Password Changed";
 
-		$headers = "MIME-Version: 1.0" . "\r\n";
-		$headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-		$headers .= "From: guide@mentored-research.com" . "\r\n";
-
 		// write the mail body here.
 		$mailBody .= "<h1>Mentored-Research Password Changed</h1><br />";
 		$mailBody .= "Dear " . $name . ", <br />";
@@ -248,12 +263,7 @@ function ForgotPasswordUserMail($toEmail, $name, $newPwd) {
 		$mailBody .= "<br />Tech Team";
 		$mailBody .= "<br /><a href='http://mentored-research.com'>Mentored-Research</a>";
 
-		if(mail($toEmail, $subject, $mailBody, $headers) == true) {
-			$res = "1";
-		}
-		else {
-			$res = "-1";	
-		}
+		$res = SendMail($toEmail, $name, $subject, $mailBody);
 		return $res;
 	}	
 	catch(Exception $e) {

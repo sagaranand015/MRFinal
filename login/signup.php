@@ -226,6 +226,9 @@
 				return false;
 			});
 
+			// focus on email field.
+			$('#txtEmail').focus();
+
         });    // end of ready function.
 
 	</script>

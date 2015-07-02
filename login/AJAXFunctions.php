@@ -144,11 +144,13 @@ function ForgotPassword($name, $email) {
 // returns -1 on error.
 function Login($email, $pwd) {
 	$res = "-1";
+	$login = "";
 	if(GetUserLevel($email) == "A") {  // go to admin table.
-		if(LoginUtility($email, $pwd, "Admin", "AdminEmail", "AdminPwd") == "1") {
+		$login = LoginUtility($email, $pwd, "Admin", "AdminEmail", "AdminPwd");
+		if($login == "1") {
 			$res = "A";
 		}
-		else if(LoginUtility($email, $pwd, "Admin", "AdminEmail", "AdminPwd") == "0") {
+		else if($login == "0") {
 			$res = "-A";
 		}
 		else {
@@ -156,10 +158,11 @@ function Login($email, $pwd) {
 		}
 	}
 	else if(GetUserLevel($email) == "B") {   // go to director table.
-		if(LoginUtility($email, $pwd, "Director", "DirectorEmail", "DirectorPwd") == "1") {
+		$login = LoginUtility($email, $pwd, "Director", "DirectorEmail", "DirectorPwd");
+		if($login == "1") {
 			$res = "B";
 		}
-		else if(LoginUtility($email, $pwd, "Director", "DirectorEmail", "DirectorPwd") == "0") {
+		else if($login == "0") {
 			$res = "-B";
 		}
 		else {
@@ -167,10 +170,11 @@ function Login($email, $pwd) {
 		}	
 	}
 	else if(GetUserLevel($email) == "C") {   // go to mentor table.
-		if(LoginUtility($email, $pwd, "Mentor", "MentorEmail", "MentorPwd") == "1") {
+		$login = LoginUtility($email, $pwd, "Mentor", "MentorEmail", "MentorPwd");
+		if($login == "1") {
 			$res = "C";
 		}
-		else if(LoginUtility($email, $pwd, "Mentor", "MentorEmail", "MentorPwd") == "0") {
+		else if($login == "0") {
 			$res = "-C";
 		}
 		else {
@@ -178,10 +182,11 @@ function Login($email, $pwd) {
 		}		
 	}
 	else if(GetUserLevel($email) == "D") {   // go to mentee table.
-		if(LoginUtility($email, $pwd, "Mentee", "MenteeEmail", "MenteePwd") == "1") {
+		$login = LoginUtility($email, $pwd, "Mentee", "MenteeEmail", "MenteePwd");
+		if($login == "1") {
 			$res = "D";
 		}
-		else if(LoginUtility($email, $pwd, "Mentee", "MenteeEmail", "MenteePwd") == "0") {
+		else if($login == "0") {
 			$res = "-D";
 		}
 		else {

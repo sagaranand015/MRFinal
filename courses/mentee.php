@@ -14,7 +14,7 @@
     <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
 	<link rel="icon" href="img/favicon.ico" type="image/x-icon" />
 
-    <title>Contact Us | Mentored-Research</title>
+    <title>Mentored-Research | Mentee</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -101,76 +101,154 @@
         	background: rgb(233, 233, 233);
         }
 
-        body {
-        	background: #070716;
-        }
-
         h1 {
-        	color: #fff;
+        	color: #000;
         }
 
          /*for the smallest phones*/ 
         @media (max-width:767px){
-			#contactUsTab {
-				float: left;
-			}   
-			#campusAbsTab {
-				float: left;
-			}         
-			#campusAbs {
-				padding-top: 50px;
-			}
+            .sidebar {
+                position: fixed;
+                top: 0%;
+                bottom: 0%;
+                left: 0;
+                z-index: 20;
+                display: none;
+                padding: 1%;
+                overflow-x: hidden;
+                overflow-y: auto; 
+                background-color: #f5f5f5;
+                border-right: 1px solid #eee;
+            }
+            .main-div {
+		    	margin: 0% 2% 2% 0%;
+		    }
+		    .menu-show {
+		    	margin: 25% 0% 0% 0%;	
+		    	display: block;
+		    }
         }   
 
         /*for the tablets and all*/
         @media (min-width:768px){
-        	#contactUsTab {
-				float: left;
-			}   
-			#campusAbsTab {
-				float: right;
-			}         
-			#campusAbs {
-				padding-top: 60px;
-			}
+        	.sidebar {
+                position: fixed;
+                top: 0%;
+                bottom: 0%;
+                left: 0;
+                z-index: 20;
+                display: none;
+                padding: 1%;
+                overflow-x: hidden;
+                overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+                background-color: #f5f5f5;
+                border-right: 1px solid #eee;
+            }
+            .main-div {
+		    	margin: 0% 2% 2% 0%;
+		    }
+
+		    .menu-show {
+		    	margin: 10% 0% 0% 0%;	
+		    	display: block;
+		    }
         }
 
         /*for medium screens and desktops*/
         @media (min-width:992px){
-            #contactUsTab {
-				float: left;
-				font-size: 1.2em;
-			}   
-			#campusAbsTab {
-				float: right;
-				font-size: 1.2em;
-			}         
-			#campusAbs {
-				padding-top: 60px;
-			}
+            .sidebar {
+                position: fixed;
+                top: 11%;
+                bottom: 0%;
+                left: 0;
+                z-index: 9;
+                display: block;
+                padding: 4% 1% 1% 1%;
+                overflow-x: hidden;
+                overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+                background-color: #f5f5f5;
+                border-right: 1px solid #eee;
+            }
+            .main-div {
+		    	margin: 8% 2% 2% 17%;
+		    }
+		    .menu-show {
+		    	display: none;
+		    }
         }
 
         /*for large screens*/ 
-        @media (min-width:1200px){
-            #contactUsTab {
-				float: left;
-				font-size: 1.2em;
-			}   
-			#campusAbsTab {
-				float: right;
-				font-size: 1.2em;
-			}         
-			#campusAbs {
-				padding-top: 70px;
-			}
+        @media (min-width:1200px) {
+            .sidebar {
+                position: fixed;
+                top: 10%;
+                bottom: 0%;
+                left: 0;
+                z-index: 9;
+                display: block;
+                padding: 4% 1% 1% 1%;
+                overflow-x: hidden;
+                overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+                background-color: #f5f5f5;
+                border-right: 1px solid #eee;
+            }  
+            .main-div {
+		    	margin: 7% 2% 2% 17%;
+		    }
+		    .menu-show {
+		    	display: none;
+		    }
         }
 
-        #campusAbsText h4 {
-        	color: #fff;
-        	text-align: center;
-        	font-family: writingText;
-        	text-transform: capitalize;
+        /* Sidebar navigation */
+        .nav-sidebar {
+            margin-right: -21px; /* 20px padding + 1px border */
+            margin-bottom: 20px;
+            margin-left: -20px;
         }
+        .nav-sidebar > li > a {
+            color: #000;
+            padding-right: 20px;
+            padding-left: 20px;
+        }
+        .nav-sidebar > .active > a,
+        .nav-sidebar > .active > a:hover,
+        .nav-sidebar > .active > a:focus {
+            color: #fff;
+            background-color: #428bca;
+        }
+
+        .show-menu {
+        	display: block;
+        }
+        .hide-menu {
+        	display: none;
+        }
+
+        .overlay-show {
+			position: fixed;
+			top: 0;
+			left: 0;
+			height: 100%;
+			width: 100%;
+			z-index: 30;
+			background-color: rgba(0,0,0,0.5);
+		}
+		.overlay-remove {
+			position: fixed;
+			top: 0;
+			left: 0;
+			height: 100%;
+			width: 100%;
+			z-index: 30;
+			background-color: rgba(0,0,0,0.5);
+			display: none;
+		}
+		.overlay-img {
+			position: relative;
+			top: 45%;
+			left: 45%;
+		}
 
     </style>
 
@@ -187,139 +265,82 @@
                 return false;
             });
 
+            var overlay = $('#overlay').addClass('overlay-remove');
+            function showLoading() {
+            	overlay.removeClass('overlay-remove');
+            	overlay.addClass('overlay-show');
+            }
+            function hideLoading() {
+            	overlay.removeClass('overlay-show');
+            	overlay.addClass('overlay-remove');	
+            }
+
             // for checking the query string and all.
 	    	var qs = getQueryStrings();
 
     		// for the scrolly thing.
     		$('.scrolly').scrolly();
 
-    		// for the queryStrings.
-    		if(qs["contact"] == "1") {
-    			$('#contactUsLink').trigger('click');
-    		}
-    		else if(qs["campusAbs"] == "1") {
-    			$('#campusAbsLink').trigger('click');
-    		}
-    		else {
-    			// nothing to be done here.
-    		}
+    		// media query functions
+            if ($(window).width() >= 1200) {
+            	$('.sidebar').addClass('show-menu');
+            }
+            else if ($(window).width() >= 992) {
+            	$('.sidebar').addClass('show-menu');
+            }
+            else if ($(window).width() >= 768) {
+            	$('.sidebar').addClass('hide-menu');
+            }
+            else if ($(window).width() <= 767) {
+            	$('.sidebar').addClass('hide-menu');
+            }
+            else {
+             	
+            }
 
-        	// for submission of the contact us form.
-        	$('#formContactUs').validator().on('submit', function (e) {
-				if (e.isDefaultPrevented()) {
-					alertMsg.children('p').remove();
-					alertMsg.fadeOut();
-					popup.children('p').remove();
-					popup.append("<p>Oops! Looks like you did not fill the fields correctly. Please Recheck and try again.</p>").fadeIn();
-				} 
-				else {
-					// everything looks good! AJAX request to be given here.
-					var contactName = $('#txtContactName').val().trim();
-					var contactEmail = $('#txtContactEmail').val().trim();
-					var contactTel = $('#txtContactTel').val().trim();
-					var contactMsg = $('#txtContactMsg').val().trim();
+            // for showing the menu on the mobile site.
+            $('#btnShowMenu').on('click', function() {
+            	if($('.sidebar').hasClass('show-menu')) {
+            		$(this).html("Show Menu");
+            		$('.sidebar').removeClass('show-menu');
+            		$('.sidebar').addClass('hide-menu');
+            	}
+            	else if($('.sidebar').hasClass('hide-menu')) {
+            		$(this).html("Hide Menu");	
+            		$('.sidebar').removeClass('hide-menu');
+            		$('.sidebar').addClass('show-menu');
+            	}
+            	else {
+            		
+            	}
+            	return false;
+            }); 
+            $('body, .main-div').on('click', function() {
+	            if ($(window).width() >= 1200) {
+	            }
+	            else if ($(window).width() >= 992) {
+	            }
+	            else if ($(window).width() >= 768 || $(window).width() <= 767) {
+            		$('.sidebar').removeClass('show-menu');
+	        		$('.sidebar').addClass('hide-menu');
+	        		$('#btnShowMenu').html("Show Menu");	
+	            }
+        		return false;
+            });
 
-					// make the AJAX request for adding the data to the database here.
-					popup.fadeOut();
-					alertMsg.children('p').remove();
-					alertMsg.append("<p>Please wait for a moment while we submit your message...</p>").fadeIn();
-					$.ajax({
-						type: "GET",
-						url: "AJAXFunctions.php",
-						data: {
-							no: "1", contactName: contactName, contactEmail: contactEmail, contactTel: contactTel, contactMsg: contactMsg
-						},
-						success: function(response) {
-							alertMsg.children('p').remove();
-							alertMsg.fadeOut();
+            // hide all the divs on page load. Except for first div.
+            $('.main-div').hide();
 
-							var res = response.split(" ~ ");
-							response = res[0];
-							var adminMail = res[1];
-							var userMail = res[2];
+            // for all the links on the left hand side.
+            $('.CRP').on('click', function() {
+            	showDiv($('.CRP-div'));
+            	return false;
+            });
 
-							if(response == "1" && adminMail == "1" && userMail == "1") {
-								popup.children('p').remove();
-								popup.append("<p>Thank you for your Message. Please check your inbox for more details.</p>").fadeIn();
-							}
-							else if(adminMail == "-1" || userMail == "-1") {
-								popup.children('p').remove();
-								popup.append("<p>Oops! There seems to be a problem connecting to the Mentored-Research's server. Please try again.</p>").fadeIn();								
-							}
-							else {
-								popup.children('p').remove();
-								popup.append("<p>Oops! There seems to be a problem connecting to the Mentored-Research's server. Please try again.</p>").fadeIn();																
-							}
-						},
-						error: function(response) {
-							alertMsg.children('p').remove();
-							alertMsg.fadeOut();
-							popup.children('p').remove();
-							popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-						}
-					});
-				}   // end of else
-				return false;
-			});
-
-			// for the campus ambassador form
-			$('#formCampusAbs').validator().on('submit', function (e) {
-				if (e.isDefaultPrevented()) {
-					alertMsg.children('p').remove();
-					alertMsg.fadeOut();
-					popup.children('p').remove();
-					popup.append("<p>Oops! Looks like you did not fill the fields correctly. Please Recheck and try again.</p>").fadeIn();
-				} 
-				else {
-					// everything looks good! AJAX request to be given here.
-					var campusAbsName = $('#txtCampusAbsName').val().trim();
-					var campusAbsEmail = $('#txtCampusAbsEmail').val().trim();
-					var campusAbsTel = $('#txtCampusAbsTel').val().trim();
-					var campusAbsCollege = $('#txtCampusAbsCollege').val().trim();
-
-					// make the AJAX request for adding the data to the database here.
-					popup.fadeOut();
-					alertMsg.children('p').remove();
-					alertMsg.append("<p>Please wait for a moment while we submit your request...</p>").fadeIn();
-					$.ajax({
-						type: "GET",
-						url: "AJAXFunctions.php",
-						data: {
-							no: "2", campusAbsName: campusAbsName, campusAbsEmail: campusAbsEmail, campusAbsTel: campusAbsTel, campusAbsCollege: campusAbsCollege
-						},
-						success: function(response) {
-							alertMsg.children('p').remove();
-							alertMsg.fadeOut();
-
-							var res = response.split(" ~ ");
-							response = res[0];
-							var adminMail = res[1];
-							var userMail = res[2];
-
-							if(response == "1" && adminMail == "1" && userMail == "1") {
-								popup.children('p').remove();
-								popup.append("<p>Thank You for applying to the Campus Ambassador programme of Mentored-Research. Please check your inbox for more details.</p>").fadeIn();
-							}
-							else if(adminMail == "-1" || userMail == "-1") {
-								popup.children('p').remove();
-								popup.append("<p>Oops! There seems to be a problem connecting to the Mentored-Research's server. Please try again.</p>").fadeIn();								
-							}
-							else {
-								popup.children('p').remove();
-								popup.append("<p>Oops! There seems to be a problem connecting to the Mentored-Research's server. Please try again.</p>").fadeIn();																
-							}
-						},
-						error: function(response) {
-							alertMsg.children('p').remove();
-							alertMsg.fadeOut();
-							popup.children('p').remove();
-							popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-						}
-					});
-
-				}   // end of else
-				return false;
-			});
+            $('.calender').on('click', function() {
+            	showDiv($('.calender-div'));
+            	return false;
+            });
 
         });    // end of ready function.
 
@@ -341,6 +362,10 @@
 
 <body id="page-top" class="index">
 
+	<div class="overlay-remove" id="overlay">
+		<img src="img/load.gif" class="overlay-img" />
+	</div>
+
     <div id="alertMsg" class="alert alert-warning" role="alert">
     </div>
 
@@ -349,7 +374,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="navbar navbar-default navbar-fixed-top" style="background: #070716;">
+    <nav class="navbar navbar-default navbar-fixed-top" style="background: #070716; z-index: 10;">
         <div class="container">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header page-scroll">
@@ -372,9 +397,6 @@
                     	<a href="http://mentored-research.com">MR-Home</a>
                     </li>
                     <!-- <li>
-                    	<a class="scrolly" href="#contactus">Contact Us</a>
-                    </li>
-                     <li>
                     	<a class="scrolly" href="#campusAbs">Ambassador</a>
                     </li> -->
                 </ul>
@@ -384,133 +406,62 @@
         <!-- /.container-fluid -->
     </nav>
 
-    <div class="container" style="margin-top: 120px;">
-    	<ul class="nav nav-tabs">
-    		<li id="contactUsTab">
-    			<a href="#contactus" id="contactUsLink" class="scrolly">Contact Us</a>
-    		</li>
-    		<li id="campusAbsTab">
-    			<a href="#campusAbs" id="campusAbsLink" class="scrolly">Be our Campus Ambassador</a>
-    		</li>
-    	</ul>
-    </div>
-
-    <section id="contactus" style="padding-top: 60px;">
-    	<div class="container">
-    		<h1 class="page-header">
-    			Contact Us
-    		</h1>
-
-    		<!-- table for the contact us form -->
-    		<form role="form" data-toggle="validator" id="formContactUs">
-	    		<table class="table">
-	    			<tr>
-	    				<td>
-	    					<input type="text" id="txtContactName" placeholder="Enter Name*" class="form-control" required />
-	    				</td>
-	    			</tr>
-	    			<tr>
-	    				<td>
-	    					<input type="email" id="txtContactEmail" placeholder="Enter Email Address*" class="form-control" required />
-	    				</td>
-	    			</tr>
-	    			<tr>
-	    				<td>
-	    					<input type="tel" id="txtContactTel" placeholder="Enter Phone number*" class="form-control" required />
-	    				</td>
-	    			</tr>
-	    			<tr>
-	    				<td>
-	    					<textarea id="txtContactMsg" placeholder="Tell us what you think..." class="form-control" rows="8" required></textarea>
-	    				</td>
-	    			</tr>
-	    			<tr>
-	    				<td>
-	    					<input type="submit" value="Submit" id="btnContactUs" class="btn btn-lg btn-primary btn-block" />
-	    				</td>
-	    			</tr>
-	    		</table>
-    		</form>
-		</div>
-    </section>
-
-    <section id="campusAbs">
-
-		<div class="container" id="campusAbsText">
-	    	<h4>
-	    		Are you interested in joining the Mentored-Research family?
-	    	</h4>
-	    	<h4>
-	    		Are you interested in making your college a Centre of Excellence in the field of finance?
-	    	</h4>
-	    	<h4>
-	    		If yes, then Apply for the Campus Ambassador position!
-	    	</h4>
-	    </div>
-
-    	<div class="container">
-    		<h1 class="page-header">
-    			Campus Ambassador
-    		</h1>
-
-    		<!-- table for the contact us form -->
-    		<form role="form" data-toggle="validator" id="formCampusAbs">
-	    		<table class="table">
-	    			<tr>
-	    				<td>
-	    					<input type="text" id="txtCampusAbsName" placeholder="Enter Name*" class="form-control" required />
-	    				</td>
-	    			</tr>
-	    			<tr>
-	    				<td>
-	    					<input type="email" id="txtCampusAbsEmail" placeholder="Enter Email Address*" class="form-control" required />
-	    				</td>
-	    			</tr>
-	    			<tr>
-	    				<td>
-	    					<input type="tel" id="txtCampusAbsTel" placeholder="Enter Phone number*" class="form-control" required />
-	    				</td>
-	    			</tr>
-	    			<tr>
-	    				<td>
-	    					<input type="text" id="txtCampusAbsCollege" placeholder="Enter College Name*" class="form-control" required />
-	    				</td>
-	    			</tr>
-	    			<tr>
-	    				<td>
-	    					<input type="submit" value="Be a Campus Ambassador" id="btnCampusAbs" class="btn btn-lg btn-primary btn-block" />
-	    				</td>
-	    			</tr>
-	    		</table>
-    		</form>
-		</div>
-    </section>
-
-    <footer>
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <span class="copyright">Copyright &copy; Mentored-Research 2015</span>
-                </div>
-                <div class="col-md-4">
-                    <!-- <ul class="list-inline social-buttons">
-                        <li><a href="https://www.facebook.com/pages/Mentored-Researchs-Equity-Research-Initiative/313860081992430?ref=br_tf" target="_blank"><i class="fa fa-facebook"></i></a>
-                        </li>
-                        <li><a href="https://www.linkedin.com/company/2217419?trk=tyah&trkInfo=tarId%3A1401993298521%2Ctas%3Amentored%2Cidx%3A1-3-3" target="_blank"><i class="fa fa-linkedin"></i></a>
-                        </li>
-                    </ul> -->
-                </div>
-                <div class="col-md-4">   <!-- TODO -->
-                    <ul class="list-inline social-buttons">
-                        <li><a href="https://www.facebook.com/pages/Mentored-Researchs-Equity-Research-Initiative/313860081992430?ref=br_tf" target="_blank"><i class="fa fa-facebook"></i></a>
-                        </li>
-                        <li><a href="https://www.linkedin.com/company/2217419?trk=tyah&trkInfo=tarId%3A1401993298521%2Ctas%3Amentored%2Cidx%3A1-3-3" target="_blank"><i class="fa fa-linkedin"></i></a>
-                        </li>
-                    </ul>
-                </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-3 col-md-2 col-xs-4 sidebar">
+                <ul class="nav nav-sidebar">
+                	<li><a href="#" class="CRP">Central Resources</a></li>
+                    <li><a href="#" class="calender">Program Calender</a></li>
+                </ul>
+                <ul class="nav nav-sidebar">
+                	
+                </ul>
             </div>
         </div>
-    </footer>
+
+        <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
+        	Menu
+        </button>
+
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div CRP-div">
+	        <h1 class="page-header">
+	        	Central Resource Page
+	        </h1>
+        </div>
+
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div calender-div">
+        	<h1 class="page-header">
+	        	Programme Calender
+	        </h1>
+        </div>
+
+    </div>
+
+   <!--   <footer class="footer">
+	        <div class="container">
+	            <div class="row">
+	                <div class="col-md-4">
+	                    <span class="copyright">Copyright &copy; Mentored-Research 2015</span>
+	                </div>
+	                <div class="col-md-4">
+	                    <ul class="list-inline social-buttons">
+	                        <li><a href="https://www.facebook.com/pages/Mentored-Researchs-Equity-Research-Initiative/313860081992430?ref=br_tf" target="_blank"><i class="fa fa-facebook"></i></a>
+	                        </li>
+	                        <li><a href="https://www.linkedin.com/company/2217419?trk=tyah&trkInfo=tarId%3A1401993298521%2Ctas%3Amentored%2Cidx%3A1-3-3" target="_blank"><i class="fa fa-linkedin"></i></a>
+	                        </li>
+	                    </ul>
+	                </div>
+	                <div class="col-md-4">  
+	                    <ul class="list-inline social-buttons">
+	                        <li><a href="https://www.facebook.com/pages/Mentored-Researchs-Equity-Research-Initiative/313860081992430?ref=br_tf" target="_blank"><i class="fa fa-facebook"></i></a>
+	                        </li>
+	                        <li><a href="https://www.linkedin.com/company/2217419?trk=tyah&trkInfo=tarId%3A1401993298521%2Ctas%3Amentored%2Cidx%3A1-3-3" target="_blank"><i class="fa fa-linkedin"></i></a>
+	                        </li>
+	                    </ul>
+	                </div>
+	            </div>
+	        </div>
+	    </footer> -->
 
     <!-- Bootstrap Core JavaScript -->
     <script src="js/bootstrap.min.js"></script>

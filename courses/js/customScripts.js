@@ -62,28 +62,17 @@ function changeActiveState(item) {
 
 //for the animate effect of the div on the RHS on click of the list on LHS
 function showDiv(item) {
-    var arr = $('.divsMain');
+    var arr = $('.main-div');
     var ob = $(item);
 
-    for (var i = 0; i < arr.length; i++) {
-        $(arr[i]).fadeOut(300);
-        // $(arr[i]).css({
-        //   top: '1000px'
-        // });
-    }
-    ob.fadeIn(300);
-    // ob.animate({
-    //   top: '0px'
-    // });
+    $(arr).animate({
+        left: '600px'
+    }, 100);
 
-
-
-    // this is for making visible the others.
-    // var others = $('.divsSec');
-    // for(var i = 0;i<others.length;i++) {
-    //     $(others[i]).show();
-    //     $(others[i]).css({
-    //         top: '0px'
-    //     });
-    // }
+    $(arr).fadeOut(function() {
+        ob.fadeIn(300);
+        ob.animate({
+          left: '0px'
+        }, 100);
+    });    
 }

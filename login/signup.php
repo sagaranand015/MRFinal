@@ -184,7 +184,7 @@
 
 							if(response == "A" || response == "B" || response == "C" || response == "D") {
 								popup.children('p').remove();
-								popup.append("<p>Success! You have successfully Signed up. Please <a href='http://mentored-research.com/login'>Login here</a> to access your Account.</p>").fadeIn();	
+								popup.append("<p>Success! You have successfully Signed up. You will be redirected to the Login Page in a moment.</p>").fadeIn();	
 
 								// navigate to login page.
 								window.location.href = "index.php?signup=1";

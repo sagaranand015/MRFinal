@@ -54,6 +54,9 @@
     <!-- For validation of the Form input elements -->
     <script src="js/validator.min.js"></script>
 
+    <!-- for the cookies jQuery plugin -->
+    <script src="js/jquery.cookie.js"></script>    
+
     <style type="text/css">
 
         @font-face {
@@ -184,29 +187,36 @@
 							no: "1", email: email, pwd: pwd
 						},
 						success: function(response) {
-							alert(response);
-
 							popup.fadeOut();
 							alertMsg.children('p').remove();
 							alertMsg.fadeOut();
 
 							if(response == "A") {  // go to the admin page.
-
+								//setCookie("email", email, 150);
+                                $.cookie("email", email, {
+                                    path: '/',
+                                    expires: 365
+                                });
+								window.location.href = "../courses/admin.php";
 							}
 							else if(response == "B") {   // go to the Director page.
-								
+								setCookie("email", email, 150);	
+								window.location.href = "../courses/director.php";
 							}
 							else if(response == "C") {   // go to the Mentor page.
-								
+								setCookie("email", email, 150);
+								window.location.href = "../courses/mentor.php";
 							}
 							else if(response == "D") {  // go to the Mentee page.
-								
+								setCookie("email", email, 150);
+								window.location.href = "../courses/mentee.php";
 							}
 							else if(response == "-A" || response == "-B" || response == "-C" || response == "-D") {   // error in password or username.
-								
+								popup.children('p').remove();
+								popup.append("<p>Oops! Looks like the Username and Password combination is incorrect. Please recheck and try again.</p>").fadeIn();									
 							}
 							else if(response == "0") {   // email not there in the User table.
-								
+								window.location.href = "others.php?source=not_added";
 							}
 							else {   // error condition
 								popup.children('p').remove();

@@ -251,12 +251,67 @@
 			position: relative;
 			top: 45%;
 			left: 45%;
+            color: #fff;
 		}
 
     </style>
 
 	<script type="text/javascript">
         
+        // function LoadProfileData() {
+        // 	alert("I m in the load profile data!!");
+        // }   // end of LoadProfileData function
+
+        // this is thw window.load function for the getting the profile data from the database.
+        $(window).load(function() {
+
+        	var overlay = $('#overlay').addClass('overlay-remove');
+            function showLoading() {
+            	overlay.removeClass('overlay-remove');
+            	overlay.addClass('overlay-show');
+            }
+            function hideLoading() {
+            	overlay.removeClass('overlay-show');
+            	overlay.addClass('overlay-remove');	
+            }
+
+            var email = $.cookie("email");
+        	showLoading();
+    		$.ajax({
+    			type: "GET",
+    			url: "AJAXFunctions.php",
+    			data: {
+    				no: "2", email: email, table: "Admin"
+    			},
+    			success: function(response) {
+    				if(response == "-1") {
+    					popup.children('p').remove();
+                    	popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
+    				}
+    				else {
+    					//populate all the fields here.
+    					var res = response.split(" ~~ ");
+    					$('#txtProfileName').val(res[1]);
+    					$('#txtProfileEmail').val(res[0]);
+    					$('#txtProfileContact').val(res[2]);
+    					$('#txtProfileOrgan').val(res[3]);
+    					$('#txtProfileProfile').val(res[4]);
+    				}
+    			},
+    			error: function() {
+    				alertMsg.children('p').remove();
+                    alertMsg.fadeOut();
+                    popup.children('p').remove();
+                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+    			},
+    			complete: function() {
+    				hideLoading();
+    			}
+    		});
+        	
+        });   // end of the window load function.
+
+
         $(document).ready(function() {
 
             var alertMsg = $('#alertMsg').fadeOut();
@@ -318,7 +373,7 @@
             	}
             	return false;
             }); 
-            $('body, .main-div').on('click', function() {
+            $('#btnCloseMenu').on('click', function() {
 	            if ($(window).width() >= 1200) {
 	            }
 	            else if ($(window).width() >= 992) {
@@ -332,21 +387,60 @@
             });
 
             // for all the links on the left hand side.
-            $('.CRP').on('click', function() {
-            	showDiv($('.CRP-div'));
+            $('.dashboard').on('click', function() {
+            	showDiv($('.dashboard-div'));
             	changeActiveState($(this).parent('li'));
             	return false;
             });
 
-            $('.calender').on('click', function() {
-            	showDiv($('.calender-div'));
+            $('.profile').on('click', function() {
+            	showDiv($('.profile-div'));
             	changeActiveState($(this).parent('li'));
             	return false;
             });
 
             // hide all the divs on page load. Except for first div.
             $('.main-div').hide();
-            $('.CRP').trigger('click');
+            $('.dashboard').trigger('click');
+
+            // for updating the profile info on the admin page.
+            $('#formProfile').validator().on('submit', function (e) {
+                if (e.isDefaultPrevented()) {
+                    alertMsg.children('p').remove();
+                    alertMsg.fadeOut();
+                    popup.children('p').remove();
+                    popup.append("<p>Oops! Looks like you did not fill the fields of the Profile Data correctly. Please Recheck and try again.</p>").fadeIn();
+                }
+                else {
+                    // make the AJAX Request for updating the profile data.
+                    var name = $('#txtProfileName').val().trim();
+                    var contact = $('#txtProfileContact').val().trim();
+                    var profile = $('#txtProfileProfile').val().trim();
+
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "1", name: name, contact: contact, profile: profile, table: "Admin"
+                        },
+                        success: function(response) {
+                            alert(response);
+                        },
+                        error: function() {
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }
+                return false;
+            });
+
 
         });    // end of ready function.
 
@@ -369,7 +463,9 @@
 <body id="page-top" class="index">
 
 	<div class="overlay-remove" id="overlay">
-		<img src="img/load.gif" class="overlay-img" />
+        <div class="overlay-img">
+            <img src="img/load.gif" />
+        </div>
 	</div>
 
     <div id="alertMsg" class="alert alert-warning" role="alert">
@@ -415,9 +511,12 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-3 col-md-2 col-xs-4 sidebar">
+
+                <i class="fa fa-remove fa-lg hidden-lg hidden-md" id="btnCloseMenu"></i>
+
                 <ul class="nav nav-sidebar">
-                	<li><a href="#" class="CRP">Central Resources</a></li>
-                    <li><a href="#" class="calender">Program Calender</a></li>
+                	<li><a href="#" class="dashboard">Admin Dashboard</a></li>
+                    <li><a href="#" class="profile">Profile</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
                 	
@@ -429,16 +528,68 @@
         	Menu
         </button>
 
-        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div CRP-div">
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div dashboard-div">
 	        <h1 class="page-header">
-	        	Central Resource Page
+	        	Admin Dashboard
 	        </h1>
         </div>
 
-        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div calender-div">
-        	<h1 class="page-header">
-	        	Programme Calender
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div profile-div">
+        	<h1 class="page-header" class="profile-header">
+	        	Your Profile
 	        </h1>
+
+            <!-- Data will come from the LoadProfileData Method on page load. -->
+            <form role="form" data-toggle="validator" id="formProfile">
+                <table class="table">
+                    <tr>
+                        <td>
+                            <label id="lblProfileName" for="txtProfileName">Name: </label>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" placeholder="Your Name" id="txtProfileName" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label id="lblProfileEmail" for="txtProfileEmail">Email Address: </label>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" placeholder="Your Email Address" id="txtProfileEmail" disabled="true" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label id="lblProfileContact" for="txtProfileContact">Contact No: </label>
+                        </td>
+                        <td>
+                            <input type="tel" class="form-control" placeholder="Your Contact Number" id="txtProfileContact" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label id="lblProfileOrgan" for="txtProfileOrgan">Organization: </label>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" placeholder="Your Organization" id="txtProfileOrgan" disabled="true" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label id="lblProfileProfile" for="txtProfileProfile">LinkedIn/Twitter/Fb: </label>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" placeholder="LinkedIn/Twitter/Fb Profile link" id="txtProfileProfile" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="submit" value="Update Profile" id="btnUpdateProfile" class="btn btn-lg btn-primary btn-block" />
+                        </td>
+                    </tr>
+                </table>                
+            </form>
+
         </div>
 
     </div>

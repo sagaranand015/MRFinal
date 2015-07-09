@@ -56,23 +56,28 @@ return assoc;
 
 //this is the function to change the active state of the list on the LHS
 function changeActiveState(item) {
-    $('a.active').removeClass('active');
+    $('li.active').removeClass('active');
     $(item).addClass('active');
 }
 
 //for the animate effect of the div on the RHS on click of the list on LHS
 function showDiv(item) {
     var arr = $('.main-div');
-    var ob = $(item);
+    var ob = $(item).css({
+        left: '600px'
+    });
 
     $(arr).animate({
-        left: '600px'
-    }, 100);
-
-    $(arr).fadeOut(function() {
-        ob.fadeIn(300);
+        top: '600px'
+    }, 50, function() {
+        $(arr).fadeOut();
         ob.animate({
-          left: '0px'
-        }, 100);
-    });    
+            left: '0px',
+            top: '0px'
+        }, 50, function() {
+            $(ob).fadeIn();
+        });
+    });
 }
+
+

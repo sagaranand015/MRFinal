@@ -192,7 +192,6 @@
 							alertMsg.fadeOut();
 
 							if(response == "A") {  // go to the admin page.
-								//setCookie("email", email, 150);
                                 $.cookie("email", email, {
                                     path: '/',
                                     expires: 365
@@ -200,15 +199,24 @@
 								window.location.href = "../courses/admin.php";
 							}
 							else if(response == "B") {   // go to the Director page.
-								setCookie("email", email, 150);	
+								$.cookie("email", email, {
+                                    path: '/',
+                                    expires: 365
+                                });
 								window.location.href = "../courses/director.php";
 							}
 							else if(response == "C") {   // go to the Mentor page.
-								setCookie("email", email, 150);
+								$.cookie("email", email, {
+                                    path: '/',
+                                    expires: 365
+                                });
 								window.location.href = "../courses/mentor.php";
 							}
 							else if(response == "D") {  // go to the Mentee page.
-								setCookie("email", email, 150);
+								$.cookie("email", email, {
+                                    path: '/',
+                                    expires: 365
+                                });
 								window.location.href = "../courses/mentee.php";
 							}
 							else if(response == "-A" || response == "-B" || response == "-C" || response == "-D") {   // error in password or username.

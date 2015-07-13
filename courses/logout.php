@@ -14,7 +14,7 @@
     <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
 	<link rel="icon" href="img/favicon.ico" type="image/x-icon" />
 
-    <title>Your Courses | Mentored-Research</title>
+    <title>Logout | Mentored-Research</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -108,7 +108,7 @@
         	background: #070716;
         }
 
-        h1 {
+        h1, p {
         	color: #fff;
         }
 
@@ -155,8 +155,7 @@
 
     		// for the logout functionality
     		$('#btnLogout').on('click', function() {
-    			// write the logout code here.
-    			window.location.href = "http://mentored-research.com/login?logout=1";
+    			
     			return false;
     		});
 
@@ -208,13 +207,13 @@
                         <a class="scrolly" href="#page-top"></a>
                     </li>
                     <li>
-                    	<a href="http://mentored-research.com">MR-Home</a>
+                    	<a href="http://mentored-research.com">M-R Home</a>
                     </li>
                     <li>
                     	<a class="scrolly" href="http://mentored-research.com/contact">Contact Us</a>
                     </li>
-                     <li>
-                    	<a class="scrolly" href="#" id="btnLogout">Logout</a>
+                    <li>
+                        <a class="scrolly" href="http://mentored-research.com/login">M-R Login</a>
                     </li>
                 </ul>
             </div>
@@ -226,6 +225,12 @@
     <section id="contactus" style="padding-top: 60px;">
     	<div class="container">
     		
+            <h1 class="page-header">Thank You</h1>
+
+            <p>
+                Thank you for being a part of Mentored-Research's programmes and enhancing your knowledge. 
+            </p>
+
 		</div>
     </section>
 

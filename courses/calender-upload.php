@@ -1,9 +1,9 @@
 <?php 
 
-if(isset($_FILES["FileInput"]) && $_FILES["FileInput"]["error"]== UPLOAD_ERR_OK)
+if(isset($_FILES["fileCalender"]) && $_FILES["fileCalender"]["error"]== UPLOAD_ERR_OK)
 {
 	############ Edit settings ##############
-	$UploadDirectory	= 'uploads/'; //specify upload directory ends with / (slash)
+	$UploadDirectory	= 'uploads/calender/'; //specify upload directory ends with / (slash)
 	##########################################
 	
 	/*
@@ -14,17 +14,17 @@ if(isset($_FILES["FileInput"]) && $_FILES["FileInput"]["error"]== UPLOAD_ERR_OK)
 	
 	//check if this is an ajax request
 	if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])){
-		die();
+		die("This is not an ajax request!");
 	}
 	
 	
 	//Is file size is less than allowed size.
-	if ($_FILES["FileInput"]["size"] > 5242880) {
+	if ($_FILES["fileCalender"]["size"] > 5242880) {
 		die("File size is too big!");
 	}
 	
 	//allowed file type Server side check
-	switch(strtolower($_FILES['FileInput']['type']))
+	switch(strtolower($_FILES['fileCalender']['type']))
 		{
 			//allowed file types
             case 'image/png': 
@@ -43,18 +43,29 @@ if(isset($_FILES["FileInput"]) && $_FILES["FileInput"]["error"]== UPLOAD_ERR_OK)
 				die('Unsupported File!'); //output error
 	}
 	
-	$File_Name          = strtolower($_FILES['FileInput']['name']);
+	$File_Name          = strtolower($_FILES['fileCalender']['name']);
 	$File_Ext           = substr($File_Name, strrpos($File_Name, '.')); //get file extention
 	//$Random_Number      = rand(0, 9999999999); //Random number to be added to name.
-	$NewFileName 		= $File_Name.$File_Ext; //new file name
-	
-	if(move_uploaded_file($_FILES['FileInput']['tmp_name'], $UploadDirectory.$NewFileName ))
-	   {
-		die('Success! File Uploaded.');
-	}else{
-		die('error uploading File!');
+	//$NewFileName = $File_Name;
+
+	$date = date_create();
+	$timestamp = date_timestamp_get($date);
+
+	$NewFileName = $timestamp . "_" . $File_Name;  //.$File_Ext; //new file name
+
+	if(isset($_COOKIE["courseID"])) {
+		$courseID = $_COOKIE["courseID"];
+	}
+	else {
+		$courseID = "-1";
 	}
 	
+	if(move_uploaded_file($_FILES['fileCalender']['tmp_name'], $UploadDirectory.$NewFileName )) {
+		die('Success! File Uploaded.');
+	}
+	else {
+		die('error uploading File!');
+	}
 }
 else
 {

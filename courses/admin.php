@@ -14,7 +14,7 @@
     <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
 	<link rel="icon" href="img/favicon.ico" type="image/x-icon" />
 
-    <title>Mentored-Research | Mentee</title>
+    <title>Mentored-Research | Admin</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -269,6 +269,9 @@
             $('#btnExitPopup').on('click', function() {
                 popup.children('p').remove();
                 popup.fadeOut();
+
+                // to hide the progress bar.
+                $('.progress').fadeOut();
                 return false;
             });
 
@@ -331,6 +334,9 @@
             $('#btnExitPopup').on('click', function() {
                 popup.children('p').remove();
                 popup.fadeOut();
+
+                // to hide the progress bar.
+                $('.progress').fadeOut();
                 return false;
             });
 
@@ -346,17 +352,11 @@
             }
 
             //function to check file size before uploading.
-            function beforeSubmit(){
-
-                showLoading();
-
-                // show the popup here for the upload progress and all.
-                popup.fadeIn();
-
+            function beforeSubmit() {
                 //check whether browser fully supports all File API
-               if (window.File && window.FileReader && window.FileList && window.Blob)
+                if (window.File && window.FileReader && window.FileList && window.Blob)
                 {
-                    if( !$('#FileInput').val()) //check empty input filed
+                    if( !$('#fileCalender').val()) //check empty input filed
                     {
                         //$("#output").html("Are you kidding me?");
                         popup.children('p').remove();
@@ -364,8 +364,8 @@
                         return false
                     }
                     
-                    var fsize = $('#FileInput')[0].files[0].size; //get file size
-                    var ftype = $('#FileInput')[0].files[0].type; // get file type
+                    var fsize = $('#fileCalender')[0].files[0].size; //get file size
+                    var ftype = $('#fileCalender')[0].files[0].type; // get file type
 
                     //allow file types 
                     switch(ftype)
@@ -386,7 +386,7 @@
                             //$("#output").html("<b>"+ftype+"</b> Unsupported file type!");
                             popup.children('p').remove();
                             popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
-                            return false
+                            return false;
                     }
                     
                     //Allowed file size is less than 5 MB (1048576)
@@ -395,7 +395,7 @@
                         //$("#output").html("<b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.");
                         popup.children('p').remove();
                         popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
-                        return false
+                        return false;
                     }
                             
                     // $('#submit-btn').hide(); //hide submit button
@@ -423,12 +423,17 @@
                 //         $('#statustxt').css('color','#000'); //change status text to white after 50%
                 //     }
 
-                $('#popup').width(percentComplete + '%') //update progressbar percent complete
-                $('#popup').html(percentComplete + '%'); //update status text
-                if(percentComplete>50)
-                    {
-                        $('#popup').css('color','#000'); //change status text to white after 50%
-                    }
+                // show the loading overlay here, when the process of uploading starts.
+                showLoading();
+
+                popup.children('p').remove();
+                popup.fadeIn();
+                $('.progress').fadeIn();
+                // $('.progress').css({
+                //     'display': 'block'
+                // });
+                $('.progress-bar').width(percentComplete + '%') //update progressbar percent complete
+                $('.progress-bar').html(percentComplete + '%'); //update status text
             }
             //function to format bites bit.ly/19yoIPO
             function bytesToSize(bytes) {
@@ -437,6 +442,21 @@
                var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
                return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
             }
+            //function after succesful file upload (when server response)
+            function afterSuccess()
+            {
+                // to hide the loading overlay after the uploading is done.
+                hideLoading();
+                popup.children('p').remove();
+                popup.fadeOut();
+                $('.progress').fadeOut();
+
+                alertMsg.fadeIn();
+                // to fadeOut the alertMsg after 10 seconds.
+                setTimeout(function() {
+                    alertMsg.fadeOut();
+                }, 10000);
+            }           
 
             // for checking the query string and all.
 	    	var qs = getQueryStrings();
@@ -724,36 +744,28 @@
 
             // for the delegate event of the change of the course drop down on calender upload.
             $('.calender-div').delegate('#ddl-course', 'change', function() {
-                $.cookie("courseID", $(this).val());
 
-                // for uploading the calender to the server.
-                var options = { 
-                    target:   '#popup',   // target element(s) to be updated with server response 
-                    beforeSubmit:  beforeSubmit,  // pre-submit callback 
-                    success:       afterSuccess,  // post-submit callback 
-                    uploadProgress: OnProgress, //upload progress callback 
-                    resetForm: true        // reset the form after successful submit 
-                }; 
-                //function after succesful file upload (when server response)
-                function afterSuccess()
-                {
-                    // $('#submit-btn').show(); //hide submit button
-                    // $('#loading-img').hide(); //hide submit button
-                    // $('#progressbox').delay( 1000 ).fadeOut(); //hide progress bar
+                if($(this).val() == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not selected a course. Please do so before uploading the calender.</p>").fadeIn();
+                }
+                else {
+                    $.cookie("courseID", $(this).val());
+                    // for uploading the calender to the server.
+                    var options = { 
+                        target:   '#alertMsg',   // target element(s) to be updated with server response 
+                        beforeSubmit:  beforeSubmit,  // pre-submit callback 
+                        success:       afterSuccess,  // post-submit callback 
+                        uploadProgress: OnProgress, //upload progress callback 
+                        resetForm: true        // reset the form after successful submit 
+                    }; 
 
-                    hideLoading();
-
-                    // popup.children('p').remove();
-                    // popup.append("<p>Your file has been Successfully uploaded. Thank You.</p>").fadeIn();
-                    
-                    // make the AJAX Request to register the URL in the database with the course id.
-                    alert($.cookie("courseID"));
-                }           
-                $('#MyUploadForm').submit(function() { 
-                    $(this).ajaxSubmit(options);            
-                    // always return false to prevent standard browser submit and page navigation 
-                    return false; 
-                });      
+                    $('#formCalender').submit(function() { 
+                        $(this).ajaxSubmit(options);            
+                        // always return false to prevent standard browser submit and page navigation 
+                        return false; 
+                    });      
+                }   // end of else
 
             });  // end of change (delegate) function
 
@@ -787,7 +799,12 @@
     </div>
 
     <div id="popup" class="alert alert-danger" role="alert">
-          <button type="button" class="close" id="btnExitPopup" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button type="button" class="close" id="btnExitPopup" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <div class="progress" style="display: none;">
+            <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">
+                <span class="sr-only"></span>
+            </div>
+        </div>
     </div>
 
     <!-- Navigation -->
@@ -1003,7 +1020,7 @@
 		    </h1>
 
 		    <!-- Data will come from the AJAX here -->
-            <form action="upload.php" method="post" enctype="multipart/form-data" id="MyUploadForm">
+            <form action="calender-upload.php" method="post" enctype="multipart/form-data" id="formCalender">
     		    <table class="table">
     		    	<tr>
     		    		<td>
@@ -1018,20 +1035,16 @@
                             <label id="lblCourseDdl" for="ddlCourse">Upload Calender: </label>
                         </td>
                         <td>
-                            <input name="FileInput" id="FileInput" type="file" class="btn btn-lg btn-primary btn-block" />            
+                            <input name="fileCalender" id="fileCalender" type="file" class="btn btn-lg btn-primary btn-block" />            
                         </td>
                     </tr>
                     <tr>
                         <td colspan="2">
-                            <input type="submit"  id="submit-btn" value="Upload" class="btn btn-lg btn-primary btn-block" />                
+                            <input type="submit"  id="submit-btn" value="Upload Calender" class="btn btn-lg btn-primary btn-block" />                
                         </td>
                     </tr>
                 </table>
             </form>
-
-            <div id="progressbox" ><div id="progressbar"></div ><div id="statustxt">0%</div></div>
-            <div id="output"></div>
-
 	    </div>
 
     </div>

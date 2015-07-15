@@ -318,6 +318,8 @@
 
         $(document).ready(function() {
 
+        	document.title = "Mentee | " + $.cookie("email");
+
             var alertMsg = $('#alertMsg').fadeOut();
             var popup = $('#popup').fadeOut();    
 
@@ -457,6 +459,9 @@
             $('.calender').on('click', function() {
             	showDiv($('.calender-div'));
             	changeActiveState($(this).parent('li'));
+
+            	// get the image of the calender and show it in the html div created.
+
             	return false;
             });
 
@@ -619,6 +624,9 @@
         	<h1 class="page-header">
 	        	Programme Calender
 	        </h1>
+
+	        <!-- image of the calender will come from ajax -->
+
         </div>   <!-- end of Programme calender div -->
 
     </div>

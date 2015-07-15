@@ -1,5 +1,8 @@
 <?php 
 
+// for the PHP helper functions.
+include('helpers.php');
+
 if(isset($_FILES["fileCalender"]) && $_FILES["fileCalender"]["error"]== UPLOAD_ERR_OK)
 {
 	############ Edit settings ##############
@@ -14,7 +17,7 @@ if(isset($_FILES["fileCalender"]) && $_FILES["fileCalender"]["error"]== UPLOAD_E
 	
 	//check if this is an ajax request
 	if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])){
-		die("This is not an ajax request!");
+		die("Apparently, you did not select the course before uploading the file. Please hit the back button and try again.");
 	}
 	
 	
@@ -45,9 +48,6 @@ if(isset($_FILES["fileCalender"]) && $_FILES["fileCalender"]["error"]== UPLOAD_E
 	
 	$File_Name          = strtolower($_FILES['fileCalender']['name']);
 	$File_Ext           = substr($File_Name, strrpos($File_Name, '.')); //get file extention
-	//$Random_Number      = rand(0, 9999999999); //Random number to be added to name.
-	//$NewFileName = $File_Name;
-
 	$date = date_create();
 	$timestamp = date_timestamp_get($date);
 
@@ -60,15 +60,26 @@ if(isset($_FILES["fileCalender"]) && $_FILES["fileCalender"]["error"]== UPLOAD_E
 		$courseID = "-1";
 	}
 	
-	if(move_uploaded_file($_FILES['fileCalender']['tmp_name'], $UploadDirectory.$NewFileName )) {
-		die('Success! File Uploaded.');
+	if($courseID == "-1") {
+		die("Please select the correct course before uploading the calender.");
 	}
 	else {
-		die('error uploading File!');
+		if(move_uploaded_file($_FILES['fileCalender']['tmp_name'], $UploadDirectory.$NewFileName )) {
+			// put url of the calender file here.
+			$register = RegisterCalenderUrl($courseID, "courses/".$UploadDirectory.$NewFileName);
+			if($register == "1") {
+				die('Your File has been successfully uploaded.');
+			}
+			else if($resp == "-1") {
+				die('Oops! We encountered an error while uploading your calender. Please try again.');	
+			}
+		}
+		else {
+			die('error uploading File!');
+		}
 	}
 }
-else
-{
+else {
 	die('Something wrong with upload! Is "upload_max_filesize" set correctly?');
 }
 

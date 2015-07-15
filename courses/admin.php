@@ -353,12 +353,18 @@
 
             //function to check file size before uploading.
             function beforeSubmit() {
+
+            	alertMsg.children('p').remove();
+            	alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+
                 //check whether browser fully supports all File API
                 if (window.File && window.FileReader && window.FileList && window.Blob)
                 {
                     if( !$('#fileCalender').val()) //check empty input filed
                     {
                         //$("#output").html("Are you kidding me?");
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
                         popup.children('p').remove();
                         popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
                         return false
@@ -384,6 +390,8 @@
                             break;
                         default:
                             //$("#output").html("<b>"+ftype+"</b> Unsupported file type!");
+                            alertMsg.children('p').remove();
+                        	alertMsg.fadeOut();
                             popup.children('p').remove();
                             popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
                             return false;
@@ -393,6 +401,8 @@
                     if(fsize>5242880) 
                     {
                         //$("#output").html("<b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.");
+                        alertMsg.children('p').remove();
+                    	alertMsg.fadeOut();
                         popup.children('p').remove();
                         popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
                         return false;
@@ -406,11 +416,17 @@
                 {
                     //Output error to older unsupported browsers that doesn't support HTML5 File API
                     //$("#output").html("Please upgrade your browser, because your current browser lacks some new features we need!");
+                    alertMsg.children('p').remove();
+                	alertMsg.fadeOut();
                     popup.children('p').remove();
                     popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
                     return false;
                 }
-            }
+
+                alertMsg.children('p').remove();
+            	alertMsg.fadeOut();
+            }   // end of beforeSubmit function.
+
             //progress bar function
             function OnProgress(event, position, total, percentComplete)
             {
@@ -456,6 +472,12 @@
                 setTimeout(function() {
                     alertMsg.fadeOut();
                 }, 10000);
+
+                // finally, remove the cookie here.
+                $.removeCookie("courseID", {
+            		path: '/'
+            	});
+            	location.reload();
             }           
 
             // for checking the query string and all.

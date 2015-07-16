@@ -309,6 +309,12 @@
 
     					// populate the header of the dashboard.
     					$('.profile-header').html(res[1] + "'s Dashboard");
+
+    					// set the cookie for the menteeID.
+    					$.cookie("id", res[5], {
+                            path: '/',
+                            expires: 365
+                        });
     				}
     			},
     			error: function() {
@@ -380,13 +386,6 @@
                         case 'image/gif': 
                         case 'image/jpeg': 
                         case 'image/pjpeg':
-                        case 'text/plain':
-                        case 'text/html':
-                        case 'application/x-zip-compressed':
-                        case 'application/pdf':
-                        case 'application/msword':
-                        case 'application/vnd.ms-excel':
-                        case 'video/mp4':
                             break;
                         default:
                             //$("#output").html("<b>"+ftype+"</b> Unsupported file type!");
@@ -473,7 +472,7 @@
                     alertMsg.fadeOut();
                 }, 10000);
 
-                // finally, remove the cookie here.
+                // finally, remove the courseID cookie here.
                 $.removeCookie("courseID", {
             		path: '/'
             	});
@@ -537,6 +536,9 @@
             	$.removeCookie("email", {
             		path: '/'
             	});
+            	$.removeCookie("id", {
+            		path: '/'
+            	});
             	window.location.href = "logout.php";
             	return false;
             });
@@ -589,77 +591,92 @@
 
 			// this is for adding the course to the database.
 			$('#formAddCourse').validator().on('submit', function (e) {
-				var courseName = $('#txtCourseName').val().trim();
-				var courseDur = $('#txtCourseDuration').val().trim();
-				var courseEdition = $('#txtCourseEdition').val().trim();
-				var courseDesc = $('#txtCourseDesc').val().trim();
+				if (e.isDefaultPrevented()) {
+					alertMsg.children('p').remove();
+                    alertMsg.fadeOut();
+                    popup.children('p').remove();
+                    popup.append("<p>Oops! Looks like you did not fill the fields of the Course Data correctly. Please Recheck and try again.</p>").fadeIn();
+				}
+				else {
+					var courseName = $('#txtCourseName').val().trim();
+					var courseDur = $('#txtCourseDuration').val().trim();
+					var courseEdition = $('#txtCourseEdition').val().trim();
+					var courseDesc = $('#txtCourseDesc').val().trim();
 
-				showLoading();
-				$.ajax({
-					type: "GET",
-					url: "AJAXFunctions.php",
-					data: {
-						no: "4", name: courseName, duration: courseDur, edition: courseEdition, desc: courseDesc
-					},
-					success: function(response) {
-						if(response == "-1") {
-							popup.children('p').remove();
-                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+					showLoading();
+					$.ajax({
+						type: "GET",
+						url: "AJAXFunctions.php",
+						data: {
+							no: "4", name: courseName, duration: courseDur, edition: courseEdition, desc: courseDesc
+						},
+						success: function(response) {
+							if(response == "-1") {
+								popup.children('p').remove();
+	                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+							}
+							else {
+								popup.children('p').remove();
+	                            popup.append("<p>Course Added Successfully.</p>").fadeIn();	
+							}
+						},
+						error: function() {
+							alertMsg.children('p').remove();
+	                        alertMsg.fadeOut();
+	                        popup.children('p').remove();
+	                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+						},
+						complete: function() {
+							hideLoading();
 						}
-						else {
-							popup.children('p').remove();
-                            popup.append("<p>Course Added Successfully.</p>").fadeIn();	
-						}
-					},
-					error: function() {
-						alertMsg.children('p').remove();
-                        alertMsg.fadeOut();
-                        popup.children('p').remove();
-                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-					},
-					complete: function() {
-						hideLoading();
-					}
-				});
+					});   // end of ajax request.
+				}   // end of else
 				return false;
 			});
 
 			// this is for adding the course to the database.
 			$('#formAddOrganisation').validator().on('submit', function (e) {
-				var organName = $('#txtOrganName').val().trim();
-				var organContact = $('#txtOrganContact').val().trim();
-				var organAddress = $('#txtOrganAddress').val().trim();
+				if (e.isDefaultPrevented()) {
+					alertMsg.children('p').remove();
+                    alertMsg.fadeOut();
+                    popup.children('p').remove();
+                    popup.append("<p>Oops! Looks like you did not fill the fields of the Organisation Data correctly. Please Recheck and try again.</p>").fadeIn();
+				}
+				else {
+					var organName = $('#txtOrganName').val().trim();
+					var organContact = $('#txtOrganContact').val().trim();
+					var organAddress = $('#txtOrganAddress').val().trim();
 
-				showLoading();
-				$.ajax({
-					type: "GET",
-					url: "AJAXFunctions.php",
-					data: {
-						no: "5", name: organName, contact: organContact, address: organAddress
-					},
-					success: function(response) {
-						alert(response);
+					showLoading();
+					$.ajax({
+						type: "GET",
+						url: "AJAXFunctions.php",
+						data: {
+							no: "5", name: organName, contact: organContact, address: organAddress
+						},
+						success: function(response) {
+							alert(response);
 
-						if(response == "-1") {
-							popup.children('p').remove();
-                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+							if(response == "-1") {
+								popup.children('p').remove();
+	                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+							}
+							else {
+								popup.children('p').remove();
+	                            popup.append("<p>Campus Added Successfully.</p>").fadeIn();	
+							}
+						},
+						error: function() {
+							alertMsg.children('p').remove();
+	                        alertMsg.fadeOut();
+	                        popup.children('p').remove();
+	                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+						},
+						complete: function() {
+							hideLoading();
 						}
-						else {
-							popup.children('p').remove();
-                            popup.append("<p>Campus Added Successfully.</p>").fadeIn();	
-						}
-					},
-					error: function() {
-						alertMsg.children('p').remove();
-                        alertMsg.fadeOut();
-                        popup.children('p').remove();
-                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-					},
-					complete: function() {
-						hideLoading();
-					}
-				});
-
+					});   // end of ajax request
+				}   // end of else.
 				return false;
 			});
 
@@ -702,6 +719,131 @@
             	return false;
             });
 
+			// for the assignment link on LHS
+			$('.assignment').on('click', function() {
+            	showDiv($('.assignment-div'));
+            	changeActiveState($(this).parent('li'));
+
+            	// to get all the courses as a drop down list
+            	showLoading();
+            	$.ajax({
+            		type: "GET",
+            		url: "AJAXFunctions.php",
+            		data: {
+            			no: "6"
+            		},
+            		success: function(response) {
+            			// to show the courses drop down at appropriate place.
+            			if(response == "-1") {
+							popup.children('p').remove();
+				        	popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();	            				
+            			}
+            			else {
+            				$('.courselist-assignment').children('select').remove();
+            				$('.courselist-assignment').append(response);
+            			}
+            		}, 
+            		error: function() {
+            			alertMsg.children('p').remove();
+				        alertMsg.fadeOut();
+				        popup.children('p').remove();
+				        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
+            		},
+            		complete: function() {
+            			hideLoading();
+            		}
+            	});
+            	return false;
+            });    // end of assignment-div
+			// for the delegate event of the course list 
+			$('.assignment-div').delegate('#ddl-course', 'change', function() {
+				// firstly, get the latest assignment number for the course.
+				if($(this).val() == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not selected a course. Please do so before uploading the calender.</p>").fadeIn();
+                }
+                else {
+                	$.cookie("courseID", $(this).val());
+                	showLoading();
+					$.ajax({
+						type: "GET",
+						url: "AJAXFunctions.php",
+						data: {
+							no: "8", courseID: $.cookie("courseID")
+						},
+						success: function(response) {
+							if(response == "-1") {
+								$('.latest-ass-no').html("Please check internet connection. Or try again.");	
+							}
+							else {
+								$('.latest-ass-no').html(response);
+								// set the cookie of latst assignment no. for further use.
+								$.cookie("latestAss", response, {
+									path: '/'
+								});
+							}
+						},
+						error: function() {
+							alertMsg.children('p').remove();
+					        alertMsg.fadeOut();
+					        popup.children('p').remove();
+					        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
+						},
+						complete: function() {
+							hideLoading();
+						}
+					});
+                }   // end of else.
+				return false;
+			});   // end of delegate() in courses list in assignment-div
+			$('#formAssignment').validator().on('submit', function (e) { 
+				if (e.isDefaultPrevented()) {
+					alertMsg.children('p').remove();
+                    alertMsg.fadeOut();
+                    popup.children('p').remove();
+                    popup.append("<p>Oops! Looks like you did not fill the fields of the Organisation Data correctly. Please Recheck and try again.</p>").fadeIn();
+				}
+				else {
+					// make the ajax Request to save the assignment details to the database.
+					var assName = $('#txtAssName').val().trim();
+					var assDesc = $('#txtAssDesc').val().trim();
+					var assPostedOn = $('#txtAssPostedOn').val().trim();
+					var assDeadline = $('#txtAssDeadline').val().trim();
+
+					showLoading();
+					$.ajax({
+						type: "GET",
+						url: "AJAXFunctions.php",
+						data: {
+							no: "9", assCourse: $.cookie("courseID"), assName: assName, assDesc: assDesc, assPostedOn: assPostedOn, assPostedBy: $.cookie("id"), assDeadline: assDeadline, assNo: $.cookie("latestAss")
+						},
+						success: function(response) {
+							alert(response);
+
+							if(response == "-1") {
+								popup.children('p').remove();
+					        	popup.append("<p>Oops! We encountered an error while registering Assignment Details. Please try again.</p>").fadeIn();		
+							}
+							else {
+								popup.children('p').remove();
+					        	popup.append("<p>Assignment Details Successfully Added. Please go ahead and upload Assignment PDFs and other material.</p>").fadeIn();										
+							}
+						},
+						error: function() {
+							alertMsg.children('p').remove();
+					        alertMsg.fadeOut();
+					        popup.children('p').remove();
+					        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
+						},
+						complete: function() {
+							hideLoading();
+						}
+					});
+				}
+				return false;
+			});
+
+
 			// for the profile link on LHS
             $('.profile').on('click', function() {
             	showDiv($('.profile-div'));
@@ -738,8 +880,14 @@
             		},
             		success: function(response) {
             			// to show the courses drop down at appropriate place.
-            			$('.courseList').children('select').remove();
-            			$('.courseList').append(response);
+            			if(response == "-1") {
+							popup.children('p').remove();
+				        	popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();	            				
+            			}
+            			else {
+            				$('.courseList').children('select').remove();
+            				$('.courseList').append(response);
+            			}
             		}, 
             		error: function() {
             			alertMsg.children('p').remove();
@@ -751,22 +899,10 @@
             			hideLoading();
             		}
             	});
-
             	return false;
             });
-
-            // hide all the divs on page load. Except for first div.
-            $('.main-div').hide();
-            $('.dashboard').trigger('click');
-
-            // for the delegate event of the change of the organisation drop down on dashboard.
-            $('.dashboard-div').delegate('#ddl-organisation', 'change', function() {
-            	alert($(this).val());
-            });
-
-            // for the delegate event of the change of the course drop down on calender upload.
+			// for the delegate event of the change of the course drop down on calender upload.
             $('.calender-div').delegate('#ddl-course', 'change', function() {
-
                 if($(this).val() == "-1") {
                     popup.children('p').remove();
                     popup.append("<p>Looks like you have not selected a course. Please do so before uploading the calender.</p>").fadeIn();
@@ -788,8 +924,16 @@
                         return false; 
                     });      
                 }   // end of else
+            });  // end of change (delegate) function in calender-div courses list
 
-            });  // end of change (delegate) function
+            // hide all the divs on page load. Except for first div.
+            $('.main-div').hide();
+            $('.dashboard').trigger('click');
+
+            // for the delegate event of the change of the organisation drop down on dashboard.
+            $('.dashboard-div').delegate('#ddl-organisation', 'change', function() {
+            	alert($(this).val());
+            });
 
         });    // end of ready function.
 
@@ -876,6 +1020,7 @@
             		<li><a href="#" class="course">Add a Course</a></li>
             		<li><a href="#" class="organisation">Add an organisation</a></li>
             		<li><a href="#" class="calender">Add Course Calender</a></li>
+            		<li><a href="#" class="assignment">Add Assignment</a></li>
                 </ul>
             </div>
         </div>
@@ -883,6 +1028,74 @@
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div assignment-div">
+	        <h1 class="page-header">
+	        	Upload new Assignment
+	        </h1>
+
+        	<table class="table">
+        		<tr>
+        			<td>
+        				<label>Select Course: </label>
+        			</td>
+        			<td class="courselist-assignment">
+						        				
+        			</td>
+        		</tr>
+        		<tr>
+        			<td>
+        				<label>Latest Assignment Number: </label>
+        			</td>
+        			<td class="latest-ass-no">
+        				<!-- data coming from ajax -->				
+        			</td>
+        		</tr>
+        	</table>
+
+        	<form role="form" data-toggle="validator" id="formAssignment">
+        		<table class="table">
+    				<tr>
+	        			<td>
+	        				<label>Assignment Name: </label>
+	        			</td>
+	        			<td>
+	        				<input type="text" id="txtAssName" class="form-control" placeholder="Assignment Name" required />
+	        			</td>
+	        		</tr>
+	        		<tr>
+	        			<td>
+	        				<label>Assignment Description: </label>
+	        			</td>
+	        			<td>
+	        				<textarea id="txtAssDesc" class="form-control" placeholder="Assignment Description" rows="4" ></textarea> 
+	        			</td>
+	        		</tr>
+	        		<tr>
+	        			<td>
+	        				<label>Assignment Posted On: </label>
+	        			</td>
+	        			<td>
+	        				<input type="datetime" id="txtAssPostedOn" class="form-control" placeholder="Assignment Posted On" required />
+	        			</td>
+	        		</tr>
+	        		<tr>
+	        			<td>
+	        				<label>Assignment Deadline: </label>
+	        			</td>
+	        			<td>
+	        				<input type="datetime" id="txtAssDeadline" class="form-control" placeholder="Assignment Deadline" required />
+	        			</td>
+	        		</tr>
+	        		<tr>
+	        			<td colspan="2">
+	        				<input type="submit" class="btn btn-lg btn-primary btn-block" value="Upload Assignment" id="btnUploadAssignment" />
+	        			</td>
+	        		</tr>
+        		</table>
+        	</form>
+
+        </div>
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div dashboard-div">
 	        <h1 class="page-header">

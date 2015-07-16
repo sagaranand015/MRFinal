@@ -5,6 +5,30 @@
 //these are for the PHP Helper files
 include 'headers/databaseConn.php';
 
+// this is the function to get the mentee course from the mentee Table.
+// returns -1 on error. returning 0 means course is not assigned to mentee.
+function GetMenteeCourse($menteeEmail) {
+	$resp = "-1";
+	$courseID = "-1";
+	try {
+		$query = "select * from Mentee where MenteeEmail='$menteeEmail'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				$courseID = $res["MenteeCourse"];
+			}
+		}
+		return $courseID;
+	}	
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // this is the function for registering the calender url to the database table.
 function RegisterCalenderUrl($courseID, $url) {
 	$resp = "-1";

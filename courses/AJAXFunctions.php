@@ -24,6 +24,89 @@ else if(isset($_GET["no"]) && $_GET["no"] == "5") {  // for adding the organisat
 else if(isset($_GET["no"]) && $_GET["no"] == "6") {  // for getting the courses as a drop down list
 	GetCoursesDropDown();
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "7") {  // for getting the calender image on the mentee page.
+	GetCalender($_GET["menteeEmail"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "8") {  // for getting the latest assignment from of the course
+	GetLatestAssignment($_GET["courseID"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "9") {  // for adding the assignment details to the database table
+	AddAssignmentDetails($_GET["assCourse"], $_GET["assName"], $_GET["assDesc"], $_GET["assPostedOn"], $_GET["assPostedBy"], $_GET["assDeadline"], $_GET["assNo"]);
+}
+
+// for adding the assignment details to the database table
+function AddAssignmentDetails($assCourse, $assName, $assDesc, $assPostedOn, $assPostedBy, $assDeadline, $assNo) {
+	$resp = "-1";
+	try {
+		$query = "insert into Assignment(AssCourse, AssName, AssDesc, AssPostedOn, AssPostedBy, AssDeadline, AssNo) values('$assCourse', '$assName', '$assDesc', '$assPostedOn', '$assPostedBy', '$assDeadline', '$assNo')";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// for getting the latest assignment from of the course
+function GetLatestAssignment($courseID) {
+	$resp = "-1";
+	try {
+		$query = "select count(*) as AssNo from Assignment where AssCourse='$courseID'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				$resp = $res["AssNo"];
+			}
+		}
+		$resp = intval($resp) + 1;
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// for getting the calender image on the mentee page.
+// returns -2 if course is not assigned. -1 on error. CalenderURL on succes.
+function GetCalender($menteeEmail) {
+	$resp = "-1";
+	$courseID = GetMenteeCourse($menteeEmail);
+	$calender = "";
+	try {
+		if($courseID == "-1" || $courseID == "0") {
+			$resp = "-2";
+		}
+		else {
+			$query = "select * from Calender where CourseID='$courseID'";
+			$rs = mysql_query($query);
+			if(!$rs) {
+				$resp = "-1";
+			}
+			else {
+				while ($res = mysql_fetch_array($rs)) {
+					$calender = $res["Calender"];
+				}
+				$resp = "http://mentored-research.com/" . $calender;
+			}
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // for getting the courses as a drop down list
 function GetCoursesDropDown() {
@@ -137,6 +220,7 @@ function GetOrganisationsDropDown() {
 // this is the function to load the profile data from the database.
 function LoadProfileData($email, $table) {
 	$resp = "-1";
+	$id = "";
 	$name = "";
 	$contact = "";
 	$profile = "";
@@ -149,13 +233,14 @@ function LoadProfileData($email, $table) {
 		}
 		else {
 			while ($res = mysql_fetch_array($rs)) {
+				$id = $res[$table . "ID"];
 				$name = $res[$table . "Name"];
 				$contact = $res[$table . "Contact"];
 				$profile = $res[$table . "Profile"];
 				$organ = $res[$table . "Organ"];
 			}
 		}
-		$resp = $email . " ~~ " . $name . " ~~ " . $contact . " ~~ " . $organ . " ~~ " . $profile;
+		$resp = $email . " ~~ " . $name . " ~~ " . $contact . " ~~ " . $organ . " ~~ " . $profile . " ~~ " . $id;
 		echo $resp; 
 	}	
 	catch(Exception $e) {

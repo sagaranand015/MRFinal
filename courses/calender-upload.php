@@ -34,13 +34,6 @@ if(isset($_FILES["fileCalender"]) && $_FILES["fileCalender"]["error"]== UPLOAD_E
 			case 'image/gif': 
 			case 'image/jpeg': 
 			case 'image/pjpeg':
-			case 'text/plain':
-			case 'text/html': //html file
-			case 'application/x-zip-compressed':
-			case 'application/pdf':
-			case 'application/msword':
-			case 'application/vnd.ms-excel':
-			case 'video/mp4':
 				break;
 			default:
 				die('Unsupported File!'); //output error

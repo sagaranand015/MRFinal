@@ -301,6 +301,12 @@
 
     					// populate the header of the dashboard.
     					$('#profile-header').html(res[1] + " Profile");
+
+    					// set the cookie for the menteeID.
+    					$.cookie("id", res[5], {
+                            path: '/',
+                            expires: 365
+                        });
     				}
     			},
     			error: function() {
@@ -396,6 +402,9 @@
             	$.removeCookie("email", {
             		path: '/'
             	});
+            	$.removeCookie("id", {
+            		path: '/'
+            	});
             	window.location.href = "logout.php";
             	return false;
             });
@@ -461,7 +470,37 @@
             	changeActiveState($(this).parent('li'));
 
             	// get the image of the calender and show it in the html div created.
+            	var menteeEmail = $.cookie("email");
+            	if(menteeEmail == "" || menteeEmail == undefined) {
+            		popup.children('p').remove();
+            		popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
+            	}
+            	else {
+            		showLoading();
+	            	$.ajax({
+	            		type: "GET",
+	            		url: "AJAXFunctions.php",
+	            		data: {
+	            			no: "7", menteeEmail: menteeEmail
+	            		},
+	            		success: function(response) {
+	            			alert(response);
 
+	            			// show the course calender in the calender-div.
+            				$('.calender-div').children('img').remove();
+	            			$('.calender-div').append("<img src='" + response + "' />");
+	            		},
+	            		error: function() {
+							alertMsg.children('p').remove();
+	                        alertMsg.fadeOut();
+	                        popup.children('p').remove();
+	                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();            			
+	            		},
+	            		complete: function() {
+	            			hideLoading();
+	            		}
+	            	});
+            	}  // end of else.
             	return false;
             });
 

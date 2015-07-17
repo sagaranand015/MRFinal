@@ -33,10 +33,39 @@ else if(isset($_GET["no"]) && $_GET["no"] == "8") {  // for getting the latest a
 else if(isset($_GET["no"]) && $_GET["no"] == "9") {  // for adding the assignment details to the database table
 	AddAssignmentDetails($_GET["assCourse"], $_GET["assName"], $_GET["assDesc"], $_GET["assPostedOn"], $_GET["assPostedBy"], $_GET["assDeadline"], $_GET["assNo"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "10") {  // for getting the assignments as a drop down list
+	GetAssignmentsDropDown($_GET["courseAssPDF"]);
+}
+
+// for getting the assignments as a drop down list
+function GetAssignmentsDropDown($assCourse) {
+	$resp = "-1";
+	try {
+		$query = "select * from Assignment where AssCourse='$assCourse'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "<select id='ddl-assignment' class='form-control'><option value='-1'> --Select Assignment-- </option>";
+			while ($res = mysql_fetch_array($rs)) {
+				$resp .= "<option value='" . $res["AssID"] . "' >" . $res["AssName"] . "</option>";
+			}
+			$resp .= "</select>";
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // for adding the assignment details to the database table
 function AddAssignmentDetails($assCourse, $assName, $assDesc, $assPostedOn, $assPostedBy, $assDeadline, $assNo) {
 	$resp = "-1";
+	$assPostedOn = strtotime($assPostedOn);
+	$assDeadline = strtotime($assDeadline);
 	try {
 		$query = "insert into Assignment(AssCourse, AssName, AssDesc, AssPostedOn, AssPostedBy, AssDeadline, AssNo) values('$assCourse', '$assName', '$assDesc', '$assPostedOn', '$assPostedBy', '$assDeadline', '$assNo')";
 		$rs = mysql_query($query);

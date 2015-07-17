@@ -5,6 +5,27 @@
 //these are for the PHP Helper files
 include 'headers/databaseConn.php';
 
+// this is the function to register the Assignment PDF upload to the database in the Assignment table.
+// returns -1 on error. 1 on success.
+function RegisterAssignmentPDF($assID, $courseID, $assLink) {
+	$resp = "-1";
+	try {
+		$query = "update Assignment set AssPdf='$assLink' where AssID='$assID' and AssCourse='$courseID'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // this is the function to get the mentee course from the mentee Table.
 // returns -1 on error. returning 0 means course is not assigned to mentee.
 function GetMenteeCourse($menteeEmail) {

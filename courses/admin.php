@@ -359,94 +359,60 @@
 
             //function to check file size before uploading.
             function beforeSubmit() {
-
             	alertMsg.children('p').remove();
             	alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
-
                 //check whether browser fully supports all File API
-                if (window.File && window.FileReader && window.FileList && window.Blob)
-                {
-                    if( !$('#fileCalender').val()) //check empty input filed
-                    {
-                        //$("#output").html("Are you kidding me?");
+                if (window.File && window.FileReader && window.FileList && window.Blob) {
+                    if( !$('#fileCalender').val()) {   //check empty input filed 
                         alertMsg.children('p').remove();
                         alertMsg.fadeOut();
                         popup.children('p').remove();
                         popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
-                        return false
+                        return false;
                     }
-                    
                     var fsize = $('#fileCalender')[0].files[0].size; //get file size
                     var ftype = $('#fileCalender')[0].files[0].type; // get file type
-
                     //allow file types 
-                    switch(ftype)
-                    {
+                    switch(ftype) {
                         case 'image/png': 
                         case 'image/gif': 
                         case 'image/jpeg': 
                         case 'image/pjpeg':
                             break;
                         default:
-                            //$("#output").html("<b>"+ftype+"</b> Unsupported file type!");
                             alertMsg.children('p').remove();
                         	alertMsg.fadeOut();
                             popup.children('p').remove();
                             popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
                             return false;
                     }
-                    
                     //Allowed file size is less than 5 MB (1048576)
-                    if(fsize>5242880) 
-                    {
-                        //$("#output").html("<b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.");
+                    if(fsize>5242880)   {
                         alertMsg.children('p').remove();
                     	alertMsg.fadeOut();
                         popup.children('p').remove();
                         popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
                         return false;
                     }
-                            
-                    // $('#submit-btn').hide(); //hide submit button
-                    // $('#loading-img').show(); //hide submit button
-                    // $("#output").html("");  
                 }
-                else
-                {
-                    //Output error to older unsupported browsers that doesn't support HTML5 File API
-                    //$("#output").html("Please upgrade your browser, because your current browser lacks some new features we need!");
+                else  {
                     alertMsg.children('p').remove();
                 	alertMsg.fadeOut();
                     popup.children('p').remove();
                     popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
                     return false;
                 }
-
                 alertMsg.children('p').remove();
             	alertMsg.fadeOut();
             }   // end of beforeSubmit function.
 
             //progress bar function
-            function OnProgress(event, position, total, percentComplete)
-            {
-                //Progress bar
-                //$('#progressbox').show();
-                // $('#progressbar').width(percentComplete + '%') //update progressbar percent complete
-                // $('#statustxt').html(percentComplete + '%'); //update status text
-                // if(percentComplete>50)
-                //     {
-                //         $('#statustxt').css('color','#000'); //change status text to white after 50%
-                //     }
-
+            function OnProgress(event, position, total, percentComplete) {
                 // show the loading overlay here, when the process of uploading starts.
                 showLoading();
-
                 popup.children('p').remove();
                 popup.fadeIn();
                 $('.progress').fadeIn();
-                // $('.progress').css({
-                //     'display': 'block'
-                // });
                 $('.progress-bar').width(percentComplete + '%') //update progressbar percent complete
                 $('.progress-bar').html(percentComplete + '%'); //update status text
             }
@@ -458,29 +424,27 @@
                return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
             }
             //function after succesful file upload (when server response)
-            function afterSuccess()
-            {
+            function afterSuccess() {
                 // to hide the loading overlay after the uploading is done.
                 hideLoading();
                 popup.children('p').remove();
                 popup.fadeOut();
                 $('.progress').fadeOut();
-
                 alertMsg.fadeIn();
                 // to fadeOut the alertMsg after 10 seconds.
                 setTimeout(function() {
                     alertMsg.fadeOut();
                 }, 10000);
-
                 // finally, remove the courseID cookie here.
                 $.removeCookie("courseID", {
             		path: '/'
             	});
             	location.reload();
-            }           
+            }     // end of afterSuccess function
 
             // for checking the query string and all.
 	    	var qs = getQueryStrings();
+	    	// for all the queryStrings
 
     		// for the scrolly thing.
     		$('.scrolly').scrolly();
@@ -763,7 +727,6 @@
                     popup.append("<p>Looks like you have not selected a course. Please do so before uploading the calender.</p>").fadeIn();
                 }
                 else {
-                	$.cookie("courseID", $(this).val());
                 	showLoading();
 					$.ajax({
 						type: "GET",
@@ -801,48 +764,228 @@
 					alertMsg.children('p').remove();
                     alertMsg.fadeOut();
                     popup.children('p').remove();
-                    popup.append("<p>Oops! Looks like you did not fill the fields of the Organisation Data correctly. Please Recheck and try again.</p>").fadeIn();
+                    popup.append("<p>Oops! Looks like you did not fill the fields of the Assignment Data correctly. Please Recheck and try again.</p>").fadeIn();
 				}
 				else {
 					// make the ajax Request to save the assignment details to the database.
+					var courseAssID = $('.courselist-assignment').children('select').val();
 					var assName = $('#txtAssName').val().trim();
 					var assDesc = $('#txtAssDesc').val().trim();
 					var assPostedOn = $('#txtAssPostedOn').val().trim();
 					var assDeadline = $('#txtAssDeadline').val().trim();
 
-					showLoading();
-					$.ajax({
-						type: "GET",
-						url: "AJAXFunctions.php",
-						data: {
-							no: "9", assCourse: $.cookie("courseID"), assName: assName, assDesc: assDesc, assPostedOn: assPostedOn, assPostedBy: $.cookie("id"), assDeadline: assDeadline, assNo: $.cookie("latestAss")
-						},
-						success: function(response) {
-							alert(response);
-
-							if(response == "-1") {
-								popup.children('p').remove();
-					        	popup.append("<p>Oops! We encountered an error while registering Assignment Details. Please try again.</p>").fadeIn();		
+					if(!isValidDate(assPostedOn) || !isValidDate(assDeadline)) {
+						alertMsg.children('p').remove();
+	                    alertMsg.fadeOut();
+	                    popup.children('p').remove();
+	                    popup.append("<p>Oops! Looks like you did not fill the Date Fields correctly. Please Recheck and try again.</p>").fadeIn();
+					}
+					else if(courseAssID == "-1") {
+						popup.children('p').remove();
+	                    popup.append("<p>Oops! Looks like you did not select the course. Please Recheck and try again.</p>").fadeIn();
+					}
+					else {
+						showLoading();
+						$.ajax({
+							type: "GET",
+							url: "AJAXFunctions.php",
+							data: {
+								no: "9", assCourse: courseAssID, assName: assName, assDesc: assDesc, assPostedOn: assPostedOn, assPostedBy: $.cookie("id"), assDeadline: assDeadline, assNo: $.cookie("latestAss")
+							},
+							success: function(response) {
+								if(response == "-1") {
+									popup.children('p').remove();
+						        	popup.append("<p>Oops! We encountered an error while registering Assignment Details. Please try again.</p>").fadeIn();		
+								}
+								else {
+									popup.children('p').remove();
+						        	popup.append("<p>Assignment Details Successfully Added. Please go ahead and upload Assignment PDFs and other material.</p>").fadeIn();										
+								}
+							},
+							error: function() {
+								alertMsg.children('p').remove();
+						        alertMsg.fadeOut();
+						        popup.children('p').remove();
+						        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
+							},
+							complete: function() {
+								hideLoading();
 							}
-							else {
-								popup.children('p').remove();
-					        	popup.append("<p>Assignment Details Successfully Added. Please go ahead and upload Assignment PDFs and other material.</p>").fadeIn();										
-							}
-						},
-						error: function() {
-							alertMsg.children('p').remove();
-					        alertMsg.fadeOut();
-					        popup.children('p').remove();
-					        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
-						},
-						complete: function() {
-							hideLoading();
-						}
-					});
-				}
+						});
+					}  // end of inner else
+				}  // end of outer else
 				return false;
 			});
 
+			// for the assignmentPDF link on LHS
+            $('.assignmentPDF').on('click', function() {
+            	showDiv($('.assignmentPDF-div'));
+            	changeActiveState($(this).parent('li'));
+
+            	// to get all the courses as a drop down list
+            	showLoading();
+            	$.ajax({
+            		type: "GET",
+            		url: "AJAXFunctions.php",
+            		data: {
+            			no: "6"
+            		},
+            		success: function(response) {
+            			// to show the courses drop down at appropriate place.
+            			if(response == "-1") {
+							popup.children('p').remove();
+				        	popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();	            				
+            			}
+            			else {
+            				$('.courseList-assPDF').children('select').remove();
+            				$('.courseList-assPDF').append(response);
+            			}
+            		}, 
+            		error: function() {
+            			alertMsg.children('p').remove();
+				        alertMsg.fadeOut();
+				        popup.children('p').remove();
+				        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
+            		},
+            		complete: function() {
+            			hideLoading();
+            		}
+            	});
+            	return false;
+            });    // end of AssignmentPDF link on LHS
+			// for the delegate function of courseList-assPDF
+			$('.assignmentPDF-div').delegate('#ddl-course', 'change', function() {
+				if($(this).val() == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not selected the course. Please do so before uploading the calender.</p>").fadeIn();
+                }
+                else {
+                	// to get all the assignments as a drop down list
+					var courseAssPDF = $(this).val();
+	            	showLoading();
+	            	$.ajax({
+	            		type: "GET",
+	            		url: "AJAXFunctions.php",
+	            		data: {
+	            			no: "10", courseAssPDF: courseAssPDF
+	            		},
+	            		success: function(response) {
+	            			// to show the assignments drop down at appropriate place.
+	            			if(response == "-1") {
+								popup.children('p').remove();
+					        	popup.append("<p>We could not retrieve the assignments from the database. Please check your internet connection and try again.</p>").fadeIn();	            				
+	            			}
+	            			else {
+	            				$('.assignmentList-assPDF').children('select').remove();
+	            				$('.assignmentList-assPDF').append(response);
+	            				// set the cookie for selected courseAssPDF (used for file upload)
+	            				$.cookie("courseAssPDF", courseAssPDF);
+	            				alert("The cookie set is: " + $.cookie("courseAssPDF"));
+	            			}
+	            		}, 
+	            		error: function() {
+	            			alertMsg.children('p').remove();
+					        alertMsg.fadeOut();
+					        popup.children('p').remove();
+					        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
+	            		},
+	            		complete: function() {
+	            			hideLoading();
+	            		}
+	            	});
+                }   // end of else.
+				return false;
+			});    // end of delegate for courseAssPDF
+			// for the delegate function of assignmentAssPDF
+			$('.assignmentPDF-div').delegate("#ddl-assignment", 'change', function() {
+				if($(this).val() == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not selected the assignment. Please do so before uploading the calender.</p>").fadeIn();
+                }
+                else {
+                	// set the cookie for assignmentAssPDF (used for file upload)
+					$.cookie("assignmentAssPDF", $(this).val());
+
+					 //function to check file size before uploading.
+		            function beforeSubmitAssignmentPDF() {
+		            	alertMsg.children('p').remove();
+		            	alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+		                //check whether browser fully supports all File API
+		                if (window.File && window.FileReader && window.FileList && window.Blob) {
+		                    if( !$('#fileAssignmentPDF').val()) {   //check empty input filed 
+		                        alertMsg.children('p').remove();
+		                        alertMsg.fadeOut();
+		                        popup.children('p').remove();
+		                        popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
+		                        return false;
+		                    }
+		                    var fsize = $('#fileAssignmentPDF')[0].files[0].size; //get file size
+		                    var ftype = $('#fileAssignmentPDF')[0].files[0].type; // get file type
+		                    //allow file types 
+		                    switch(ftype) {
+								case 'application/pdf':
+		                            break;
+		                        default:
+		                            alertMsg.children('p').remove();
+		                        	alertMsg.fadeOut();
+		                            popup.children('p').remove();
+		                            popup.append("<p>The file uploaded is not supported by the server. Please upload the file in PDF format only.</p>").fadeIn();
+		                            return false;
+		                    }
+		                    //Allowed file size is less than 5 MB (1048576)
+		                    if(fsize>5242880)   {
+		                        alertMsg.children('p').remove();
+		                    	alertMsg.fadeOut();
+		                        popup.children('p').remove();
+		                        popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
+		                        return false;
+		                    }
+		                }
+		                else  {
+		                    alertMsg.children('p').remove();
+		                	alertMsg.fadeOut();
+		                    popup.children('p').remove();
+		                    popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
+		                    return false;
+		                }
+		                alertMsg.children('p').remove();
+		            	alertMsg.fadeOut();
+		            }   // end of beforeSubmitAssignmentPDF function.
+
+		            function afterSuccessAssignmentPDF() {
+		                // to hide the loading overlay after the uploading is done.
+		                hideLoading();
+		                popup.children('p').remove();
+		                popup.fadeOut();
+		                $('.progress').fadeOut();
+		                alertMsg.fadeIn();
+		                // to fadeOut the alertMsg after 10 seconds.
+		                setTimeout(function() {
+		                    alertMsg.fadeOut();
+		                }, 10000);
+		                // finally, remove the courseAssPDF and assignmentAssPDF cookie here.
+		                $.removeCookie("courseAssPDF");
+		            	$.removeCookie("assignmentAssPDF");
+		            	location.reload();
+		            }     // end of afterSuccessAssignmentPDF function
+
+                	// code for assignmentPDF File upload
+                	var options = { 
+                        target:   '#alertMsg',   // target element(s) to be updated with server response 
+                        beforeSubmit:  beforeSubmitAssignmentPDF,  // pre-submit callback 
+                        success:       afterSuccessAssignmentPDF,  // post-submit callback 
+                        uploadProgress: OnProgress, //upload progress callback 
+                        resetForm: true        // reset the form after successful submit 
+                    }; 
+
+                    $('#formAssignmentPDF').submit(function() { 
+                        $(this).ajaxSubmit(options);            
+                        // always return false to prevent standard browser submit and page navigation 
+                        return false; 
+                    });      
+                }   // end of else.
+				return false;
+			});
 
 			// for the profile link on LHS
             $('.profile').on('click', function() {
@@ -1020,7 +1163,14 @@
             		<li><a href="#" class="course">Add a Course</a></li>
             		<li><a href="#" class="organisation">Add an organisation</a></li>
             		<li><a href="#" class="calender">Add Course Calender</a></li>
-            		<li><a href="#" class="assignment">Add Assignment</a></li>
+                </ul>
+                <ul class="nav nav-sidebar">
+                	<li><a href="#" class="assignment">Add Assignment Details</a></li>
+                	<li><a href="#" class="assignmentPDF">Add Assignment PDF</a></li>
+                	<li><a href="#" class="assignment-video">Add Assignment Videos</a></li>
+                	<li><a href="#" class="assignment-report">Add Assignment Sample Reports</a></li>
+                	<li><a href="#" class="assignment-offtopic">Add Assignment Off Topics</a></li>
+                	<li><a href="#" class="assignment-extra">Add Assignment Extra Reads</a></li>
                 </ul>
             </div>
         </div>
@@ -1076,7 +1226,7 @@
 	        				<label>Assignment Posted On: </label>
 	        			</td>
 	        			<td>
-	        				<input type="datetime" id="txtAssPostedOn" class="form-control" placeholder="Assignment Posted On" required />
+	        				<input type="date" id="txtAssPostedOn" class="form-control" placeholder="mm/dd/yyyy" required />
 	        			</td>
 	        		</tr>
 	        		<tr>
@@ -1084,7 +1234,7 @@
 	        				<label>Assignment Deadline: </label>
 	        			</td>
 	        			<td>
-	        				<input type="datetime" id="txtAssDeadline" class="form-control" placeholder="Assignment Deadline" required />
+	        				<input type="date" id="txtAssDeadline" class="form-control" placeholder="mm/dd/yyyy" required />
 	        			</td>
 	        		</tr>
 	        		<tr>
@@ -1094,8 +1244,47 @@
 	        		</tr>
         		</table>
         	</form>
+        </div>   <!-- end of assignment Details div -->
 
-        </div>
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div assignmentPDF-div">
+        	<h1 class="page-header">
+        		Add Assignment PDF
+        	</h1>
+
+        	<form action="assignment-upload.php" method="post" enctype="multipart/form-data" id="formAssignmentPDF">
+        		<table class="table">
+        			<tr>
+	    				<td>
+    						<label>Select Course: </label>
+	    				</td>
+	    				<td class="courseList-assPDF">
+	    					<!-- data will come from ajax here -->
+	    				</td>
+	    			</tr>
+	    			<tr>
+	    				<td>
+    						<label>Select Assignment: </label>
+	    				</td>
+	    				<td class="assignmentList-assPDF">
+	    					<!-- data will come from ajax here -->
+	    				</td>
+	    			</tr>
+	    			<tr>
+	    				<td>
+	    					<label>Upload Assignment PDF (less than 5 MB): </label>
+	    				</td>
+	    				<td>
+	    					<input type="file" name="fileAssignmentPDF" id="fileAssignmentPDF" class="btn btn-lg btn-primary btn-block" />
+	    				</td>
+	    			</tr>
+	    			<tr>
+	    				<td colspan="2">
+	    					<input type="submit"  id="btnSubmitAssignment" value="Upload Assignment PDF" class="btn btn-lg btn-primary btn-block" /> 
+	    				</td>
+	    			</tr>
+	        	</table>
+        	</form>
+        </div>   <!-- end of assignmentPDF-div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div dashboard-div">
 	        <h1 class="page-header">

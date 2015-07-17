@@ -36,6 +36,29 @@ else if(isset($_GET["no"]) && $_GET["no"] == "9") {  // for adding the assignmen
 else if(isset($_GET["no"]) && $_GET["no"] == "10") {  // for getting the assignments as a drop down list
 	GetAssignmentsDropDown($_GET["courseAssPDF"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "11") {  // for adding the video link to the database for a particular assignment.
+	RegisterAssignmentVideo($_GET["assID"], $_GET["assVideo"]);
+}
+
+// for adding the video link to the database for a particular assignment.
+function RegisterAssignmentVideo($assID, $assVideo) {
+	$resp = "-1";
+	try {
+		$query = "insert into AssignmentVideo(AssID, AssVideo) values('$assID', '$assVideo')";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // for getting the assignments as a drop down list
 function GetAssignmentsDropDown($assCourse) {

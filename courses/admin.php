@@ -619,8 +619,6 @@
 							no: "5", name: organName, contact: organContact, address: organAddress
 						},
 						success: function(response) {
-							alert(response);
-
 							if(response == "-1") {
 								popup.children('p').remove();
 	                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
@@ -727,12 +725,13 @@
                     popup.append("<p>Looks like you have not selected a course. Please do so before uploading the calender.</p>").fadeIn();
                 }
                 else {
+                	var courseID = $(this).val();
                 	showLoading();
 					$.ajax({
 						type: "GET",
 						url: "AJAXFunctions.php",
 						data: {
-							no: "8", courseID: $.cookie("courseID")
+							no: "8", courseID: courseID
 						},
 						success: function(response) {
 							if(response == "-1") {
@@ -880,7 +879,6 @@
 	            				$('.assignmentList-assPDF').append(response);
 	            				// set the cookie for selected courseAssPDF (used for file upload)
 	            				$.cookie("courseAssPDF", courseAssPDF);
-	            				alert("The cookie set is: " + $.cookie("courseAssPDF"));
 	            			}
 	            		}, 
 	            		error: function() {
@@ -963,14 +961,11 @@
 		                setTimeout(function() {
 		                    alertMsg.fadeOut();
 		                }, 10000);
-		                // finally, remove the courseAssPDF and assignmentAssPDF cookie here.
-		                $.removeCookie("courseAssPDF");
-		            	$.removeCookie("assignmentAssPDF");
 		            	location.reload();
 		            }     // end of afterSuccessAssignmentPDF function
 
                 	// code for assignmentPDF File upload
-                	var options = { 
+                	var optionsAssignmentPDF = { 
                         target:   '#alertMsg',   // target element(s) to be updated with server response 
                         beforeSubmit:  beforeSubmitAssignmentPDF,  // pre-submit callback 
                         success:       afterSuccessAssignmentPDF,  // post-submit callback 
@@ -978,14 +973,69 @@
                         resetForm: true        // reset the form after successful submit 
                     }; 
 
-                    $('#formAssignmentPDF').submit(function() { 
-                        $(this).ajaxSubmit(options);            
+                    // check for the courseAssPDF and assignmentAssPDF cookies first and then upload the form.
+                	$('#formAssignmentPDF').submit(function() { 
+                		if($.cookie("courseAssPDF") == "undefined" || $.cookie("assignmentAssPDF") == "undefined" || $.cookie("courseAssPDF") == undefined || $.cookie("assignmentAssPDF") == undefined) {
+                			popup.children('p').remove();
+                    		popup.append("<p>You havn't selected the Course and Assignment Properly. Please try again.</p>").fadeIn();
+                		}
+                		else {
+                			$(this).ajaxSubmit(optionsAssignmentPDF);            
+                		}
                         // always return false to prevent standard browser submit and page navigation 
                         return false; 
                     });      
                 }   // end of else.
 				return false;
 			});
+			// for adding the video link to the database.
+			$('#formAssVideo').validator().on('submit', function (e) { 
+				if (e.isDefaultPrevented()) {
+					alertMsg.children('p').remove();
+                    alertMsg.fadeOut();
+                    popup.children('p').remove();
+                    popup.append("<p>Oops! Looks like you have not provided the Video Link. Please Recheck and try again.</p>").fadeIn();
+				}
+				else {
+					// put the ajax Request for the Video link to the database.
+					if($.cookie("assignmentAssPDF") == "undefined" ||  $.cookie("assignmentAssPDF") == undefined) {
+						popup.children('p').remove();
+				        popup.append("<p>Looks like you have not selected the Assignment Properly. Please do so first.</p>").fadeIn();	
+					}
+					else {
+						var assVideo = $('#txtAssVideo').val().trim();
+						var assID = $.cookie("assignmentAssPDF");
+						showLoading();
+						$.ajax({
+							type: "GET",
+							url: "AJAXFunctions.php",
+							data: {
+								no: "11", assID: assID, assVideo: assVideo
+							},
+							success: function(response) {
+								if(response == "-1") {
+									popup.children('p').remove();
+				        			popup.append("<p>Oops! We encountered an error while registering the Video link. Please try again.</p>").fadeIn();	
+								}
+								else {
+									popup.children('p').remove();
+				        			popup.append("<p>Assignment Video Added Successfully.</p>").fadeIn();		
+								}
+							},
+							error: function() {
+								alertMsg.children('p').remove();
+						        alertMsg.fadeOut();
+						        popup.children('p').remove();
+						        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
+							},
+							complete: function() {
+								hideLoading();
+							}
+						});
+					}  // end of inner else.
+				}   // end of outer else.
+				return false;
+			});  // end of add video link form
 
 			// for the profile link on LHS
             $('.profile').on('click', function() {
@@ -1166,11 +1216,7 @@
                 </ul>
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="assignment">Add Assignment Details</a></li>
-                	<li><a href="#" class="assignmentPDF">Add Assignment PDF</a></li>
-                	<li><a href="#" class="assignment-video">Add Assignment Videos</a></li>
-                	<li><a href="#" class="assignment-report">Add Assignment Sample Reports</a></li>
-                	<li><a href="#" class="assignment-offtopic">Add Assignment Off Topics</a></li>
-                	<li><a href="#" class="assignment-extra">Add Assignment Extra Reads</a></li>
+                	<li><a href="#" class="assignmentPDF">Add Assignment Material</a></li>
                 </ul>
             </div>
         </div>
@@ -1284,6 +1330,26 @@
 	    			</tr>
 	        	</table>
         	</form>
+
+        	<!-- table for Assignment Videos -->
+        	<form role="form" data-toggle="validator" id="formAssVideo">
+        		<table class="table">
+					<tr>
+						<td>
+							<label>Add Video Link: </label>
+						</td>
+						<td>
+							<input type="text" placeholder="Video Lecture Link" id="txtAssVideo" class="form-control" required />
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<input type="submit" class="btn btn-lg btn-primary btn-block" value="Add Video Link" id="btnAddAssVideo" />
+						</td>
+					</tr>
+		    	</table>	
+        	</form>
+
         </div>   <!-- end of assignmentPDF-div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div dashboard-div">

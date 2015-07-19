@@ -375,52 +375,61 @@
 
     <section id="login-section" style="padding-botton: 0px;">
     	<div class="container">
-    		<h1 class="page-header text-center">
-    			Login
-    		</h1>
 
-    		<!-- table for the contact us form -->
-    		<form role="form" data-toggle="validator" id="formLogin">
-	    		<table class="table">
-	    			<tr>
-	    				<td>
-	    					<input type="email" class="form-control" placeholder="Enter Email*" id="txtEmail" required />
-	    				</td>
-	    			</tr>
-	    			<tr>
-	    				<td>
-	    					<input type="password" class="form-control" placeholder="Enter Password*" id="txtPwd" required />
-	    				</td>
-	    			</tr>
-	    			<tr>
-	    				<td>
-	    					<a href="#" id="btnForgotPassword">Forgot Password</a>		
-	    				</td>
-	    			</tr>
-	    			<tr>
-	    				<td>
-	    					<input type="submit" class="btn btn-lg btn-primary btn-block" id="btnLogin" value="Log In" />
-	    				</td>
-	    			</tr>
-	    		</table>
-    		</form>
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2">
+                    <h1 class="page-header text-center">
+                        Login
+                    </h1>
+                    <!-- table for the contact us form -->
+                    <form role="form" data-toggle="validator" id="formLogin">
+                        <table class="table">
+                            <tr>
+                                <td>
+                                    <input type="email" class="form-control" placeholder="Enter Email*" id="txtEmail" required />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="password" class="form-control" placeholder="Enter Password*" id="txtPwd" required />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#" id="btnForgotPassword">Forgot Password</a>      
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="submit" class="btn btn-lg btn-primary btn-block" id="btnLogin" value="Log In" />
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+            </div>   <!-- end of row -->
 
-    		<form>
-    			<table class="table">
-	    			<tr>
-	    				<td>
-	    					<h1 class="text-center">
-	    						Sign up here
-	    					</h1>
-	    				</td>
-	    			</tr>
-    				<tr>
-    					<td>
-    						<input type="button" class="btn btn-lg btn-primary btn-block" value="Sign Up Here" id="btnSignup" />
-    					</td>
-    				</tr>
-    			</table>
-    		</form>
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2">
+                    <form>
+                        <table class="table">
+                            <tr>
+                                <td>
+                                    <h1 class="text-center">
+                                        Sign up here
+                                    </h1>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="button" class="btn btn-lg btn-primary btn-block" value="Sign Up Here" id="btnSignup" />
+                                </td>
+                            </tr>
+                        </table>
+                    </form>        
+                </div>
+            </div>
+
 		</div>
     </section>
 

@@ -904,7 +904,7 @@
                 	// set the cookie for assignmentAssPDF (used for file upload)
 					$.cookie("assignmentAssPDF", $(this).val());
 
-					 //function to check file size before uploading.
+					//function to check file size before uploading.
 		            function beforeSubmitAssignmentPDF() {
 		            	alertMsg.children('p').remove();
 		            	alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
@@ -985,7 +985,239 @@
                         // always return false to prevent standard browser submit and page navigation 
                         return false; 
                     });      
-                }   // end of else.
+
+                	//function to check file size before uploading.
+		            function beforeSubmitAssignmentSampleReport() {
+		            	alertMsg.children('p').remove();
+		            	alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+		                //check whether browser fully supports all File API
+		                if (window.File && window.FileReader && window.FileList && window.Blob) {
+		                    if( !$('#fileAssignmentSampleReport').val()) {   //check empty input filed 
+		                        alertMsg.children('p').remove();
+		                        alertMsg.fadeOut();
+		                        popup.children('p').remove();
+		                        popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
+		                        return false;
+		                    }
+		                    var fsize = $('#fileAssignmentSampleReport')[0].files[0].size; //get file size
+		                    var ftype = $('#fileAssignmentSampleReport')[0].files[0].type; // get file type
+		                    //allow file types 
+		                    switch(ftype) {
+								case 'image/png': 
+								case 'image/gif': 
+								case 'image/jpeg': 
+								case 'image/pjpeg':
+								case 'text/plain':
+								case 'text/html':
+								case 'application/x-zip-compressed':
+								case 'application/pdf':
+								case 'application/msword':
+								case 'application/vnd.ms-excel':
+								case 'video/mp4':
+		                            break;
+		                        default:
+		                            alertMsg.children('p').remove();
+		                        	alertMsg.fadeOut();
+		                            popup.children('p').remove();
+		                            popup.append("<p>The file uploaded is not supported by the server. Please upload the file in PDF format only.</p>").fadeIn();
+		                            return false;
+		                    }
+		                    //Allowed file size is less than 5 MB (1048576)
+		                    if(fsize>5242880)   {
+		                        alertMsg.children('p').remove();
+		                    	alertMsg.fadeOut();
+		                        popup.children('p').remove();
+		                        popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
+		                        return false;
+		                    }
+		                }
+		                else  {
+		                    alertMsg.children('p').remove();
+		                	alertMsg.fadeOut();
+		                    popup.children('p').remove();
+		                    popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
+		                    return false;
+		                }
+		                alertMsg.children('p').remove();
+		            	alertMsg.fadeOut();
+		            }   // end of beforeSubmitAssignmentSampleReport function.
+                	// code for assignmentSampleReport File upload
+                	var optionsAssignmentSampleReport = { 
+                        target:   '#alertMsg',   // target element(s) to be updated with server response 
+                        beforeSubmit:  beforeSubmitAssignmentSampleReport,  // pre-submit callback 
+                        success:       afterSuccessAssignmentPDF,  // post-submit callback 
+                        uploadProgress: OnProgress, //upload progress callback 
+                        resetForm: true        // reset the form after successful submit 
+                    }; 
+                    // check for the courseAssPDF and assignmentAssPDF cookies first and then upload the form.
+                	$('#formAssSampleReport').submit(function() { 
+                		if($.cookie("courseAssPDF") == "undefined" || $.cookie("assignmentAssPDF") == "undefined" || $.cookie("courseAssPDF") == undefined || $.cookie("assignmentAssPDF") == undefined) {
+                			popup.children('p').remove();
+                    		popup.append("<p>You havn't selected the Course and Assignment Properly. Please try again.</p>").fadeIn();
+                		}
+                		else {
+                			$(this).ajaxSubmit(optionsAssignmentSampleReport);            
+                		}
+                        // always return false to prevent standard browser submit and page navigation 
+                        return false; 
+                    });     // end of form submit for formAssSampleReport 
+
+                	//function to check file size before uploading.
+		            function beforeSubmitAssignmentOffTopic() {
+		            	alertMsg.children('p').remove();
+		            	alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+		                //check whether browser fully supports all File API
+		                if (window.File && window.FileReader && window.FileList && window.Blob) {
+		                    if( !$('#fileAssignmentOffTopic').val()) {   //check empty input filed 
+		                        alertMsg.children('p').remove();
+		                        alertMsg.fadeOut();
+		                        popup.children('p').remove();
+		                        popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
+		                        return false;
+		                    }
+		                    var fsize = $('#fileAssignmentOffTopic')[0].files[0].size; //get file size
+		                    var ftype = $('#fileAssignmentOffTopic')[0].files[0].type; // get file type
+		                    //allow file types 
+		                    switch(ftype) {
+								case 'image/png': 
+								case 'image/gif': 
+								case 'image/jpeg': 
+								case 'image/pjpeg':
+								case 'text/plain':
+								case 'text/html':
+								case 'application/x-zip-compressed':
+								case 'application/pdf':
+								case 'application/msword':
+								case 'application/vnd.ms-excel':
+								case 'video/mp4':
+		                            break;
+		                        default:
+		                            alertMsg.children('p').remove();
+		                        	alertMsg.fadeOut();
+		                            popup.children('p').remove();
+		                            popup.append("<p>The file uploaded is not supported by the server. Please upload the file in PDF format only.</p>").fadeIn();
+		                            return false;
+		                    }
+		                    //Allowed file size is less than 5 MB (1048576)
+		                    if(fsize>5242880)   {
+		                        alertMsg.children('p').remove();
+		                    	alertMsg.fadeOut();
+		                        popup.children('p').remove();
+		                        popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
+		                        return false;
+		                    }
+		                }
+		                else  {
+		                    alertMsg.children('p').remove();
+		                	alertMsg.fadeOut();
+		                    popup.children('p').remove();
+		                    popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
+		                    return false;
+		                }
+		                alertMsg.children('p').remove();
+		            	alertMsg.fadeOut();
+		            }   // end of beforeSubmitAssignmentOffTopic function.
+                    // code for assignmentOffTopic File upload
+                	var optionsAssignmentOffTopic = { 
+                        target:   '#alertMsg',   // target element(s) to be updated with server response 
+                        beforeSubmit:  beforeSubmitAssignmentOffTopic,  // pre-submit callback 
+                        success:       afterSuccessAssignmentPDF,  // post-submit callback 
+                        uploadProgress: OnProgress, //upload progress callback 
+                        resetForm: true        // reset the form after successful submit 
+                    }; 
+
+                    // check for the courseAssPDF and assignmentAssPDF cookies first and then upload the form.
+                	$('#formAssOffTopic').submit(function() { 
+                		if($.cookie("courseAssPDF") == "undefined" || $.cookie("assignmentAssPDF") == "undefined" || $.cookie("courseAssPDF") == undefined || $.cookie("assignmentAssPDF") == undefined) {
+                			popup.children('p').remove();
+                    		popup.append("<p>You havn't selected the Course and Assignment Properly. Please try again.</p>").fadeIn();
+                		}
+                		else {
+                			$(this).ajaxSubmit(optionsAssignmentOffTopic);            
+                		}
+                        // always return false to prevent standard browser submit and page navigation 
+                        return false; 
+                    });     // end of form submit for formAssSampleReport 
+
+                    //function to check file size before uploading.
+		            function beforeSubmitAssignmentExtra() {
+		            	alertMsg.children('p').remove();
+		            	alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+		                //check whether browser fully supports all File API
+		                if (window.File && window.FileReader && window.FileList && window.Blob) {
+		                    if( !$('#fileAssignmentExtra').val()) {   //check empty input filed 
+		                        alertMsg.children('p').remove();
+		                        alertMsg.fadeOut();
+		                        popup.children('p').remove();
+		                        popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
+		                        return false;
+		                    }
+		                    var fsize = $('#fileAssignmentExtra')[0].files[0].size; //get file size
+		                    var ftype = $('#fileAssignmentExtra')[0].files[0].type; // get file type
+		                    //allow file types 
+		                    switch(ftype) {
+								case 'image/png': 
+								case 'image/gif': 
+								case 'image/jpeg': 
+								case 'image/pjpeg':
+								case 'text/plain':
+								case 'text/html':
+								case 'application/x-zip-compressed':
+								case 'application/pdf':
+								case 'application/msword':
+								case 'application/vnd.ms-excel':
+								case 'video/mp4':
+		                            break;
+		                        default:
+		                            alertMsg.children('p').remove();
+		                        	alertMsg.fadeOut();
+		                            popup.children('p').remove();
+		                            popup.append("<p>The file uploaded is not supported by the server. Please upload the file in correct format.</p>").fadeIn();
+		                            return false;
+		                    }
+		                    //Allowed file size is less than 5 MB (1048576)
+		                    if(fsize>5242880)   {
+		                        alertMsg.children('p').remove();
+		                    	alertMsg.fadeOut();
+		                        popup.children('p').remove();
+		                        popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
+		                        return false;
+		                    }
+		                }
+		                else  {
+		                    alertMsg.children('p').remove();
+		                	alertMsg.fadeOut();
+		                    popup.children('p').remove();
+		                    popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
+		                    return false;
+		                }
+		                alertMsg.children('p').remove();
+		            	alertMsg.fadeOut();
+		            }   // end of beforeSubmitAssignmentExtra function.
+                    // code for assignmentOffTopic File upload
+                	var optionsAssignmentExtra = { 
+                        target:   '#alertMsg',   // target element(s) to be updated with server response 
+                        beforeSubmit:  beforeSubmitAssignmentExtra,  // pre-submit callback 
+                        success:       afterSuccessAssignmentPDF,  // post-submit callback 
+                        uploadProgress: OnProgress, //upload progress callback 
+                        resetForm: true        // reset the form after successful submit 
+                    }; 
+
+                    // check for the courseAssPDF and assignmentAssPDF cookies first and then upload the form.
+                	$('#formAssExtra').submit(function() { 
+                		if($.cookie("courseAssPDF") == "undefined" || $.cookie("assignmentAssPDF") == "undefined" || $.cookie("courseAssPDF") == undefined || $.cookie("assignmentAssPDF") == undefined) {
+                			popup.children('p').remove();
+                    		popup.append("<p>You havn't selected the Course and Assignment Properly. Please try again.</p>").fadeIn();
+                		}
+                		else {
+                			$(this).ajaxSubmit(optionsAssignmentExtra);            
+                		}
+                        // always return false to prevent standard browser submit and page navigation 
+                        return false; 
+                    });     // end of form submit for formAssSampleReport 
+
+
+                }   // end of else (for ddl-assignment value to be -1 or not)
 				return false;
 			});
 			// for adding the video link to the database.
@@ -1297,30 +1529,38 @@
         		Add Assignment PDF
         	</h1>
 
+        	<table class="table">
+    			<tr>
+    				<td>
+						<label>Select Course: </label>
+    				</td>
+    				<td class="courseList-assPDF">
+    					<!-- data will come from ajax here -->
+    				</td>
+    			</tr>
+    			<tr>
+    				<td>
+						<label>Select Assignment: </label>
+    				</td>
+    				<td class="assignmentList-assPDF">
+    					<!-- data will come from ajax here -->
+    				</td>
+    			</tr>
+        	</table>
+
+        	<br />
+
         	<form action="assignment-upload.php" method="post" enctype="multipart/form-data" id="formAssignmentPDF">
+        		<h3 class="page-header">
+    				Upload Assignment PDF
+        		</h3>
         		<table class="table">
-        			<tr>
-	    				<td>
-    						<label>Select Course: </label>
-	    				</td>
-	    				<td class="courseList-assPDF">
-	    					<!-- data will come from ajax here -->
-	    				</td>
-	    			</tr>
-	    			<tr>
-	    				<td>
-    						<label>Select Assignment: </label>
-	    				</td>
-	    				<td class="assignmentList-assPDF">
-	    					<!-- data will come from ajax here -->
-	    				</td>
-	    			</tr>
 	    			<tr>
 	    				<td>
 	    					<label>Upload Assignment PDF (less than 5 MB): </label>
 	    				</td>
 	    				<td>
-	    					<input type="file" name="fileAssignmentPDF" id="fileAssignmentPDF" class="btn btn-lg btn-primary btn-block" />
+	    					<input type="file" name="fileAssignmentPDF" id="fileAssignmentPDF" class="btn btn-lg btn-primary btn-block" required />
 	    				</td>
 	    			</tr>
 	    			<tr>
@@ -1331,8 +1571,13 @@
 	        	</table>
         	</form>
 
+        	<br />
+
         	<!-- table for Assignment Videos -->
         	<form role="form" data-toggle="validator" id="formAssVideo">
+		    	<h3 class="page-header">
+					Add Video Lectures
+	    		</h3>
         		<table class="table">
 					<tr>
 						<td>
@@ -1345,6 +1590,78 @@
 					<tr>
 						<td colspan="2">
 							<input type="submit" class="btn btn-lg btn-primary btn-block" value="Add Video Link" id="btnAddAssVideo" />
+						</td>
+					</tr>
+		    	</table>	
+        	</form>
+
+        	<br />
+
+        	<!-- table for Assignment Sample Report Upload -->
+        	<form action="sampleReport-upload.php" method="post" enctype="multipart/form-data" id="formAssSampleReport">
+        		<h3 class="page-header">
+    				Upload Sample Reports
+        		</h3>
+        		<table class="table">
+					<tr>
+						<td>
+							<label>Upload Sample Report(less than 5MB): </label>
+						</td>
+						<td>
+							<input type="file" name="fileAssignmentSampleReport" id="fileAssignmentSampleReport" class="btn btn-lg btn-primary btn-block" required />
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<input type="submit" class="btn btn-lg btn-primary btn-block" value="Add Sample Report" id="btnAddAssSampleReport" />
+						</td>
+					</tr>
+		    	</table>	
+        	</form>
+
+        	<br />
+
+        	<!-- table for Assignment Off Topic Upload -->
+        	<form action="offTopic-upload.php" method="post" enctype="multipart/form-data" id="formAssOffTopic">
+        		<h3 class="page-header">
+    				Upload Off Topic Reads
+        		</h3>
+        		<table class="table">
+					<tr>
+						<td>
+							<label>Upload Off Topic Reads(less than 5MB): </label>
+						</td>
+						<td>
+							<input type="file" name="fileAssignmentOffTopic" id="fileAssignmentOffTopic" class="btn btn-lg btn-primary btn-block" required />
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<input type="submit" class="btn btn-lg btn-primary btn-block" value="Add Sample Report" id="btnAddAssOffTopic" />
+						</td>
+					</tr>
+		    	</table>	
+        	</form>
+
+        	<br />
+
+        	<!-- table for Assignment Off Topic Upload -->
+        	<form action="extra-upload.php" method="post" enctype="multipart/form-data" id="formAssExtra">
+				<h3 class="page-header">
+    				Upload Assignment Extras
+        		</h3>        	
+        		<table class="table">
+					<tr>
+						<td>
+							<label>Upload Extra Reads(less than 5MB): </label>
+						</td>
+						<td>
+							<input type="file" name="fileAssignmentExtra" id="fileAssignmentExtra" class="btn btn-lg btn-primary btn-block" required />
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<input type="submit" class="btn btn-lg btn-primary btn-block" value="Add Sample Report" id="btnAddAssExtra" />
 						</td>
 					</tr>
 		    	</table>	

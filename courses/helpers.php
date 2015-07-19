@@ -5,6 +5,69 @@
 //these are for the PHP Helper files
 include 'headers/databaseConn.php';
 
+// this is the function to register the Assignment Off Topic upload to the database in the Assignment table.
+// returns -1 on error. 1 on success.
+function RegisterAssignmentExtra($assID, $courseID, $extraLink) {
+	$resp = "-1";
+	try {
+		$query = "insert into AssignmentExtra(AssID, AssExtra) values('$assID', '$extraLink')";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// this is the function to register the Assignment Off Topic upload to the database in the Assignment table.
+// returns -1 on error. 1 on success.
+function RegisterAssignmentOffTopic($assID, $courseID, $offTopicLink) {
+	$resp = "-1";
+	try {
+		$query = "insert into AssignmentOffTopic(AssID, AssOffTopic) values('$assID', '$offTopicLink')";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// this is the function to register the Assignment Sample Report upload to the database in the Assignment table.
+// returns -1 on error. 1 on success.
+function RegisterAssignmentSampleReport($assID, $courseID, $sampleReportLink) {
+	$resp = "-1";
+	try {
+		$query = "insert into AssignmentSampleReport(AssID, AssSampleReport) values('$assID', '$sampleReportLink')";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // this is the function to register the Assignment PDF upload to the database in the Assignment table.
 // returns -1 on error. 1 on success.
 function RegisterAssignmentPDF($assID, $courseID, $assLink) {

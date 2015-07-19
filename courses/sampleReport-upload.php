@@ -3,10 +3,10 @@
 // for the PHP helper functions.
 include('helpers.php');
 
-if(isset($_FILES["fileAssignmentPDF"]) && $_FILES["fileAssignmentPDF"]["error"]== UPLOAD_ERR_OK)
+if(isset($_FILES["fileAssignmentSampleReport"]) && $_FILES["fileAssignmentSampleReport"]["error"]== UPLOAD_ERR_OK)
 {
 	############ Edit settings ##############
-	$UploadDirectory	= 'uploads/assignmentPDF/'; //specify upload directory ends with / (slash)
+	$UploadDirectory	= 'uploads/assignmentSampleReport/'; //specify upload directory ends with / (slash)
 	##########################################
 	
 	/*
@@ -22,21 +22,31 @@ if(isset($_FILES["fileAssignmentPDF"]) && $_FILES["fileAssignmentPDF"]["error"]=
 	
 	
 	//Is file size is less than allowed size.
-	if ($_FILES["fileAssignmentPDF"]["size"] > 5242880) {
+	if ($_FILES["fileAssignmentSampleReport"]["size"] > 5242880) {
 		die("File size is too big!");
 	}
 	
 	//allowed file type Server side check
-	switch(strtolower($_FILES['fileAssignmentPDF']['type']))
+	switch(strtolower($_FILES['fileAssignmentSampleReport']['type']))
 		{
 			//allowed file types
+			case 'image/png': 
+			case 'image/gif': 
+			case 'image/jpeg': 
+			case 'image/pjpeg':
+			case 'text/plain':
+			case 'text/html': //html file
+			case 'application/x-zip-compressed':
 			case 'application/pdf':
+			case 'application/msword':
+			case 'application/vnd.ms-excel':
+			case 'video/mp4':
 				break;
 			default:
 				die('Unsupported File!'); //output error
 	}
 	
-	$File_Name          = strtolower($_FILES['fileAssignmentPDF']['name']);
+	$File_Name          = strtolower($_FILES['fileAssignmentSampleReport']['name']);
 	$File_Ext           = substr($File_Name, strrpos($File_Name, '.')); //get file extention
 	$date = date_create();
 	$timestamp = date_timestamp_get($date);
@@ -58,14 +68,14 @@ if(isset($_FILES["fileAssignmentPDF"]) && $_FILES["fileAssignmentPDF"]["error"]=
 		die("Please select the correct course and/or assignment before uploading the Assignment PDF.");
 	}
 	else {
-		if(move_uploaded_file($_FILES['fileAssignmentPDF']['tmp_name'], $UploadDirectory.$NewFileName )) {
+		if(move_uploaded_file($_FILES['fileAssignmentSampleReport']['tmp_name'], $UploadDirectory.$NewFileName )) {
 			// save the link to the database.
-			$register = RegisterAssignmentPDF($assignmentAssPDF, $courseAssPDF, "courses/".$UploadDirectory.$NewFileName);
+			$register = RegisterAssignmentSampleReport($assignmentAssPDF, $courseAssPDF, "courses/".$UploadDirectory.$NewFileName);
 			if($register == "-1") {
 				die("Oops! We encountered an error while uploading your Assignment PDF. Please try again.");
 			}
 			else {
-				die("Assignment PDF Successfully uploaded.");	
+				die("Assignment Sample Report Successfully uploaded.");	
 			}
 		}
 		else {

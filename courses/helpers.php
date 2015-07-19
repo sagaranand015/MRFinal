@@ -5,6 +5,26 @@
 //these are for the PHP Helper files
 include 'headers/databaseConn.php';
 
+// this is the function for registering the guide url to the database table.
+function RegisterGuideUrl($courseID, $guideName, $url) {
+	$resp = "-1";
+	try {
+		$query = "insert into Guide(GuideName, Guide, GuideCourse) values('$guideName', '$url', '$courseID')";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // this is the function to register the Assignment Off Topic upload to the database in the Assignment table.
 // returns -1 on error. 1 on success.
 function RegisterAssignmentExtra($assID, $courseID, $extraLink) {

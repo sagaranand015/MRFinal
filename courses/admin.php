@@ -357,6 +357,10 @@
             	overlay.addClass('overlay-remove');	
             }
 
+             // for checking the query string and all.
+	    	var qs = getQueryStrings();
+	    	// for all the queryStrings
+
             //function to check file size before uploading.
             function beforeSubmit() {
             	alertMsg.children('p').remove();
@@ -431,20 +435,14 @@
                 popup.fadeOut();
                 $('.progress').fadeOut();
                 alertMsg.fadeIn();
-                // to fadeOut the alertMsg after 10 seconds.
+                // finally, remove the courseID cookie here.
+                $.removeCookie("courseID");
+                // to fadeOut the alertMsg and reload the page after 3 seconds.
                 setTimeout(function() {
                     alertMsg.fadeOut();
+                    //location.reload();
                 }, 10000);
-                // finally, remove the courseID cookie here.
-                $.removeCookie("courseID", {
-            		path: '/'
-            	});
-            	location.reload();
             }     // end of afterSuccess function
-
-            // for checking the query string and all.
-	    	var qs = getQueryStrings();
-	    	// for all the queryStrings
 
     		// for the scrolly thing.
     		$('.scrolly').scrolly();
@@ -961,7 +959,7 @@
 		                setTimeout(function() {
 		                    alertMsg.fadeOut();
 		                }, 10000);
-		            	location.reload();
+		            	//location.reload();
 		            }     // end of afterSuccessAssignmentPDF function
 
                 	// code for assignmentPDF File upload
@@ -1290,7 +1288,7 @@
             	return false;
             });
 
-             // for the add course calender link on LHS
+            // for the add course calender link on LHS
             $('.calender').on('click', function() {
             	showDiv($('.calender-div'));
             	changeActiveState($(this).parent('li'));
@@ -1350,6 +1348,157 @@
                     });      
                 }   // end of else
             });  // end of change (delegate) function in calender-div courses list
+
+			// for the add course calender link on LHS
+            $('.guide').on('click', function() {
+            	showDiv($('.guide-div'));
+            	changeActiveState($(this).parent('li'));
+
+            	// to get all the courses as a drop down list
+            	showLoading();
+            	$.ajax({
+            		type: "GET",
+            		url: "AJAXFunctions.php",
+            		data: {
+            			no: "6"
+            		},
+            		success: function(response) {
+            			// to show the courses drop down at appropriate place.
+            			if(response == "-1") {
+							popup.children('p').remove();
+				        	popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();	            				
+            			}
+            			else {
+            				$('.courseList').children('select').remove();
+            				$('.courseList').append(response);
+            			}
+            		}, 
+            		error: function() {
+            			alertMsg.children('p').remove();
+				        alertMsg.fadeOut();
+				        popup.children('p').remove();
+				        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
+            		},
+            		complete: function() {
+            			hideLoading();
+            		}
+            	});
+            	return false;
+            });
+			// for the onfocusout event of the guide name
+			$('#txtGuideName').on('focusout', function() {
+				$.cookie("guideName", $(this).val());
+				return false;
+			});
+			// for the delegate event of the change of the course drop down on calender upload.
+            $('.guide-div').delegate('#ddl-course', 'change', function() {
+                if($(this).val() == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not selected a course. Please do so before uploading the calender.</p>").fadeIn();
+                }
+                else {
+                    $.cookie("courseID", $(this).val());
+
+                    //function to check file size before uploading.
+		            function beforeSubmitCourseGuide() {
+		            	alertMsg.children('p').remove();
+		            	alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+		                //check whether browser fully supports all File API
+		                if (window.File && window.FileReader && window.FileList && window.Blob) {
+		                    if( !$('#fileGuide').val()) {   //check empty input filed 
+		                        alertMsg.children('p').remove();
+		                        alertMsg.fadeOut();
+		                        popup.children('p').remove();
+		                        popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
+		                        return false;
+		                    }
+		                    var fsize = $('#fileGuide')[0].files[0].size; //get file size
+		                    var ftype = $('#fileGuide')[0].files[0].type; // get file type
+		                    //allow file types 
+		                    switch(ftype) {
+		                        case 'image/png': 
+								case 'image/gif': 
+								case 'image/jpeg': 
+								case 'image/pjpeg':
+								case 'text/plain':
+								case 'text/html':
+								case 'application/x-zip-compressed':
+								case 'application/pdf':
+								case 'application/msword':
+								case 'application/vnd.ms-excel':
+								case 'video/mp4':
+		                            break;
+		                        default:
+		                            alertMsg.children('p').remove();
+		                        	alertMsg.fadeOut();
+		                            popup.children('p').remove();
+		                            popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
+		                            return false;
+		                    }
+		                    //Allowed file size is less than 5 MB (1048576)
+		                    if(fsize>5242880)   {
+		                        alertMsg.children('p').remove();
+		                    	alertMsg.fadeOut();
+		                        popup.children('p').remove();
+		                        popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
+		                        return false;
+		                    }
+		                }
+		                else  {
+		                    alertMsg.children('p').remove();
+		                	alertMsg.fadeOut();
+		                    popup.children('p').remove();
+		                    popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
+		                    return false;
+		                }
+		                alertMsg.children('p').remove();
+		            	alertMsg.fadeOut();
+		            }   // end of beforeSubmit function.
+
+		            //function after succesful file upload (when server response)
+		            function afterSuccessCourseGuide() {
+		                // to hide the loading overlay after the uploading is done.
+		                hideLoading();
+		                popup.children('p').remove();
+		                popup.fadeOut();
+		                $('.progress').fadeOut();
+		                alertMsg.fadeIn();
+		                // finally, remove the courseID cookie here.
+		                $.removeCookie("courseID");
+		            	$.removeCookie("guideName");
+		            	// to fadeOut the alertMsg and Reload after 3 seconds.
+		                setTimeout(function() {
+		                    alertMsg.fadeOut();
+		                    //location.reload();
+		                }, 10000);
+		            }     // end of afterSuccess function
+
+                    // for uploading the calender to the server.
+                    var optionsCourseGuide = { 
+                        target:   '#alertMsg',   // target element(s) to be updated with server response 
+                        beforeSubmit:  beforeSubmitCourseGuide,  // pre-submit callback 
+                        success:       afterSuccessCourseGuide,  // post-submit callback 
+                        uploadProgress: OnProgress, //upload progress callback 
+                        resetForm: true        // reset the form after successful submit 
+                    }; 
+
+                    $('#formGuide').submit(function() { 
+                    	if($.cookie("courseID") == "undefined" || $.cookie("courseID") == undefined || $.cookie("guideName") == "undefined" || $.cookie("guideName") == undefined) {
+                    		popup.children('p').remove();
+                    		popup.append("<p>Please select the course or add the Guide Name. Something's not right.</p>").fadeIn();
+                    	}
+                    	else if($.cookie("guideName") == "" || $('#txtGuideName').val() == "") {
+                    		popup.children('p').remove();
+                    		popup.append("<p>Oops! Looks like you have not added the Guide Name. Please do so first.</p>").fadeIn();	
+                    	}
+                    	else {
+                    		$(this).ajaxSubmit(optionsCourseGuide);            
+                    	}
+                        // always return false to prevent standard browser submit and page navigation 
+                        return false; 
+                    });      
+                }   // end of else
+            });  // end of change (delegate) function in guide-div courses list
 
             // hide all the divs on page load. Except for first div.
             $('.main-div').hide();
@@ -1445,6 +1594,7 @@
             		<li><a href="#" class="course">Add a Course</a></li>
             		<li><a href="#" class="organisation">Add an organisation</a></li>
             		<li><a href="#" class="calender">Add Course Calender</a></li>
+            		<li><a href="#" class="guide">Add Course Guide</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="assignment">Add Assignment Details</a></li>
@@ -1668,6 +1818,47 @@
         	</form>
 
         </div>   <!-- end of assignmentPDF-div -->
+
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div guide-div">
+	        <h1 class="page-header">
+	        	Upload Course Guide
+	        </h1>
+
+	        <!-- Data will come from the AJAX here -->
+            <form action="guide-upload.php" method="post" enctype="multipart/form-data" id="formGuide">
+    		    <table class="table">
+    		    	<tr>
+    		    		<td>
+    		    			<label id="lblCourseDdl" for="ddlCourse">Select Course: </label>
+    		    		</td>
+    		    		<td class="courseList">
+    		    			<!-- course list will come from ajax -->
+    		    		</td>
+    		    	</tr>
+    		    	<tr>
+    		    		<td>
+    		    			<label>Guide Name: </label>
+    		    		</td>
+    		    		<td>
+    		    			<input type="text" placeholder="Course Guide Name" id="txtGuideName" class="form-control" required />
+    		    		</td>
+    		    	</tr>
+                    <tr>
+                        <td>
+                            <label>Upload Course Guide: </label>
+                        </td>
+                        <td>
+                            <input name="fileGuide" id="fileGuide" type="file" class="btn btn-lg btn-primary btn-block" />            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="submit"  id="submit-btn" value="Upload Course Guide" class="btn btn-lg btn-primary btn-block" />                
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div dashboard-div">
 	        <h1 class="page-header">

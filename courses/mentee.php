@@ -253,6 +253,13 @@
 			left: 45%;
 		}
 
+		.assignment-video {
+			cursor: pointer;
+		}
+		.assignment-report {
+			cursor: pointer;
+		}
+
     </style>
 
 	<script type="text/javascript">
@@ -278,48 +285,61 @@
             }
 
             var email = $.cookie("email");
-        	showLoading();
-    		$.ajax({
-    			type: "GET",
-    			url: "AJAXFunctions.php",
-    			data: {
-    				no: "2", email: email, table: "Mentee"
-    			},
-    			success: function(response) {
-    				if(response == "-1") {
-    					popup.children('p').remove();
-                    	popup.append("<p>Oops! We encountered an error while loading the page. Please try again.</p>").fadeIn();	
-    				}
-    				else {
-    					//populate all the fields here.
-    					var res = response.split(" ~~ ");
-    					$('#txtProfileName').val(res[1]);
-    					$('#txtProfileEmail').val(res[0]);
-    					$('#txtProfileContact').val(res[2]);
-    					$('#txtProfileOrgan').val(res[3]);
-    					$('#txtProfileProfile').val(res[4]);
+            if($.cookie("email") == "undefined" || $.cookie("email") == undefined) {
+            	popup.children('p').remove();
+            	popup.append("<p>You have not logged in. Please do so before continuing.</p>").fadeIn();
+            }
+            else {
+            	showLoading();
+	    		$.ajax({
+	    			type: "GET",
+	    			url: "AJAXFunctions.php",
+	    			data: {
+	    				no: "2", email: email, table: "Mentee"
+	    			},
+	    			success: function(response) {
+	    				if(response == "-1") {
+	    					popup.children('p').remove();
+	                    	popup.append("<p>Oops! We encountered an error while loading the page. Please try again.</p>").fadeIn();	
+	    				}
+	    				else if(response == "-2") {
+	    					popup.children('p').remove();
+	    					popup.fadeOut();
+	                    	alertMsg.children('p').remove();
+	                    	alertMsg.append("<p>You have not logged in properly. Please <a href='http://mentored-research.com/login' style='color: black;'>LOGIN AGAIN</a> to continue.</p>").fadeIn();
+                    		$('#overlay-error').removeClass('overlay-remove');
+	                    	$('#overlay-error').addClass('overlay-show');
+	    				}	
+	    				else {
+	    					//populate all the fields here.
+	    					var res = response.split(" ~~ ");
+	    					$('#txtProfileName').val(res[1]);
+	    					$('#txtProfileEmail').val(res[0]);
+	    					$('#txtProfileContact').val(res[2]);
+	    					$('#txtProfileOrgan').val(res[3]);
+	    					$('#txtProfileProfile').val(res[4]);
 
-    					// populate the header of the dashboard.
-    					$('#profile-header').html(res[1] + " Profile");
+	    					// populate the header of the dashboard.
+	    					$('#profile-header').html(res[1] + " Profile");
 
-    					// set the cookie for the menteeID.
-    					$.cookie("id", res[5], {
-                            path: '/',
-                            expires: 365
-                        });
-    				}
-    			},
-    			error: function() {
-    				alertMsg.children('p').remove();
-			        alertMsg.fadeOut();
-			        popup.children('p').remove();
-			        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-    			},
-    			complete: function() {
-    				hideLoading();
-    			}
-    		});
-
+	    					// set the cookie for the menteeID.
+	    					$.cookie("id", res[5], {
+	                            path: '/',
+	                            expires: 365
+	                        });
+	    				}
+	    			},
+	    			error: function() {
+	    				alertMsg.children('p').remove();
+				        alertMsg.fadeOut();
+				        popup.children('p').remove();
+				        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+	    			},
+	    			complete: function() {
+	    				hideLoading();
+	    			}
+	    		});   // end of ajax request.
+            }   // end of else.
 		});
 
         $(document).ready(function() {
@@ -461,8 +481,173 @@
             $('.CRP').on('click', function() {
             	showDiv($('.CRP-div'));
             	changeActiveState($(this).parent('li'));
+
+            	// get the assignments drop down list from here.
+            	var email = $.cookie("email");
+            	var id = $.cookie("id");
+            	if($.cookie("email") == "undefined" || $.cookie("email") == undefined) {
+            		popup.children('p').remove();
+            		popup.append("<p>You have not logged in properly. Please logout and login again.</p>").fadeIn();
+            	}
+            	else {
+            		showLoading();
+	            	$.ajax({
+	            		type: "GET",
+	            		url: "AJAXFunctions.php",
+	            		data: {
+	            			no: "12", email: email, id: id
+	            		},
+	            		success: function(response) {
+	            			// to show the assignments drop down at appropriate place.
+	            			if(response == "-1") {
+								popup.children('p').remove();
+					        	popup.append("<p>We could not retrieve your assignments from the database. Please check your internet connection and try again.</p>").fadeIn();	            				
+	            			}
+	            			else if(response == "-2") {
+								popup.children('p').remove();
+					        	popup.append("<p>You have not been assigned any courses. Please try again or contact your mentor.</p>").fadeIn();	            				
+	            			}
+	            			else {
+	            				$('.assignment-crp').children('select').remove();
+	            				$('.assignment-crp').append(response);
+	            			}
+	            		}, 
+	            		error: function() {
+	            			alertMsg.children('p').remove();
+					        alertMsg.fadeOut();
+					        popup.children('p').remove();
+					        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
+	            		},
+	            		complete: function() {
+	            			hideLoading();
+	            		}
+	            	});	  // end of ajax.
+            	}   // end of else.
             	return false;
             });
+			// for the delegate event of the assignments in CRP.
+			$('.CRP-div').delegate('#ddl-assignment', 'change', function() {
+				var assID = $(this).val();
+
+				// ajax request to get the assignment PDF and assignment materials.
+				if(assID == "-1") {
+					popup.children('p').remove();
+					popup.append("<p>Please select an assignment before proceeding.</p>").fadeIn();
+				}
+				else {
+					showLoading();
+					$.ajax({
+						type: "GET",
+						url: "AJAXFunctions.php",
+						data: {
+							no: "13", assID: assID
+						},
+						success: function(response) {
+							console.log(response);
+							// now, parse the data and show all the results.
+							if(response.AssName == "" || response.AssName == undefined) { 
+								$('.assignment-name').html("No Assignment Name");	
+							}
+							else {
+								$('.assignment-name').html("<b>" + response.AssName + "</b>");
+							}
+							if(response.AssDesc == "" || response.AssDesc == undefined) { 
+								$('.assignment-desc').html("No Assignment Description");	
+							}
+							else {
+								$('.assignment-desc').html(response.AssDesc);
+							}
+							if(response.AssPostedOn == "" || response.AssPostedOn == undefined) { 
+								$('.assignment-postedon').html("No Assignment Date");	
+							}
+							else {
+								$('.assignment-postedon').html(response.AssPostedOn);
+							}
+							if(response.AssDeadline == "" || response.AssDeadline == undefined) { 
+								$('.assignment-deadline').html("No Assignment Deadline Date");	
+							}
+							else {
+								$('.assignment-deadline').html(response.AssDeadline);
+							}
+							if(response.AssPdf == "" || response.AssPdf == undefined) { 
+								$('.assignment-question').html("No Question Uploaded");	
+							}
+							else {
+								$('.assignment-question').html("<a href='" + response.AssPdf + "' target='_blank'>Click to download Assignment</a>");
+							}
+
+							// now, for the assignment Video tabs.
+							$('.videos').children('.assignment-video').remove();
+							var videos = response.AssVideo;
+							var videoDiv = "";
+							for(var i=0;i<videos.length;i++) {
+								videoDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 assignment-video'";
+								if(videos[i] == undefined || videos[i] == "undefined" || videos[i] == "") {
+									videoDiv += "data-url='" + "" +  "'>";
+								}
+								else {
+									videoDiv += "data-url='" + videos[i] +  "'>";
+								}
+								videoDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
+								videoDiv += "<p class='text-muted'>" + "Video Lecture " + (i+1) + "</p>";
+								videoDiv += "</div>";
+							}
+							$('.videos').append(videoDiv);
+
+							// now, for the assignment Sample Reports
+							$('.reports').children('.assignment-report').remove();
+							var reports = response.AssSampleReport;
+							var reportDiv = "";
+							for(var i=0;i<reports.length;i++) {
+								reportDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 assignment-report'";
+								if(reports[i] == undefined || reports[i] == "undefined" || reports[i] == "") {
+									reportDiv += "data-url='" + "" +  "'>";
+								}
+								else {
+									reportDiv += "data-url='" + reports[i] +  "'>";
+								}
+								reportDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
+								reportDiv += "<p class='text-muted'>" + "Sample Report " + (i+1) + "</p>";
+								reportDiv += "</div>";
+							}
+							$('.reports').append(reportDiv);
+
+						},
+						error: function() {
+							alertMsg.children('p').remove();
+					        alertMsg.fadeOut();
+					        popup.children('p').remove();
+					        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
+						},
+						complete: function() {
+							hideLoading();
+						}
+					});
+				}  // end of else.
+				return false;
+			});   // end of delegate function of the assigment ddl in CRP.
+			// for the delegate function of the lecture videos.
+			$('.videos').delegate('.assignment-video', 'click', function() {
+				var url = $(this).attr('data-url');
+				if(url == "" || url == undefined) {
+					alert("No defined.");
+				}
+				else {
+					window.open(url, "_blank");
+				}
+				return false;
+			});
+			// for the delegate function of the lecture Sample Reports
+			$('.reports').delegate('.assignment-report', 'click', function() {
+				var url = $(this).attr('data-url');
+				if(url == "" || url == undefined) {
+					alert("No defined.");
+				}
+				else {
+					window.open(url, "_blank");
+				}
+				return false;
+			});
 
             // for the Programme calender page on LHS
             $('.calender').on('click', function() {
@@ -537,6 +722,9 @@
 
 	<div class="overlay-remove" id="overlay">
 		<img src="img/load.gif" class="overlay-img" />
+	</div>
+
+	<div class="overlay-remove" id="overlay-error">
 	</div>
 
     <div id="alertMsg" class="alert alert-warning" role="alert">
@@ -657,6 +845,90 @@
 	        <h1 class="page-header">
 	        	Central Resource Page
 	        </h1>
+
+	        <table class="table">
+	        	<tr>
+	        		<td>
+	        			<label>Select Assignment: </label>
+	        		</td>
+	        		<td class="assignment-crp">
+	        			<!-- data will come here from ajax -->
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<td>
+	        			<label>Assignment Name: </label>
+	        		</td>
+	        		<td class="assignment-name">
+	        			<!-- data will come here from ajax -->
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<td>
+	        			<label>Assignment Description: </label>
+	        		</td>
+	        		<td class="assignment-desc">
+	        			<!-- data will come here from ajax -->
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<td>
+	        			<label>Assignment Posted On: </label>
+	        		</td>
+	        		<td class="assignment-postedon">
+	        			<!-- data will come from ajax here -->
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<td>
+	        			<label>Assignment Deadline: </label>
+	        		</td>
+	        		<td class="assignment-deadline">
+        				<!-- data will come from ajax here -->
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<td>
+	        			<label>Assignment Question: </label>
+	        		</td>
+	        		<td class="assignment-question">
+        				<!-- data will come from ajax here -->
+	        		</td>
+	        	</tr>
+	        </table>
+
+	        <!-- for assignment videos -->
+	        <div class="row text-center videos">
+	        	<h3 class="page-header">
+		        	Assignment Video Lectures
+		        </h3>
+		        <!-- data will come from ajax here -->
+	        </div>
+
+	        <!-- for assignment Sample Reports -->
+	        <div class="row text-center reports">
+	        	<h3 class="page-header">
+		        	Assignment Sample Reports
+		        </h3>
+		        <!-- data will come from ajax here -->
+	        </div>
+
+	        <!-- for assignment Off Topics -->
+	        <div class="row text-center offtopics">
+	        	<h3 class="page-header">
+		        	Assignment Off Topic Reads
+		        </h3>
+		        <!-- data will come from ajax here -->
+	        </div>
+
+	        <!-- for assignment Extras -->
+	        <div class="row text-center extras">
+	        	<h3 class="page-header">
+		        	Assignment Extras
+		        </h3>
+		        <!-- data will come from ajax here -->
+	        </div>
+	        
         </div>  <!-- end of CRP-div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div calender-div">

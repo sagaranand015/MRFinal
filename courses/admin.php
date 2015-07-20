@@ -286,50 +286,62 @@
             }
 
             var email = $.cookie("email");
-        	showLoading();
-    		$.ajax({
-    			type: "GET",
-    			url: "AJAXFunctions.php",
-    			data: {
-    				no: "2", email: email, table: "Admin"
-    			},
-    			success: function(response) {
-    				if(response == "-1") {
-    					popup.children('p').remove();
-                    	popup.append("<p>Oops! We encountered an error while loading the page. Please try again.</p>").fadeIn();	
-    				}
-    				else {
-    					//populate all the fields here.
-    					var res = response.split(" ~~ ");
-    					$('#txtProfileName').val(res[1]);
-    					$('#txtProfileEmail').val(res[0]);
-    					$('#txtProfileContact').val(res[2]);
-    					$('#txtProfileOrgan').val(res[3]);
-    					$('#txtProfileProfile').val(res[4]);
+            if($.cookie("email") == "undefined" || $.cookie("email") == undefined) {
+            	popup.children('p').remove();
+            	popup.append("<p>You have not logged in. Please do so before continuing.</p>").fadeIn();
+            }
+            else {
+            	showLoading();
+	    		$.ajax({
+	    			type: "GET",
+	    			url: "AJAXFunctions.php",
+	    			data: {
+	    				no: "2", email: email, table: "Admin"
+	    			},
+	    			success: function(response) {
+	    				if(response == "-1") {
+	    					popup.children('p').remove();
+	                    	popup.append("<p>Oops! We encountered an error while loading the page. Please try again.</p>").fadeIn();	
+	    				}
+	    				else if(response == "-2") {
+	    					popup.children('p').remove();
+	    					popup.fadeOut();
+	                    	alertMsg.children('p').remove();
+	                    	alertMsg.append("<p>You have not logged in properly. Please <a href='http://mentored-research.com/login' style='color: black;'>LOGIN AGAIN</a> to continue.</p>").fadeIn();
+                    		$('#overlay-error').removeClass('overlay-remove');
+	                    	$('#overlay-error').addClass('overlay-show');
+	    				}	
+	    				else {
+	    					//populate all the fields here.
+	    					var res = response.split(" ~~ ");
+	    					$('#txtProfileName').val(res[1]);
+	    					$('#txtProfileEmail').val(res[0]);
+	    					$('#txtProfileContact').val(res[2]);
+	    					$('#txtProfileOrgan').val(res[3]);
+	    					$('#txtProfileProfile').val(res[4]);
 
-    					// populate the header of the dashboard.
-    					$('.profile-header').html(res[1] + "'s Dashboard");
+	    					// populate the header of the dashboard.
+	    					$('.profile-header').html(res[1] + "'s Dashboard");
 
-    					// set the cookie for the menteeID.
-    					$.cookie("id", res[5], {
-                            path: '/',
-                            expires: 365
-                        });
-    				}
-    			},
-    			error: function() {
-    				alertMsg.children('p').remove();
-			        alertMsg.fadeOut();
-			        popup.children('p').remove();
-			        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-    			},
-    			complete: function() {
-    				hideLoading();
-    			}
-    		});
-        	
+	    					// set the cookie for the menteeID.
+	    					$.cookie("id", res[5], {
+	                            path: '/',
+	                            expires: 365
+	                        });
+	    				}
+	    			},
+	    			error: function() {
+	    				alertMsg.children('p').remove();
+				        alertMsg.fadeOut();
+				        popup.children('p').remove();
+				        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+	    			},
+	    			complete: function() {
+	    				hideLoading();
+	    			}
+	    		});   // end of ajax request.
+            }   // end of else.
         });   // end of the window load function.
-
 
         $(document).ready(function() {
 
@@ -1533,6 +1545,9 @@
         <div class="overlay-img">
             <img src="img/load.gif" />
         </div>
+	</div>
+
+	<div class="overlay-remove" id="overlay-error">
 	</div>
 
     <div id="alertMsg" class="alert alert-warning" role="alert">

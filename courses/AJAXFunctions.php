@@ -39,6 +39,150 @@ else if(isset($_GET["no"]) && $_GET["no"] == "10") {  // for getting the assignm
 else if(isset($_GET["no"]) && $_GET["no"] == "11") {  // for adding the video link to the database for a particular assignment.
 	RegisterAssignmentVideo($_GET["assID"], $_GET["assVideo"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "12") {  // for getting the assignments based on a mentee email and id.
+	GetMenteeAssignment($_GET["email"], $_GET["id"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "13") {  // for getting the assignment material based on Assignment ID chosen by mentee.
+	GetAssignmentMaterial($_GET["assID"]);
+}
+
+// for getting the assignment material based on Assignment ID chosen by mentee.
+function GetAssignmentMaterial($assID) {
+	$resp = "-1";
+	$assignment = array();
+	$assVideo = array();
+	$assSampleReport = array();
+	$assOffTopic = array();
+	$assExtra = array();
+	$i = 0;   // for the array index.
+	try {
+		// firstly, get the assignment details in an array.
+		$detailsQuery = "select * from Assignment where AssID='$assID'";
+		$detailsRs = mysql_query($detailsQuery);
+		if(!$detailsRs) {
+			$assignment[$i] = "-1";  $i++;
+		}
+		else {
+			while ($detailsRes = mysql_fetch_array($detailsRs)) {
+				$assignment["AssCourse"] = $detailsRes["AssCourse"];   $i++;  // i == 0 before and i == 1 afterwards.
+				$assignment["AssName"] = $detailsRes["AssName"];   $i++;
+				$assignment["AssDesc"] = $detailsRes["AssDesc"];   $i++;
+				$assignment["AssPostedOn"] = $detailsRes["AssPostedOn"];   $i++;
+				$assignment["AssPostedBy"] = $detailsRes["AssPostedBy"];   $i++;
+				$assignment["AssDeadline"] = $detailsRes["AssDeadline"];   $i++;
+				$assignment["AssPdf"] = $detailsRes["AssPdf"];   $i++;
+				$assignment["AssNo"] = $detailsRes["AssNo"];   $i++;
+			}
+		}
+
+		//now, get the Assignment Video lectures.
+		$videoQuery = "select * from AssignmentVideo where AssID='$assID'";
+		$videoRs = mysql_query($videoQuery);
+		if(!$videoRs) {
+			$assVideo[0] = "-1";
+		}
+		else {
+			$j = 0;
+			while ($videoRes = mysql_fetch_array($videoRs)) {
+				$assVideo[$j] = $videoRes["AssVideo"];  
+				$j++;
+			}
+			$assignment["AssVideo"] = $assVideo;
+			$i++;
+		}
+
+		//now, get the Assignment Sample Reports.
+		$reportQuery = "select * from AssignmentSampleReport where AssID='$assID'";
+		$reportRs = mysql_query($reportQuery);
+		if(!$reportRs) {
+			$assSampleReport[0] = "-1";
+		}
+		else {
+			$j = 0;
+			while ($reportRes = mysql_fetch_array($reportRs)) {
+				$assSampleReport[$j] = $reportRes["AssSampleReport"];  
+				$j++;
+			}
+			$assignment["AssSampleReport"] = $assSampleReport;
+			$i++;
+		}
+
+		// for the Assignment Off topic reads.
+		$offQuery = "select * from AssignmentOffTopic where AssID='$assID'";
+		$offRs = mysql_query($offQuery);
+		if(!$offRs) {
+			$assOffTopic[0] = "-1";
+		}
+		else {
+			$j = 0;
+			while ($offRes = mysql_fetch_array($offRs)) {
+				$assOffTopic[$j] = $offRes["AssOffTopic"];  
+				$j++;
+			}
+			$assignment["AssOffTopic"] = $assOffTopic;
+			$i++;
+		}
+
+		// for the Assignment Off topic reads.
+		$extraQuery = "select * from AssignmentExtra where AssID='$assID'";
+		$extraRs = mysql_query($extraQuery);
+		if(!$extraRs) {
+			$assExtra[0] = "-1";
+		}
+		else {
+			$j = 0;
+			while ($extraRes = mysql_fetch_array($extraRs)) {
+				$assExtra[$j] = $extraRes["AssExtra"];  
+				$j++;
+			}
+			$assignment["AssExtra"] = $assExtra;
+			$i++;
+		}
+
+		header('Content-Type: application/json');
+		$resp = json_encode($assignment);
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// for getting the assignments based on a mentee email and id.
+// returns -2 if the course is not assigned. -1 on error. html list on success.
+function GetMenteeAssignment($email, $id) {
+	$resp = "-1";
+	$assCourse = "-1";
+	try {
+		$assCourse = GetMenteeCourse($email);
+		if($assCourse == "0") {
+			$resp = "-2";
+		}
+		else if($assCourse == "-1") {
+			$resp = "-1";
+		}
+		else {
+			$query = "select * from Assignment where AssCourse='$assCourse'";
+			$rs = mysql_query($query);
+			if(!$rs) {
+				$resp = "-1";
+			}
+			else {
+				$resp = "<select id='ddl-assignment' class='form-control'><option value='-1'> --Select Assignment-- </option>";
+				while ($res = mysql_fetch_array($rs)) {
+					$resp .= "<option value='" . $res["AssID"] . "' >" . $res["AssName"] . "</option>";
+				}
+				$resp .= "</select>";
+			}
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // for adding the video link to the database for a particular assignment.
 function RegisterAssignmentVideo($assID, $assVideo) {
@@ -292,7 +436,12 @@ function LoadProfileData($email, $table) {
 				$organ = $res[$table . "Organ"];
 			}
 		}
-		$resp = $email . " ~~ " . $name . " ~~ " . $contact . " ~~ " . $organ . " ~~ " . $profile . " ~~ " . $id;
+		if($id == "") {   // to check if the user is in the table or not.
+			$resp = "-2";
+		}
+		else {
+			$resp = $email . " ~~ " . $name . " ~~ " . $contact . " ~~ " . $organ . " ~~ " . $profile . " ~~ " . $id;
+		}
 		echo $resp; 
 	}	
 	catch(Exception $e) {

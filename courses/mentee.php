@@ -253,13 +253,10 @@
 			left: 45%;
 		}
 
-		.assignment-video {
+		.assignment-video, .assignment-report, .assignment-offtopic, .assignment-extra {
 			cursor: pointer;
 		}
-		.assignment-report {
-			cursor: pointer;
-		}
-
+		 
     </style>
 
 	<script type="text/javascript">
@@ -612,6 +609,42 @@
 							}
 							$('.reports').append(reportDiv);
 
+							// now, for the assignment Off Topics
+							$('.offtopics').children('.assignment-offtopic').remove();
+							var offtopics = response.AssOffTopic;
+							var offTopicDiv = "";
+							for(var i=0;i<offtopics.length;i++) {
+								offTopicDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 assignment-offtopic'";
+								if(offtopics[i] == undefined || offtopics[i] == "undefined" || offtopics[i] == "") {
+									offTopicDiv += "data-url='" + "" +  "'>";
+								}
+								else {
+									offTopicDiv += "data-url='" + offtopics[i] +  "'>";
+								}
+								offTopicDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
+								offTopicDiv += "<p class='text-muted'>" + "Off Topic Read " + (i+1) + "</p>";
+								offTopicDiv += "</div>";
+							}
+							$('.offtopics').append(offTopicDiv);
+
+							// now, for the assignment Extras
+							$('.extras').children('.assignment-extra').remove();
+							var extras = response.AssExtra;
+							var extraDiv = "";
+							for(var i=0;i<extras.length;i++) {
+								extraDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 assignment-extra'";
+								if(extras[i] == undefined || extras[i] == "undefined" || extras[i] == "") {
+									extraDiv += "data-url='" + "" +  "'>";
+								}
+								else {
+									extraDiv += "data-url='" + extras[i] +  "'>";
+								}
+								extraDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
+								extraDiv += "<p class='text-muted'>" + "Extra Material " + (i+1) + "</p>";
+								extraDiv += "</div>";
+							}
+							$('.extras').append(extraDiv);
+
 						},
 						error: function() {
 							alertMsg.children('p').remove();
@@ -648,6 +681,28 @@
 				}
 				return false;
 			});
+			// for the delegate function of the lecture Off Topic Reads
+			$('.offtopics').delegate('.assignment-offtopic', 'click', function() {
+				var url = $(this).attr('data-url');
+				if(url == "" || url == undefined) {
+					alert("No defined.");
+				}
+				else {
+					window.open(url, "_blank");
+				}
+				return false;
+			});
+			// for the delegate function of the lecture Off Topic Reads
+			$('.extras').delegate('.assignment-extra', 'click', function() {
+				var url = $(this).attr('data-url');
+				if(url == "" || url == undefined) {
+					alert("No defined.");
+				}
+				else {
+					window.open(url, "_blank");
+				}
+				return false;
+			});
 
             // for the Programme calender page on LHS
             $('.calender').on('click', function() {
@@ -669,8 +724,6 @@
 	            			no: "7", menteeEmail: menteeEmail
 	            		},
 	            		success: function(response) {
-	            			alert(response);
-
 	            			// show the course calender in the calender-div.
             				$('.calender-div').children('img').remove();
 	            			$('.calender-div').append("<img src='" + response + "' />");
@@ -695,6 +748,122 @@
             	changeActiveState($(this).parent('li'));
             	return false;
             });
+
+            // for the Mentor Profile page on LHS
+            $('.mentor').on('click', function() {
+            	showDiv($('.mentor-div'));
+            	changeActiveState($(this).parent('li'));
+
+            	var email = $.cookie("email");
+            	var id = $.cookie("id");
+            	if($.cookie("email") == "undefined" || $.cookie("email") == undefined || $.cookie("email") == "") {
+            		popup.children('p').remove();
+            		popup.append("<p>You have not logged in properly. Please <a href='http://mentored-research.com/login' style='color: black;'>LOGIN AGAIN</a> to continue.</p>").fadeIn();
+            	}
+            	else {
+            		showLoading();
+	            	$.ajax({
+	            		type: "GET",
+	            		url: "AJAXFunctions.php",
+	            		data: {
+	            			no: "14", email: email, id: id
+	            		},
+	            		success: function(response) {
+	            			if(response.MentorName == "undefined" || response.MentorName == undefined || response.MentorName == "") {
+	            				$('.mentor-name').html("No Data Available");
+            				}
+            				else {
+            					$('.mentor-name').html(response.MentorName);
+            				}	
+            				if(response.MentorContact == "undefined" || response.MentorContact == undefined || response.MentorContact == "") {
+	            				$('.mentor-contact').html("No Data Available");
+            				}
+            				else {
+            					$('.mentor-contact').html(response.MentorContact);
+            				}	
+            				if(response.MentorEmail == "undefined" || response.MentorEmail == undefined || response.MentorEmail == "") {
+	            				$('.mentor-email').html("No Data Available");
+            				}
+            				else {
+            					$('.mentor-email').html(response.MentorEmail);
+            				}	
+            				if(response.MentorProfile == "undefined" || response.MentorProfile == undefined || response.MentorProfile == "") {
+	            				$('.mentor-profile').html("No Data Available");
+            				}
+            				else {
+            					$('.mentor-profile').html(response.MentorProfile);
+            				}	
+	            		},
+	            		error: function() {
+	            			alertMsg.children('p').remove();
+	                        alertMsg.fadeOut();
+	                        popup.children('p').remove();
+	                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();            			
+	            		},
+	            		complete: function() {
+	            			hideLoading();
+	            		}
+	            	});   // end of ajax request
+            	}  // end of else.
+            	return false;
+            });   // end of mentor link on LHS.
+			// for sending message button 
+			$('#btnSendMessageToMentorModal').on('click', function() {
+				var email = $('.mentor-email').html();   // to get the email for the mail to be send.
+
+				if(email == "" || email == "No Data Available") {
+					$('#txtSendMessageEmail').val("Email Address not Available");
+				}
+				else {
+					$('#txtSendMessageEmail').val(email);  // show it to the user, but disabled.
+				}
+				// show the modal now.
+				$('#sendMessageModal').modal('show');
+				return false;
+			});
+			// for sending the mail from the Send Message button in the modal box.
+			$('#btnSendMessage').on('click', function() {
+				var toEmail = $('#txtSendMessageEmail').val().trim();
+				var msg = $('#txtSendMessage').val();
+				var email = $.cookie("email");
+
+				showLoading();
+				$('#sendMessageModal').modal('hide');
+				$.ajax({
+					type: "GET",
+					url: "AJAXFunctions.php",
+					data: {
+						no: "15", toEmail: toEmail, msg: msg, email: email
+					},
+					success: function(response) {
+						if(response[0]["status"] == "sent") {
+							popup.children('p').remove();
+							popup.append("<p>Your Message has been sent. Thank You.</p>").fadeIn();
+
+							// remove the contents of the message box here.
+							$('#txtSendMessage').val("");
+						}
+						else if(response[0]["status"] == "queued" || response[0]["status"] == "scheduled") {
+							popup.children('p').remove();
+							popup.append("<p>Your Message has been Queued. Sit back and relax while we send your message in sometime.</p>").fadeIn();
+						}
+						else if(response[0]["status"] == "rejected" || response[0]["status"] == "invalid") {
+							popup.children('p').remove();
+							popup.append("<p>Oops! Your Message could not ben sent. Please try again.</p>").fadeIn();
+						}
+					},
+					error: function() {
+						alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();            									
+					},
+					complete: function() {
+						hideLoading();
+					}
+				});
+				return false;
+			});
 
             // hide all the divs on page load. Except for first div.
             $('.main-div').hide();
@@ -776,6 +945,7 @@
                 </ul>
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="profile">Profile</a></li>
+                	<li><a href="#" class="mentor">Mentor Profile</a></li>
                 </ul>
             </div>
         </div>
@@ -935,12 +1105,84 @@
         	<h1 class="page-header">
 	        	Programme Calender
 	        </h1>
-
 	        <!-- image of the calender will come from ajax -->
-
         </div>   <!-- end of Programme calender div -->
 
-    </div>
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div mentor-div">
+        	<h1 class="page-header">
+	        	Your Mentor Details
+	        </h1>
+	        <table class="table">
+	        	<tr>
+	        		<td>
+	        			<label>Mentor Name: </label>
+	        		</td>
+	        		<td class="mentor-name">
+	        			
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<td>
+	        			<label>Mentor Contact: </label>
+	        		</td>
+	        		<td class="mentor-contact">
+	        			
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<td>
+	        			<label>Mentor Email Address: </label>
+	        		</td>
+	        		<td class="mentor-email">
+	        			
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<td>
+	        			<label>Mentor Profile: </label>
+	        		</td>
+	        		<td class="mentor-profile">
+	        			
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<td colspan="2">
+	        			<button class="btn btn-lg btn-primary btn-block" id="btnSendMessageToMentorModal">Send Message</button>
+	        		</td>
+	        	</tr>
+	        </table>
+        </div>   <!-- end of Programme calender div -->
+    </div>   <!-- end of main container-fluid div -->
+
+    <!-- this is for sending the email to the mentor using the modal -->
+    <div class="modal fade" id="sendMessageModal">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">Send Message to Mentor</h4>
+				</div>
+				<div class="modal-body">
+					<table class="table">
+						<tr>
+							<td>
+								<input type="email" id="txtSendMessageEmail" placeholder="Email Address" required class="form-control" disabled="disabled" />
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<textarea id="txtSendMessage" placeholder="Type in your message" required class="form-control" rows="10"></textarea>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" id="btnSendMessage">Send Message</button>
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+
 
    <!--   <footer class="footer">
 	        <div class="container">

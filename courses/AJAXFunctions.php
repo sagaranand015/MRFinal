@@ -45,6 +45,70 @@ else if(isset($_GET["no"]) && $_GET["no"] == "12") {  // for getting the assignm
 else if(isset($_GET["no"]) && $_GET["no"] == "13") {  // for getting the assignment material based on Assignment ID chosen by mentee.
 	GetAssignmentMaterial($_GET["assID"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "14") {  // for getting the mentor of a particular mentee.
+	GetMentorDetailsOfMentee($_GET["email"], $_GET["id"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "15") {  // for sending the message from the mentee to the mentor.
+	SendMessageFromMenteeToMentor($_GET["toEmail"], $_GET["msg"], $_GET["email"]);
+}
+
+// for sending the message from the mentee to the mentor.
+function SendMessageFromMenteeToMentor($toEmail, $msg, $email) {
+	$mentorArr = GetMentorDetailsByEmail($toEmail);
+	$menteeArr = GetMenteeDetailsByEmail($email);
+
+	// mentor names and email address
+	$mentorEmail = $mentorArr["MentorEmail"];
+	$mentorName = $mentorArr["MentorName"];
+
+	// mentee name and email address
+	$menteeEmail = $menteeArr["MenteeEmail"];
+	$menteeName = $menteeArr["MenteeName"];
+
+	$subject = $menteeName . " - Query Received";
+
+	$message = "Dear " . $mentorName . "<br /><br />";
+	$message .= "You have Received a query from one of your mentees, namely " . $menteeName . " (" . $menteeEmail . "). Please repond to him either privately or through the <a href='http://mentored-research.com/login' target='_blank'>MR-Portal</a> <br /><br />";
+	$message .= $msg . "<br /><br />";
+	$message .= "Please do not reply to this automated mail.<br /><br />";
+	$message .= "Team Mentored-Research<br />";
+	$message .= "info@mentored-research.com<br />";
+
+	$res = SendMessage($mentorEmail, $mentorName, $menteeEmail, $menteeName, $subject, $message);
+	if($res == "-1") {
+		echo $res;
+	}
+	else {
+		header('Content-Type: application/json');
+		echo json_encode($res);
+	}
+}
+
+// for getting the mentor of a particular mentee.
+function GetMentorDetailsOfMentee($email, $id) {
+	$resp = "-1";
+	$mentor = array();
+	$mentorID = "0";
+	try {
+		$mentorID = GetMentorIDOfMentee($email, $id);
+		if($mentorID == "0") {
+			$resp = "-2";
+		}
+		else if($mentorID == "-1") {
+			$resp = "-1";
+		}
+		else {
+			$mentor = GetMentorDetails($mentorID);
+			header('Content-Type: application/json');
+			$resp = json_encode($mentor);
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // for getting the assignment material based on Assignment ID chosen by mentee.
 function GetAssignmentMaterial($assID) {

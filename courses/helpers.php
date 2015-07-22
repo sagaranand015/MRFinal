@@ -5,6 +5,156 @@
 //these are for the PHP Helper files
 include 'headers/databaseConn.php';
 
+// for mandrill mail sending API.
+require_once 'mandrill/Mandrill.php'; 
+
+// for sending the message through mandrill API.
+function SendMessage($to, $toName, $from, $fromName, $subject, $message) {
+	try {
+		$mandrill = new Mandrill('E1R2dN5PlF1ZnY2pWeX86Q');
+		$message = array(
+	        'html' => $message,
+	        'subject' => $subject,
+	        'from_email' => 'sagar.anand015@gmail.com',
+	        'from_name' => 'Mentored-Research',
+	        'to' => array(
+	            array(
+	                'email' => $to,
+	                'name' => $toName,
+	                'type' => 'to'
+	            )
+	        )
+	    );
+	    $async = false;
+	    $ip_pool = 'Main Pool';
+	    $send_at = null;
+	    $result = $mandrill->messages->send($message, $async, $ip_pool, $send_at);
+		return $result;
+	} 
+	catch(Mandrill_Error $e) {
+		$res = "-1";
+		return $res;
+	    //echo 'A mandrill error occurred: ' . get_class($e) . ' - ' . $e->getMessage();
+	    //throw $e;
+	}
+}
+
+// for getting the mentee details in a json response based on mentee email
+// returns -1 on error. array of mentee details on success.
+function GetMenteeDetailsByEmail($menteeEmail) {
+	$resp = "-1";
+	$mentee = array();
+	try {
+		$query = "select * from Mentee where MenteeEmail='$menteeEmail'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				$mentee["MenteeName"] = $res["MenteeName"];
+				$mentee["MenteeEmail"] = $res["MenteeEmail"];
+				$mentee["MenteeContact"] = $res["MenteeContact"];
+				$mentee["MenteeProfile"] = $res["MenteeProfile"];
+				$mentee["MenteeCourse"] = $res["MenteeCourse"];
+				$mentee["MenteeOrgan"] = $res["MenteeOrgan"];
+				$mentee["MenteeMentor"] = $res["MenteeMentor"];
+			}
+		}
+		$resp = $mentee;
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// for getting the mentor details in a json response based on mentor ID
+// returns -1 on error. array of mentor details on success.
+function GetMentorDetailsByEmail($mentorEmail) {
+	$resp = "-1";
+	$mentor = array();
+	try {
+		$query = "select * from Mentor where MentorEmail='$mentorEmail'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				$mentor["MentorName"] = $res["MentorName"];
+				$mentor["MentorEmail"] = $res["MentorEmail"];
+				$mentor["MentorContact"] = $res["MentorContact"];
+				$mentor["MentorProfile"] = $res["MentorProfile"];
+				$mentor["MentorCourse"] = $res["MentorCourse"];
+				$mentor["MentorOrgan"] = $res["MentorOrgan"];
+				$mentor["MentorDirector"] = $res["MentorDirector"];
+			}
+		}
+		$resp = $mentor;
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// for getting the mentor details in a json response based on mentor ID
+// returns -1 on error. array of mentor details on success.
+function GetMentorDetails($mentorID) {
+	$resp = "-1";
+	$mentor = array();
+	try {
+		$query = "select * from Mentor where MentorID='$mentorID'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				$mentor["MentorName"] = $res["MentorName"];
+				$mentor["MentorEmail"] = $res["MentorEmail"];
+				$mentor["MentorContact"] = $res["MentorContact"];
+				$mentor["MentorProfile"] = $res["MentorProfile"];
+				$mentor["MentorCourse"] = $res["MentorCourse"];
+				$mentor["MentorOrgan"] = $res["MentorOrgan"];
+				$mentor["MentorDirector"] = $res["MentorDirector"];
+			}
+		}
+		$resp = $mentor;
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// for getting the mentorID of the mentee passed.
+// returns 0 if mentor not assigned. -1 on error. mentorID on success.
+function GetMentorIDOfMentee($email, $id) {
+	$resp = "-1";
+	try {
+		$query = "select * from Mentee where MenteeEmail='$email'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				$resp = $res["MenteeMentor"];
+			}
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // this is the function for registering the guide url to the database table.
 function RegisterGuideUrl($courseID, $guideName, $url) {
 	$resp = "-1";

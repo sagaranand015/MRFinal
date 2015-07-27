@@ -19,7 +19,8 @@ else if(isset($_GET["no"]) && $_GET["no"] == "3") {   // for signup
 // this is the function for the user signup
 function Signup($email, $pwd, $name, $contact, $profile) {
 	$res = "-1";
-	if(GetUserLevel($email) == "A") {  // go to admin table.
+	$level = GetUserLevel($email);
+	if($level == "A") {  // go to admin table.
 		$signup = SignupUtility($email, $pwd, $name, $contact, $profile, "Admin");
 		if($signup == "1") {
 			$res = "A";
@@ -37,7 +38,7 @@ function Signup($email, $pwd, $name, $contact, $profile) {
 			$res = "-1";
 		}
 	}
-	else if(GetUserLevel($email) == "B") {   // go to director table.
+	else if($level == "B") {   // go to director table.
 		$signup = SignupUtility($email, $pwd, $name, $contact, $profile, "Director");
 		if($signup == "1") {
 			$res = "B";
@@ -55,7 +56,7 @@ function Signup($email, $pwd, $name, $contact, $profile) {
 			$res = "-1";
 		}	
 	}
-	else if(GetUserLevel($email) == "C") {   // go to mentor table.
+	else if($level == "C") {   // go to mentor table.
 		$signup = SignupUtility($email, $pwd, $name, $contact, $profile, "Mentor");
 		if($signup == "1") {
 			$res = "C";
@@ -73,7 +74,7 @@ function Signup($email, $pwd, $name, $contact, $profile) {
 			$res = "-1";
 		}		
 	}
-	else if(GetUserLevel($email) == "D") {   // go to mentee table.
+	else if($level == "D") {   // go to mentee table.
 		$signup = SignupUtility($email, $pwd, $name, $contact, $profile, "Mentee");
 		if($signup == "1") {
 			$res = "D";
@@ -91,10 +92,10 @@ function Signup($email, $pwd, $name, $contact, $profile) {
 			$res = "-1";
 		}			
 	}
-	else if(GetUserLevel($email) == "") {   // user email not in the user table.
+	else if($level == "") {   // user email not in the user table.
 		$res = "0";
 	}
-	else if(GetUserLevel($email) == "-1") {   // error condition.
+	else if($level == "-1") {   // error condition.
 		$res = "-1";
 	}
 
@@ -118,12 +119,14 @@ function ForgotPassword($name, $email) {
 	$updatePwd = UpdatePassword($email, $newPwd);
 	if($updatePwd == "A" || $updatePwd == "B" || $updatePwd == "C" || $updatePwd == "D") {
 		// write the mail here.
-		if(ForgotPasswordUserMail($email, $name, $newPwd) == "1") {
-			$res = "1";
-		}
-		else {
-			$res = "2";
-		}
+		ForgotPasswordUserMail($email, $name, $newPwd);
+		$res = "1";
+		// if( == "1") {
+		// 	$res = "1";
+		// }
+		// else {
+		// 	$res = "2";
+		// }
 	}
 	else if($updatePwd == "-A" || $updatePwd == "-B" || $updatePwd == "-C" || $updatePwd == "-D" || $updatePwd == "0") {
 		// could not find the email address in the database.
@@ -145,7 +148,8 @@ function ForgotPassword($name, $email) {
 function Login($email, $pwd) {
 	$res = "-1";
 	$login = "";
-	if(GetUserLevel($email) == "A") {  // go to admin table.
+	$level = GetUserLevel($email);
+	if($level == "A") {  // go to admin table.
 		$login = LoginUtility($email, $pwd, "Admin", "AdminEmail", "AdminPwd");
 		if($login == "1") {
 			$res = "A";
@@ -157,7 +161,7 @@ function Login($email, $pwd) {
 			$res = "-1";
 		}
 	}
-	else if(GetUserLevel($email) == "B") {   // go to director table.
+	else if($level == "B") {   // go to director table.
 		$login = LoginUtility($email, $pwd, "Director", "DirectorEmail", "DirectorPwd");
 		if($login == "1") {
 			$res = "B";
@@ -169,7 +173,7 @@ function Login($email, $pwd) {
 			$res = "-1";
 		}	
 	}
-	else if(GetUserLevel($email) == "C") {   // go to mentor table.
+	else if($level == "C") {   // go to mentor table.
 		$login = LoginUtility($email, $pwd, "Mentor", "MentorEmail", "MentorPwd");
 		if($login == "1") {
 			$res = "C";
@@ -181,7 +185,7 @@ function Login($email, $pwd) {
 			$res = "-1";
 		}		
 	}
-	else if(GetUserLevel($email) == "D") {   // go to mentee table.
+	else if($level == "D") {   // go to mentee table.
 		$login = LoginUtility($email, $pwd, "Mentee", "MenteeEmail", "MenteePwd");
 		if($login == "1") {
 			$res = "D";
@@ -193,10 +197,10 @@ function Login($email, $pwd) {
 			$res = "-1";
 		}			
 	}
-	else if(GetUserLevel($email) == "") {   // user email not in the user table.
+	else if($level == "") {   // user email not in the user table.
 		$res = "0";
 	}
-	else if(GetUserLevel($email) == "-1") {   // error condition.
+	else if($level == "-1") {   // error condition.
 		$res = "-1";
 	}
 	echo $res;

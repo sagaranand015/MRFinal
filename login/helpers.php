@@ -5,41 +5,38 @@
 //these are for the PHP Helper files
 include 'headers/databaseConn.php';
 
-require("PHPMailer/PHPMailerAutoload.php");
+// for mandrill mail sending API.
+require_once 'mandrill/Mandrill.php'; 
 
-// this is the mail function using the PHPMailer Library.
-function SendMail($toEmail, $toName, $subject, $message) {
-	$resp = "-1";
+// for sending the message through mandrill API.
+function SendMail($to, $toName, $from, $fromName, $subject, $message) {
 	try {
-		$mail = new PHPMailer();
-		$mail->IsSMTP();                                                            
-		$mail->Host = "relay-hosting.secureserver.net";                                                              // this will change to godaddy smtp 
-		$mail->Port = 25;          // input port
-		//$mail->SMTPSecure = 'ssl';        // ssl or tls depends                                            
-		$mail->SMTPAuth = false;     
-		$mail->Username = "mentored.research@gmail.com";                                                               // SMTP username
-		$mail->Password = "EriMentor123";                                                                 // SMTP password
-		$mail->From = "guide@mentored-research.com";
-		$mail->FromName = "M-R Guide";                                    
-		$mail->AddAddress($toEmail, $toName);                              // your email address                                    
-		$mail->WordWrap = 50;                                
-		$mail->IsHTML(true);                                                                         // makes it slow. remove if not necessary
-		$mail->Subject = $subject;                                                           // input as per the details you wanna recieve on ur mail
-		$mail->Body = $message;
-
-		if(!$mail->Send()) {
-			$res = "-1";
-		}
-		else {
-			$res = "1";
-		}
-		return $resp;
+		$mandrill = new Mandrill('E1R2dN5PlF1ZnY2pWeX86Q');
+		$message = array(
+	        'html' => $message,
+	        'subject' => $subject,
+	        'from_email' => 'sagar.anand015@gmail.com',
+	        'from_name' => 'Mentored-Research',
+	        'to' => array(
+	            array(
+	                'email' => $to,
+	                'name' => $toName,
+	                'type' => 'to'
+	            )
+	        )
+	    );
+	    $async = false;
+	    $ip_pool = 'Main Pool';
+	    $send_at = null;
+	    $result = $mandrill->messages->send($message, $async, $ip_pool, $send_at);
+		return $result;
+	} 
+	catch(Mandrill_Error $e) {
+		$res = "-1";
+		return $res;
+	    // echo 'A mandrill error occurred: ' . get_class($e) . ' - ' . $e->getMessage();
+	    // throw $e;
 	}
-	catch(Exception $e) {
-		$resp = "-1";
-		return $resp;
-	}
-	
 }
 
 // this is the function to check if the user has signed up in a table.
@@ -111,7 +108,7 @@ function NotRegisteredUserMail($toEmail, $name) {
 
         $mailBody .= "<br /><br />-------------------------------------------------------------------------------------------------------<br />This is an automated mail. Please do not reply to this message.";
 
-		$res = SendMail($toEmail, $name, $subject, $mailBody);
+		$res = SendMail($toEmail, $name, "info@mentored-research.com", "Mentored-Research",  $subject, $mailBody);
 		return $res;
 	}	
 	catch(Exception $e) {
@@ -127,13 +124,12 @@ function SignupUserMail($toEmail, $name) {
 	$res = "-1";
 	$mailBody = "";
 	try{
-
 		$subject = "Mentored-Research Signup Successful";
 
 		// write the mail body here.
 		$mailBody .= "<h1>Mentored-Research</h1><br />";
 		$mailBody .= "Dear " . $name . ", <br />";
-		$mailBody .= "Welcome to the Mentored Research Family. Your Mentored-Research account has been created for you.<br /><br />";
+		$mailBody .= "Welcome to the Mentored Research Family. Your Mentored-Research account has been created for you. You can now log into your account <a href='http://mentored-research.com/login' target='_blank'>HERE</a><br /><br />";
 		$mailBody .= "In case of any problems, please drop a mail to guide@mentored-research.com. <br /><br />";
 		$mailBody .= "Please add guide@mentored-research, to your address book, to prevent future emails from Mentored-Research from going to the SPAM folder.<br /><br />";
 		$mailBody .= "Welcome to the Mentored-Research family!<br /><br />";
@@ -148,7 +144,7 @@ function SignupUserMail($toEmail, $name) {
 
         $mailBody .= "<br /><br />-------------------------------------------------------------------------------------------------------<br />This is an automated mail. Please do not reply to this message.";
 
-		$res = SendMail($toEmail, $name, $subject, $mailBody);
+		$res = SendMail($toEmail, $name, "info@mentored-research.com", "Mentored-Research", $subject, $mailBody);
 		return $res;
 	}	
 	catch(Exception $e) {
@@ -189,8 +185,14 @@ function SignupUtility($email, $pwd, $name, $contact, $profile, $table) {
 	try {
 		$userNo = IsUserExistInTable($email, $table);
 		$isSignedup = IsAlreadySignedup($email, $table);
+
+		// for encrypting the password thing
+		$hash = hashSSHA($pwd);
+        $encryptedPwd = $hash["encrypted"]; // encrypted password
+        $salt = $hash["salt"]; // salt
+
 		if($userNo == 1 && $isSignedup == "") {
-			$query = "update " . $table . " set " . $table . "Name='$name', " . $table . "Pwd='$pwd', " . $table . "Contact='$contact', " . $table . "Profile='$profile' where " . $table . "Email='$email'";
+			$query = "update " . $table . " set " . $table . "Name='$name', " . $table . "Pwd='$encryptedPwd', Salt='$salt', " . $table . "Contact='$contact', " . $table . "Profile='$profile' where " . $table . "Email='$email'";
 			$rs = mysql_query($query);
 			if(!$rs) {
 				$resp = "-1";
@@ -263,7 +265,7 @@ function ForgotPasswordUserMail($toEmail, $name, $newPwd) {
 		$mailBody .= "<br />Tech Team";
 		$mailBody .= "<br /><a href='http://mentored-research.com'>Mentored-Research</a>";
 
-		$res = SendMail($toEmail, $name, $subject, $mailBody);
+		$res = SendMail($toEmail, $name, "info@mentored-research.com", "Mentored-Research", $subject, $mailBody);
 		return $res;
 	}	
 	catch(Exception $e) {
@@ -277,7 +279,13 @@ function UpdatePasswordUtility($email, $newPwd, $table, $emailCol, $pwdCol) {
 	$resp = "-1";
 	try {
 		if(IsAlreadySignedup($email, $table) != "") {
-			$query = "update " . $table . " set " . $pwdCol . "='$newPwd' where " . $emailCol . "='$email'";
+
+			// get the encrpyted password here and insert into the database. for encrypting the password thing
+			$hash = hashSSHA($newPwd);
+	        $encryptedPwd = $hash["encrypted"]; // encrypted password
+	        $salt = $hash["salt"]; // salt
+
+			$query = "update " . $table . " set " . $pwdCol . "='$encryptedPwd', Salt='$salt' where " . $emailCol . "='$email'";
 			$rs = mysql_query($query);
 			if(!$rs) {
 				$resp = "-1";
@@ -301,7 +309,8 @@ function UpdatePasswordUtility($email, $newPwd, $table, $emailCol, $pwdCol) {
 function UpdatePassword($email, $newPwd) {
 	$res = "-1";
 	$pwd = "";
-	if(GetUserLevel($email) == "A") {  // go to admin table.
+	$level = GetUserLevel($email);
+	if($level == "A") {  // go to admin table.
 		$pwd = UpdatePasswordUtility($email, $newPwd, "Admin", "AdminEmail", "AdminPwd");
 		if($pwd == "1") {
 			$res = "A";
@@ -316,7 +325,7 @@ function UpdatePassword($email, $newPwd) {
 			$res = "-1";
 		}
 	}
-	else if(GetUserLevel($email) == "B") {   // go to director table.
+	else if($level == "B") {   // go to director table.
 		$pwd = UpdatePasswordUtility($email, $newPwd, "Director", "DirectorEmail", "DirectorPwd");
 		if($pwd == "1") {
 			$res = "B";
@@ -331,7 +340,7 @@ function UpdatePassword($email, $newPwd) {
 			$res = "-1";
 		}	
 	}
-	else if(GetUserLevel($email) == "C") {   // go to mentor table.
+	else if($level == "C") {   // go to mentor table.
 		$pwd = UpdatePasswordUtility($email, $newPwd, "Mentor", "MentorEmail", "MentorPwd");
 		if($pwd == "1") {
 			$res = "C";
@@ -346,7 +355,7 @@ function UpdatePassword($email, $newPwd) {
 			$res = "-1";
 		}		
 	}
-	else if(GetUserLevel($email) == "D") {   // go to mentee table.
+	else if($level == "D") {   // go to mentee table.
 		$pwd = UpdatePasswordUtility($email, $newPwd, "Mentee", "MenteeEmail", "MenteePwd");
 		if($pwd == "1") {
 			$res = "D";
@@ -361,10 +370,10 @@ function UpdatePassword($email, $newPwd) {
 			$res = "-1";
 		}			
 	}
-	else if(GetUserLevel($email) == "") {   // user email not in the user table.
+	else if($level == "") {   // user email not in the user table.
 		$res = "0";
 	}
-	else if(GetUserLevel($email) == "-1") {   // error condition.
+	else if($level == "-1") {   // error condition.
 		$res = "-1";
 	}
 	return $res;
@@ -383,24 +392,27 @@ function GenerateRandomPassword() {
 // this is the utility function for login. Returns 1 if exists. 0 if not exists. and -1 on error.
 function LoginUtility($email, $pwd, $table, $emailCol, $pwdCol) {
 	$resp = "-1";
-	$i = 0;
 	try {
-		$query = "select * from " . $table . " where " . $emailCol . "='$email' and " . $pwdCol . "='$pwd'";
+		$query = "select * from " . $table . " where " . $emailCol . "='$email'";
 		$rs = mysql_query($query);
 		if(!$rs) {
 			$resp = "-1";
 		}
 		else {
-			while ($res = mysql_fetch_array($rs)) {
-				$i++;	
+			$no = mysql_num_rows($rs);
+			if($no > 0) {
+				$res = mysql_fetch_array($rs);
+	            $salt = $res["Salt"];
+	            $encrypted_password = $res[$table . "Pwd"];
+	            $hash = checkhashSSHA($salt, $pwd);
+	            // check for password equality
+	            if ($encrypted_password == $hash) {
+	                $resp = "1";
+	            }
+	            else {
+	            	$resp = "0";
+	            }
 			}
-		}
-
-		if($i == 0) {
-			$resp = "0";
-		}
-		else {
-			$resp = "1";
 		}
 		return $resp;
 	}
@@ -486,6 +498,29 @@ function GetUserNumberInUserTable($email) {
 		$resp = -1;
 		return $resp;
 	}
+}
+
+/**
+ * Encrypting password
+ * @param password
+ * returns salt and encrypted password
+ */
+function hashSSHA($password) {
+    $salt = sha1(rand());
+    $salt = substr($salt, 0, 10);
+    $encrypted = base64_encode(sha1($password . $salt, true) . $salt);
+    $hash = array("salt" => $salt, "encrypted" => $encrypted);
+    return $hash;
+}
+
+/**
+ * Decrypting password
+ * @param salt, password
+ * returns hash string
+ */
+function checkhashSSHA($salt, $password) {
+    $hash = base64_encode(sha1($password . $salt, true) . $salt);
+    return $hash;
 }
 
 // this is the helper function to save the details to the log file.

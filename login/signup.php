@@ -176,8 +176,6 @@
 							no: "3", email: email, pwd: pwd, name: name, contact: contact, profile: profile
 						},
 						success: function(response) {
-							alert(response);
-
 							popup.fadeOut();
 							alertMsg.children('p').remove();
 							alertMsg.fadeOut();

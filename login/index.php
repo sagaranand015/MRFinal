@@ -187,6 +187,7 @@
 							no: "1", email: email, pwd: pwd
 						},
 						success: function(response) {
+
 							popup.fadeOut();
 							alertMsg.children('p').remove();
 							alertMsg.fadeOut();
@@ -272,7 +273,6 @@
 							no: "2", pwdName: pwdName, pwdEmail: pwdEmail
 						},
 						success: function(response) {
-
 							popup.fadeOut();
 							alertMsg.children('p').remove();
 							alertMsg.fadeOut();

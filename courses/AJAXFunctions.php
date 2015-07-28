@@ -51,6 +51,46 @@ else if(isset($_GET["no"]) && $_GET["no"] == "14") {  // for getting the mentor 
 else if(isset($_GET["no"]) && $_GET["no"] == "15") {  // for sending the message from the mentee to the mentor.
 	SendMessageFromMenteeToMentor($_GET["toEmail"], $_GET["msg"], $_GET["email"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "16") {  // for adding the user to the User and the Specified table.
+	AddUser($_GET["organ"], $_GET["course"], $_GET["email"], $_GET["level"]);
+}
+
+// for adding the user to the User and the Specified table.
+function AddUser($organ, $course, $email, $level) {
+	$resp = "-1";
+	$userAdd = "-1";
+	$userTable = "-1";
+	try {
+		if($level == "B") {   // for adding the director.
+			$userAdd = AddToUserTable($email, $level);
+			$userTable = AddToDirectorTable($organ, $email, "Director");
+		}
+		else if($level == "C") {
+			$userAdd = AddToUserTable($email, $level);
+			$userTable = AddToMentorTable($organ, $course, $email, "Mentor");
+		}
+		else if($level == "D") {
+			$userAdd = AddToUserTable($email, $level);
+			$userTable = AddToMenteeTable($organ, $course, $email, "Mentee");
+		}
+		else {
+			$resp = "-1";
+		}
+
+		if($userAdd == "1" && $userTable == "1") {   // successful insertions.
+			SendNewUserMail($email);
+			$resp = "1";
+		}
+		else {
+			$resp = "-1";
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // for sending the message from the mentee to the mentor.
 function SendMessageFromMenteeToMentor($toEmail, $msg, $email) {
@@ -70,9 +110,10 @@ function SendMessageFromMenteeToMentor($toEmail, $msg, $email) {
 	$message = "Dear " . $mentorName . "<br /><br />";
 	$message .= "You have Received a query from one of your mentees, namely " . $menteeName . " (" . $menteeEmail . "). Please repond to him either privately or through the <a href='http://mentored-research.com/login' target='_blank'>MR-Portal</a> <br /><br />";
 	$message .= $msg . "<br /><br />";
-	$message .= "Please do not reply to this automated mail.<br /><br />";
+
 	$message .= "Team Mentored-Research<br />";
-	$message .= "info@mentored-research.com<br />";
+	$message .= "info@mentored-research.com<br /><br />";
+	$message .= "Please do not reply to this automated mail.<br />";
 
 	$res = SendMessage($mentorEmail, $mentorName, $menteeEmail, $menteeName, $subject, $message);
 	if($res == "-1") {

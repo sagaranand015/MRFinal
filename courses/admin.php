@@ -1512,6 +1512,185 @@
                 }   // end of else
             });  // end of change (delegate) function in guide-div courses list
 
+			 // for the add organisation link on LHS
+            $('.user').on('click', function() {
+            	showDiv($('.user-div'));
+            	changeActiveState($(this).parent('li'));
+
+            	// for showing the correct tab
+            	$('#director-tab').tab('show');
+            	$('#add-user-tab a').click(function (e) {
+					e.preventDefault();
+					$(this).tab('show');
+				});
+
+				// for getting the organisation and course ddls.
+            	showLoading();
+            	$.ajax({
+            		type: "GET",
+            		url: "AJAXFunctions.php",
+            		data: {
+            			no: "6"
+            		},
+            		success: function(response) {
+            			// to show the courses drop down at appropriate place.
+            			if(response == "-1") {
+							popup.children('p').remove();
+				        	popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();	            				
+            			}
+            			else {
+            				$('.add-mentor-course').children('select').remove();
+            				$('.add-mentor-course').append(response);
+
+            				$('.add-mentee-course').children('select').remove();
+            				$('.add-mentee-course').append(response);
+            			}
+            		}, 
+            		error: function() {
+            			alertMsg.children('p').remove();
+				        alertMsg.fadeOut();
+				        popup.children('p').remove();
+				        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
+            		}
+            	});
+				$.ajax({
+				    type: "GET",
+				    url: "AJAXFunctions.php",
+				    data: {
+				        no: "3"
+				    },
+				    success: function(response) {
+			    		if(response == "-1") {
+			    			popup.children('p').remove();
+				        	popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+				    	}
+				    	else {
+
+				    		$('.add-director-organ').children('select').remove();
+            				$('.add-director-organ').append(response);
+
+				    		$('.add-mentor-organ').children('select').remove();
+            				$('.add-mentor-organ').append(response);
+
+            				$('.add-mentee-organ').children('select').remove();
+            				$('.add-mentee-organ').append(response);
+				    	}
+				    },
+				    error: function() {
+				        alertMsg.children('p').remove();
+				        alertMsg.fadeOut();
+				        popup.children('p').remove();
+				        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+				    },
+				    complete: function() {
+				        hideLoading();
+				    }
+				});
+
+				// for the form submitting while adding the users to the database.
+				$('#form-add-director').on('submit', function() {
+					var organ = $('.add-director-organ').children('select').val();
+					var directorEmail = $('#txtAddDirector').val().trim();
+					if(organ == "-1") {
+						popup.children('p').remove();
+						popup.append("<p>Please select the organization correctly.</p>").fadeIn();
+					}
+					else {
+						showLoading();
+						$.ajax({
+							type: "GET",
+							url: "AJAXFunctions.php",
+							data: {
+								no: "16", organ: organ, course: "", email: directorEmail, level: "B"
+							},
+							success: function(response) {
+								alert(response);
+							},
+							error: function() {
+								alertMsg.children('p').remove();
+						        alertMsg.fadeOut();
+						        popup.children('p').remove();
+						        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+							},
+							complete: function() {
+								hideLoading();
+							}
+						});
+					}
+					return false;
+				});
+
+				// for the form submitting while adding the users(mentors) to the database.
+				$('#form-add-mentor').on('submit', function() {
+					var organ = $('.add-mentor-organ').children('select').val();
+					var course = $('.add-mentor-course').children('select').val();
+					var mentorEmail = $('#txtAddMentor').val().trim();
+					if(organ == "-1" || course == "-1") {
+						popup.children('p').remove();
+						popup.append("<p>Please select the organization or course correctly.</p>").fadeIn();
+					}
+					else {
+						showLoading();
+						$.ajax({
+							type: "GET",
+							url: "AJAXFunctions.php",
+							data: {
+								no: "16", organ: organ, course: course, email: mentorEmail, level: "C"
+							},
+							success: function(response) {
+								alert(response);
+							},
+							error: function() {
+								alertMsg.children('p').remove();
+						        alertMsg.fadeOut();
+						        popup.children('p').remove();
+						        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+							},
+							complete: function() {
+								hideLoading();
+							}
+						});
+					}
+					return false;
+				});
+
+				// for the form submitting while adding the users(mentors) to the database.
+				$('#form-add-mentee').on('submit', function() {
+					var organ = $('.add-mentee-organ').children('select').val();
+					var course = $('.add-mentee-course').children('select').val();
+					var mentorEmail = $('#txtAddMentee').val().trim();
+					if(organ == "-1" || course == "-1") {
+						popup.children('p').remove();
+						popup.append("<p>Please select the organization or course correctly.</p>").fadeIn();
+					}
+					else {
+						showLoading();
+						$.ajax({
+							type: "GET",
+							url: "AJAXFunctions.php",
+							data: {
+								no: "16", organ: organ, course: course, email: mentorEmail, level: "D"
+							},
+							success: function(response) {
+								alert(response);
+							},
+							error: function() {
+								alertMsg.children('p').remove();
+						        alertMsg.fadeOut();
+						        popup.children('p').remove();
+						        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+							},
+							complete: function() {
+								hideLoading();
+							}
+						});
+					}
+					return false;
+				});
+
+            	return false;
+            });
+
             // hide all the divs on page load. Except for first div.
             $('.main-div').hide();
             $('.dashboard').trigger('click');
@@ -1615,12 +1794,129 @@
                 	<li><a href="#" class="assignment">Add Assignment Details</a></li>
                 	<li><a href="#" class="assignmentPDF">Add Assignment Material</a></li>
                 </ul>
+                <ul class="nav nav-sidebar">
+                	<li><a href="#" class="user">Add User</a></li>
+                </ul>
             </div>
         </div>
 
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div user-div">
+	        <h1 class="page-header">
+	        	Add Users
+	        </h1>
+
+		     <ul class="nav nav-tabs nav-justified" role="tablist">
+				<li role="presentation" class="active"><a href="#director" id="director-tab" aria-controls="director" role="tab" data-toggle="tab">Add Director</a></li>
+				<li role="presentation"><a href="#mentor" aria-controls="mentor" role="tab" data-toggle="tab">Add Mentor</a></li>
+				<li role="presentation"><a href="#mentee" aria-controls="mentee" role="tab" data-toggle="tab">Add Mentee</a></li>
+			</ul>
+
+			<div class="tab-content">
+				<div role="tabpanel" class="tab-pane active" id="director">
+					<form id="form-add-director">
+						<table class="table">
+							<tr>
+								<td>
+									<label>Select Organisation: </label>
+								</td>
+								<td class="add-director-organ">
+									<!-- data from ajax -->
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<label>Director Email Address: </label>
+								</td>
+								<td>
+									<input type="email" placeholder="Director Email Address" id="txtAddDirector" class="form-control" required />
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<input type="submit" value="Add Director" class="btn btn-lg btn-primary btn-block" />
+								</td>
+							</tr>
+						</table>
+					</form>
+				</div>  <!-- end of Add Director -->
+				<div role="tabpanel" class="tab-pane" id="mentor">
+					<form id="form-add-mentor">
+						<table class="table">
+							<tr>
+								<td>
+									<label>Select Organisation: </label>
+								</td>
+								<td class="add-mentor-organ">
+									<!-- data from ajax -->
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<label>Select Course: </label>
+								</td>
+								<td class="add-mentor-course">
+									<!-- data from ajax -->
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<label>Mentor Email Address: </label>
+								</td>
+								<td>
+									<input type="email" placeholder="Mentor Email Address" id="txtAddMentor" class="form-control" required/>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<input type="submit" value="Add Mentor" class="btn btn-lg btn-primary btn-block" />
+								</td>
+							</tr>
+						</table>
+					</form>
+				</div>
+				<div role="tabpanel" class="tab-pane" id="mentee">
+					<form id="form-add-mentee">
+						<table class="table">
+							<tr>
+								<td>
+									<label>Select Organisation: </label>
+								</td>
+								<td class="add-mentee-organ">
+									<!-- data from ajax -->
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<label>Select Course: </label>
+								</td>
+								<td class="add-mentee-course">
+									<!-- data from ajax -->
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<label>Mentee Email Address: </label>
+								</td>
+								<td>
+									<input type="email" placeholder="Mentee Email Address" id="txtAddMentee" class="form-control" required />
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<input type="submit" value="Add Mentor" class="btn btn-lg btn-primary btn-block" />
+								</td>
+							</tr>
+						</table>
+					</form>
+				</div>
+			</div>
+
+
+        </div>  <!-- end of add user div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div assignment-div">
 	        <h1 class="page-header">
@@ -1873,7 +2169,7 @@
                     </tr>
                 </table>
             </form>
-        </div>
+        </div>   <!-- end of guide div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div dashboard-div">
 	        <h1 class="page-header">
@@ -1881,7 +2177,7 @@
 	        </h1>
 
 	        <!-- Data will come from the AJAX here -->
-        </div>
+        </div>  <!-- end of dashboard div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div profile-div">
         	<h1 class="page-header" class="profile-header">

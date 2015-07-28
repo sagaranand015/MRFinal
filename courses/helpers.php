@@ -8,6 +8,100 @@ include 'headers/databaseConn.php';
 // for mandrill mail sending API.
 require_once 'mandrill/Mandrill.php'; 
 
+// this is for sending the mail to the newly added user by the admin.
+function SendNewUserMail($email) {
+	$subject = "User Added - " . $email;
+
+	$message = "Dear " . $email . "<br /><br />";
+	$message .= "Congratulations! You are now a part of the Mentored-Research Family. You have been added to the M-R database. To get started with your account, please <a href='http://mentored-research.com/login/signup.php' target='_blank'>Sign Up Here.</a>" . "<br /><br />";
+	$message .= "In case you face any issues, please put in a word to us at: guide@mentored-research.com <br /><br />";
+
+	$message .= "Team Mentored-Research<br />";
+	$message .= "info@mentored-research.com<br /><br />";
+	$message .= "Please do not reply to this automated mail.<br /><br />";
+	$res = SendMessage($email, $email, "info@mentored-research.com", "Mentored-Research", $subject, $message);
+}
+
+// this is for adding the data to the specified mentor table.
+function AddToMenteeTable($organ, $course, $email, $table) {
+	$resp = "-1";
+	try {
+		$query = "insert into " . $table . "(" . $table . "Email, " . $table . "Organ, " . $table . "Course) values('$email', '$organ', '$course')";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// this is for adding the data to the specified mentor table.
+function AddToMentorTable($organ, $course, $email, $table) {
+	$resp = "-1";
+	try {
+		$query = "insert into " . $table . "(" . $table . "Email, " . $table . "Organ, " . $table . "Course) values('$email', '$organ', '$course')";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// this is for adding the data to the specified Director table.
+function AddToDirectorTable($organ, $email, $table) {
+	$resp = "-1";
+	try {
+		$query = "insert into " . $table . "(" . $table . "Email, " . $table . "Organ) values('$email', '$organ')";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// for adding the email to the user table. 1 on success. -1 on error.
+function AddToUserTable($email, $level) {
+	$resp = "-1";
+	try {
+		$query = "insert into User(UserEmail, UserLevel) values('$email', '$level')";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // for sending the message through mandrill API.
 function SendMessage($to, $toName, $from, $fromName, $subject, $message) {
 	try {
@@ -34,8 +128,6 @@ function SendMessage($to, $toName, $from, $fromName, $subject, $message) {
 	catch(Mandrill_Error $e) {
 		$res = "-1";
 		return $res;
-	    //echo 'A mandrill error occurred: ' . get_class($e) . ' - ' . $e->getMessage();
-	    //throw $e;
 	}
 }
 

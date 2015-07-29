@@ -8,6 +8,31 @@ include 'headers/databaseConn.php';
 // for mandrill mail sending API.
 require_once 'mandrill/Mandrill.php'; 
 
+// this is for changing the password of the specified user.
+function ChangePasswordUtility($email, $newPassword, $table) {
+	$resp = "-1";
+	try {
+		// for encrypting the password thing
+		$hash = hashSSHA($newPassword);
+        $encryptedPwd = $hash["encrypted"]; // encrypted password
+        $salt = $hash["salt"]; // salt
+
+		$query = "update " . $table . " set " . $table . "Pwd='$encryptedPwd', Salt='$salt' where " . $table . "Email='$email'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // this is for sending the mail to the newly added user by the admin.
 function SendNewUserMail($email) {
 	$subject = "User Added - " . $email;
@@ -393,6 +418,29 @@ function RegisterCalenderUrl($courseID, $url) {
 		$resp = "-1";
 		return $resp;
 	}
+}
+
+/**
+ * Encrypting password
+ * @param password
+ * returns salt and encrypted password
+ */
+function hashSSHA($password) {
+    $salt = sha1(rand());
+    $salt = substr($salt, 0, 10);
+    $encrypted = base64_encode(sha1($password . $salt, true) . $salt);
+    $hash = array("salt" => $salt, "encrypted" => $encrypted);
+    return $hash;
+}
+
+/**
+ * Decrypting password
+ * @param salt, password
+ * returns hash string
+ */
+function checkhashSSHA($salt, $password) {
+    $hash = base64_encode(sha1($password . $salt, true) . $salt);
+    return $hash;
 }
 
 // this is the helper function to save the details to the log file.

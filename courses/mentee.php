@@ -337,7 +337,12 @@
 	    			}
 	    		});   // end of ajax request.
             }   // end of else.
-		});
+
+            // hide all the divs on page load. Except for first div.
+            // this is supposed to be done here and not in ready() function. Or else, it gives an error while loading the divs.
+            $('.main-div').hide();
+            $('.CRP').trigger('click');
+		});   // end of load function.
 
         $(document).ready(function() {
 
@@ -865,9 +870,57 @@
 				return false;
 			});
 
-            // hide all the divs on page load. Except for first div.
-            $('.main-div').hide();
-            $('.CRP').trigger('click');
+            // for the change password link on the LHS
+            $('.password').on('click', function() {
+                showDiv($('.password-div'));
+                changeActiveState($(this).parent('li'));
+
+                $('#formChangePassword').submit(function() {
+                    // first, check for both the new passwords:
+                    var oldPassword = $('#txtOldPassword').val().trim();
+                    var newPassword = $('#txtNewPassword').val().trim();
+                    var newPasswordConfirm = $('#txtNewPasswordConfirm').val().trim();
+                    var email = $.cookie("email");
+
+                    if(newPassword != newPasswordConfirm) {
+                        popup.children('p').remove();
+                        popup.append("<p>Your Passwords do not match. Please recheck and try again.</p>").fadeIn();
+                    }
+                    else if(email == "" || email == "undefined" || email == undefined) {
+                        popup.children('p').remove();
+                        popup.append("<p>You have not logged in properly. Please log out and login again.</p>").fadeIn();   
+                    }
+                    else {   // ajax request for password change
+                        showLoading();
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "17", email: email, oldPassword: oldPassword, newPassword: newPassword, newPasswordConfirm: newPasswordConfirm, table: "Mentee"
+                            },
+                            success: function(response) {
+                                if(response == "1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Password Successfully Changed.</p>").fadeIn();
+                                }
+                                else {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Error encountered while changing your password. Please try again.</p>").fadeIn();   
+                                }
+                            },
+                            error: function() {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
+                            },
+                            complete: function() {
+                                hideLoading();
+                            }
+                        });   // end of AJAX Request.
+                    }
+                    return false;
+                });   // end of formChangePassword submit()
+                return false;
+            });   // end of .password on LHS.
 
         });    // end of ready function.
 
@@ -945,6 +998,7 @@
                 </ul>
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="profile">Profile</a></li>
+                    <li><a href="#" class="password">Change Password</a></li>
                 	<li><a href="#" class="mentor">Mentor Profile</a></li>
                 </ul>
             </div>
@@ -953,6 +1007,45 @@
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div password-div">
+            <h1 class="page-header">
+                Change Password
+            </h1>
+            <form id="formChangePassword">
+                <table class="table">
+                    <tr>
+                        <td>
+                            <label>Enter Old Password: </label>
+                        </td>
+                        <td>
+                            <input type="password" id="txtOldPassword" class="form-control" placeholder="Old Password" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Enter New Password: </label>
+                        </td>
+                        <td>
+                            <input type="password" id="txtNewPassword" class="form-control" placeholder="New Password" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Confirm New Password: </label>
+                        </td>
+                        <td>
+                            <input type="password" id="txtNewPasswordConfirm" class="form-control" placeholder="Confirm New Password" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="submit" value="Change Password" class="btn btn-lg btn-primary btn-block" id="btnChangePassword" />
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>  <!-- end of change-password div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div profile-div">
 	        <h1 class="page-header" id="profile-header">

@@ -1604,7 +1604,14 @@
 								no: "16", organ: organ, course: "", email: directorEmail, level: "B"
 							},
 							success: function(response) {
-								alert(response);
+								if(response == "1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Director Successfully Added. Thank You.</p>").fadeIn();
+                                }
+                                else {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while adding the Director. Please try again.</p>").fadeIn();
+                                }
 							},
 							error: function() {
 								alertMsg.children('p').remove();
@@ -1638,7 +1645,14 @@
 								no: "16", organ: organ, course: course, email: mentorEmail, level: "C"
 							},
 							success: function(response) {
-								alert(response);
+								if(response == "1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Mentor Successfully Added. Thank You.</p>").fadeIn();
+                                }
+                                else {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while adding the Mentor. Please try again.</p>").fadeIn();
+                                }
 							},
 							error: function() {
 								alertMsg.children('p').remove();
@@ -1672,7 +1686,14 @@
 								no: "16", organ: organ, course: course, email: mentorEmail, level: "D"
 							},
 							success: function(response) {
-								alert(response);
+								if(response == "1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Mentee Successfully Added. Thank You.</p>").fadeIn();
+                                }
+                                else {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while adding the Mentee. Please try again.</p>").fadeIn();
+                                }
 							},
 							error: function() {
 								alertMsg.children('p').remove();
@@ -1687,9 +1708,60 @@
 					}
 					return false;
 				});
-
             	return false;
             });
+
+            // for the change password link on the LHS
+            $('.password').on('click', function() {
+                showDiv($('.password-div'));
+                changeActiveState($(this).parent('li'));
+
+                $('#formChangePassword').submit(function() {
+                    // first, check for both the new passwords:
+                    var oldPassword = $('#txtOldPassword').val().trim();
+                    var newPassword = $('#txtNewPassword').val().trim();
+                    var newPasswordConfirm = $('#txtNewPasswordConfirm').val().trim();
+                    var email = $.cookie("email");
+
+                    if(newPassword != newPasswordConfirm) {
+                        popup.children('p').remove();
+                        popup.append("<p>Your Passwords do not match. Please recheck and try again.</p>").fadeIn();
+                    }
+                    else if(email == "" || email == "undefined" || email == undefined) {
+                        popup.children('p').remove();
+                        popup.append("<p>You have not logged in properly. Please log out and login again.</p>").fadeIn();   
+                    }
+                    else {   // ajax request for password change
+                        showLoading();
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "17", email: email, oldPassword: oldPassword, newPassword: newPassword, newPasswordConfirm: newPasswordConfirm, table: "Admin"
+                            },
+                            success: function(response) {
+                                if(response == "1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Password Successfully Changed.</p>").fadeIn();
+                                }
+                                else {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Error encountered while changing your password. Please try again.</p>").fadeIn();   
+                                }
+                            },
+                            error: function() {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
+                            },
+                            complete: function() {
+                                hideLoading();
+                            }
+                        });   // end of AJAX Request.
+                    }
+                    return false;
+                });   // end of formChangePassword submit()
+                return false;
+            });   // end of .password on LHS.
 
             // hide all the divs on page load. Except for first div.
             $('.main-div').hide();
@@ -1783,6 +1855,7 @@
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="dashboard">Admin Dashboard</a></li>
                     <li><a href="#" class="profile">Profile</a></li>
+                    <li><a href="#" class="password">Change Password</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
             		<li><a href="#" class="course">Add a Course</a></li>
@@ -1804,6 +1877,46 @@
         	Menu
         </button>
 
+          <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div password-div">
+            <h1 class="page-header">
+                Change Password
+            </h1>
+            <form id="formChangePassword">
+                <table class="table">
+                    <tr>
+                        <td>
+                            <label>Enter Old Password: </label>
+                        </td>
+                        <td>
+                            <input type="password" id="txtOldPassword" class="form-control" placeholder="Old Password" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Enter New Password: </label>
+                        </td>
+                        <td>
+                            <input type="password" id="txtNewPassword" class="form-control" placeholder="New Password" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Confirm New Password: </label>
+                        </td>
+                        <td>
+                            <input type="password" id="txtNewPasswordConfirm" class="form-control" placeholder="Confirm New Password" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="submit" value="Change Password" class="btn btn-lg btn-primary btn-block" id="btnChangePassword" />
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>  <!-- end of change-password div -->
+
+        <!-- div for adding the users -->
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div user-div">
 	        <h1 class="page-header">
 	        	Add Users

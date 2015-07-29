@@ -54,6 +54,41 @@ else if(isset($_GET["no"]) && $_GET["no"] == "15") {  // for sending the message
 else if(isset($_GET["no"]) && $_GET["no"] == "16") {  // for adding the user to the User and the Specified table.
 	AddUser($_GET["organ"], $_GET["course"], $_GET["email"], $_GET["level"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "17") {  // for changing the password of the specified Account.
+	ChangePassword($_GET["email"], $_GET["oldPassword"], $_GET["newPassword"], $_GET["newPasswordConfirm"], $_GET["table"]);
+}
+
+// for changing the password of the specified Account.  Returns 0 if the old password is incorrect. 1 on successful change. -1 on error.
+function ChangePassword($email, $oldPassword, $newPassword, $newPasswordConfirm, $table) {
+	$resp = "-1";
+	try {
+		$query = "select * from " . $table . " where " . $table . "Email='$email'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$no = mysql_num_rows($rs);
+			if($no > 0) {
+				$res = mysql_fetch_array($rs);
+	            $salt = $res["Salt"];
+	            $encrypted_password = $res[$table . "Pwd"];
+	            $hash = checkhashSSHA($salt, $oldPassword);
+	            if ($encrypted_password == $hash) {    // old Password matches. Now, update the password here.
+	                $resp = ChangePasswordUtility($email, $newPassword, $table);
+	            }
+	            else {
+	            	$resp = "0";
+	            }
+			}
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // for adding the user to the User and the Specified table.
 function AddUser($organ, $course, $email, $level) {

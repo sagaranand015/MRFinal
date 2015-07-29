@@ -189,6 +189,35 @@ function GetMenteeDetailsByEmail($menteeEmail) {
 
 // for getting the mentor details in a json response based on mentor ID
 // returns -1 on error. array of mentor details on success.
+function GetDirectorDetailsByEmail($directorEmail) {
+	$resp = "-1";
+	$director = array();
+	try {
+		$query = "select * from Director where DirectorEmail='$directorEmail'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				$director["DirectorName"] = $res["DirectorName"];
+				$director["DirectorEmail"] = $res["DirectorEmail"];
+				$director["DirectorContact"] = $res["DirectorContact"];
+				$director["DirectorProfile"] = $res["DirectorProfile"];
+				$director["DirectorOrgan"] = $res["DirectorOrgan"];
+			}
+		}
+		$resp = $director;
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// for getting the mentor details in a json response based on mentor ID
+// returns -1 on error. array of mentor details on success.
 function GetMentorDetailsByEmail($mentorEmail) {
 	$resp = "-1";
 	$mentor = array();
@@ -220,6 +249,35 @@ function GetMentorDetailsByEmail($mentorEmail) {
 
 // for getting the mentor details in a json response based on mentor ID
 // returns -1 on error. array of mentor details on success.
+function GetDirectorDetails($directorId) {
+	$resp = "-1";
+	$director = array();
+	try {
+		$query = "select * from Director where DirectorID='$directorId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				$director["DirectorName"] = $res["DirectorName"];
+				$director["DirectorEmail"] = $res["DirectorEmail"];
+				$director["DirectorContact"] = $res["DirectorContact"];
+				$director["DirectorProfile"] = $res["DirectorProfile"];
+				$director["DirectorOrgan"] = $res["DirectorOrgan"];
+			}
+		}
+		$resp = $director;
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// for getting the mentor details in a json response based on mentor ID
+// returns -1 on error. array of mentor details on success.
 function GetMentorDetails($mentorID) {
 	$resp = "-1";
 	$mentor = array();
@@ -241,6 +299,29 @@ function GetMentorDetails($mentorID) {
 			}
 		}
 		$resp = $mentor;
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// for getting the directorId of the mentor passed.
+// returns 0 if director not assigned. -1 on error. directorId on success.
+function GetDirectorIdOfMentor($email, $id) {
+	$resp = "-1";
+	try {
+		$query = "select * from Mentor where MentorEmail='$email'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				$resp = $res["MentorDirector"];
+			}
+		}
 		return $resp;
 	}
 	catch(Exception $e) {
@@ -370,6 +451,30 @@ function RegisterAssignmentPDF($assID, $courseID, $assLink) {
 		}
 		return $resp;
 	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// this is the function to get the mentor course from the mentee Table.
+// returns -1 on error. returning 0 means course is not assigned to mentor.
+function GetMentorCourse($mentorEmail) {
+	$resp = "-1";
+	$courseID = "-1";
+	try {
+		$query = "select * from Mentor where MentorEmail='$mentorEmail'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				$courseID = $res["MentorCourse"];
+			}
+		}
+		return $courseID;
+	}	
 	catch(Exception $e) {
 		$resp = "-1";
 		return $resp;

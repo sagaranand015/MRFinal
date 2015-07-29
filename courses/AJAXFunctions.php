@@ -57,6 +57,110 @@ else if(isset($_GET["no"]) && $_GET["no"] == "16") {  // for adding the user to 
 else if(isset($_GET["no"]) && $_GET["no"] == "17") {  // for changing the password of the specified Account.
 	ChangePassword($_GET["email"], $_GET["oldPassword"], $_GET["newPassword"], $_GET["newPasswordConfirm"], $_GET["table"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "18") {  // for getting the assignments based on a mentor email and id.
+	GetMentorAssignment($_GET["email"], $_GET["id"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "19") {  // for getting the calender image on the mentor page.
+	GetMentorCalender($_GET["mentorEmail"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "20") {  // for getting the director details of a particular mentor.
+	GetDirectorDetailsOfMentor($_GET["email"], $_GET["id"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "21") {  // for sending the message from the mentor to the director.
+	SendMessageFromMentorToDirector($_GET["toEmail"], $_GET["msg"], $_GET["email"]);
+}
+
+// for getting the mentor of a particular mentee.
+function GetDirectorDetailsOfMentor($email, $id) {
+	$resp = "-1";
+	$director = array();
+	$directorId = "0";
+	try {
+		$directorId = GetDirectorIdOfMentor($email, $id);
+		if($directorId == "0") {
+			$resp = "-2";
+		}
+		else if($directorId == "-1") {
+			$resp = "-1";
+		}
+		else {
+			$director = GetDirectorDetails($directorId);
+			header('Content-Type: application/json');
+			$resp = json_encode($director);
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// for getting the calender image on the mentor page.
+// returns -2 if course is not assigned. -1 on error. CalenderURL on succes.
+function GetMentorCalender($mentorEmail) {
+	$resp = "-1";
+	$courseID = GetMentorCourse($mentorEmail);
+	$calender = "";
+	try {
+		if($courseID == "-1" || $courseID == "0") {
+			$resp = "-2";
+		}
+		else {
+			$query = "select * from Calender where CourseID='$courseID'";
+			$rs = mysql_query($query);
+			if(!$rs) {
+				$resp = "-1";
+			}
+			else {
+				while ($res = mysql_fetch_array($rs)) {
+					$calender = $res["Calender"];
+				}
+				$resp = "http://mentored-research.com/" . $calender;
+			}
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// for getting the assignments based on a mentor's email and id.
+// returns -2 if the course is not assigned. -1 on error. html list on success.
+function GetMentorAssignment($email, $id) {
+	$resp = "-1";
+	$assCourse = "-1";
+	try {
+		$assCourse = GetMentorCourse($email);
+		if($assCourse == "0") {
+			$resp = "-2";
+		}
+		else if($assCourse == "-1") {
+			$resp = "-1";
+		}
+		else {
+			$query = "select * from Assignment where AssCourse='$assCourse'";
+			$rs = mysql_query($query);
+			if(!$rs) {
+				$resp = "-1";
+			}
+			else {
+				$resp = "<select id='ddl-assignment' class='form-control'><option value='-1'> --Select Assignment-- </option>";
+				while ($res = mysql_fetch_array($rs)) {
+					$resp .= "<option value='" . $res["AssID"] . "' >" . $res["AssName"] . "</option>";
+				}
+				$resp .= "</select>";
+			}
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // for changing the password of the specified Account.  Returns 0 if the old password is incorrect. 1 on successful change. -1 on error.
 function ChangePassword($email, $oldPassword, $newPassword, $newPasswordConfirm, $table) {
@@ -124,6 +228,39 @@ function AddUser($organ, $course, $email, $level) {
 	catch(Exception $e) {
 		$resp = "-1";
 		echo $resp;
+	}
+}
+
+// for sending the message from the mentee to the mentor.
+function SendMessageFromMentorToDirector($toEmail, $msg, $email) {
+	$directorArr = GetDirectorDetailsByEmail($toEmail);
+	$mentorArr = GetMentorDetailsByEmail($email);
+
+	// mentor names and email address
+	$directorEmail = $directorArr["DirectorEmail"];
+	$directorName = $directorArr["DirectorName"];
+
+	// mentee name and email address
+	$mentorEmail = $mentorArr["MentorEmail"];
+	$mentorName = $mentorArr["MentorName"];
+
+	$subject = $mentorName . " - Query Received";
+
+	$message = "Dear " . $directorName . "<br /><br />";
+	$message .= "You have Received a query from one of your mentors, namely " . $mentorName . " (" . $mentorEmail . "). Please repond to him either privately or through the <a href='http://mentored-research.com/login' target='_blank'>MR-Portal</a> <br /><br />";
+	$message .= $msg . "<br /><br />";
+
+	$message .= "Team Mentored-Research<br />";
+	$message .= "info@mentored-research.com<br /><br />";
+	$message .= "Please do not reply to this automated mail.<br />";
+
+	$res = SendMessage($directorEmail, $directorName, $mentorEmail, $mentorName, $subject, $message);
+	if($res == "-1") {
+		echo $res;
+	}
+	else {
+		header('Content-Type: application/json');
+		echo json_encode($res);
 	}
 }
 

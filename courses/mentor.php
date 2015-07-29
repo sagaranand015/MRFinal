@@ -14,7 +14,7 @@
     <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
 	<link rel="icon" href="img/favicon.ico" type="image/x-icon" />
 
-    <title>Mentored-Research | Mentee</title>
+    <title>Mentored-Research | Mentor</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -292,7 +292,7 @@
 	    			type: "GET",
 	    			url: "AJAXFunctions.php",
 	    			data: {
-	    				no: "2", email: email, table: "Mentee"
+	    				no: "2", email: email, table: "Mentor"
 	    			},
 	    			success: function(response) {
 	    				if(response == "-1") {
@@ -319,7 +319,7 @@
 	    					// populate the header of the dashboard.
 	    					$('#profile-header').html(res[1] + " Profile");
 
-	    					// set the cookie for the menteeID.
+	    					// set the cookie for the mentorID.
 	    					$.cookie("id", res[5], {
 	                            path: '/',
 	                            expires: 365
@@ -338,15 +338,16 @@
 	    		});   // end of ajax request.
             }   // end of else.
 
-            // hide all the divs on page load. Except for first div.
+            // to hide all the divs on the ready() function.
             // this is supposed to be done here and not in ready() function. Or else, it gives an error while loading the divs.
             $('.main-div').hide();
             $('.CRP').trigger('click');
+
 		});   // end of load function.
 
         $(document).ready(function() {
 
-        	document.title = "Mentee | " + $.cookie("email");
+        	document.title = "Mentor | " + $.cookie("email");
 
             var alertMsg = $('#alertMsg').fadeOut();
             var popup = $('#popup').fadeOut();    
@@ -451,7 +452,7 @@
                         type: "GET",
                         url: "AJAXFunctions.php",
                         data: {
-                            no: "1", email: email, name: name, contact: contact, profile: profile, table: "Mentee"
+                            no: "1", email: email, name: name, contact: contact, profile: profile, table: "Mentor"
                         },
                         success: function(response) {
                             if(response == "-1") {
@@ -497,7 +498,7 @@
 	            		type: "GET",
 	            		url: "AJAXFunctions.php",
 	            		data: {
-	            			no: "12", email: email, id: id
+	            			no: "18", email: email, id: id
 	            		},
 	            		success: function(response) {
 	            			// to show the assignments drop down at appropriate place.
@@ -715,8 +716,8 @@
             	changeActiveState($(this).parent('li'));
 
             	// get the image of the calender and show it in the html div created.
-            	var menteeEmail = $.cookie("email");
-            	if(menteeEmail == "" || menteeEmail == undefined) {
+            	var mentorEmail = $.cookie("email");
+            	if(mentorEmail == "" || mentorEmail == undefined) {
             		popup.children('p').remove();
             		popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
             	}
@@ -726,7 +727,7 @@
 	            		type: "GET",
 	            		url: "AJAXFunctions.php",
 	            		data: {
-	            			no: "7", menteeEmail: menteeEmail
+	            			no: "19", mentorEmail: mentorEmail
 	            		},
 	            		success: function(response) {
 	            			// show the course calender in the calender-div.
@@ -755,8 +756,8 @@
             });
 
             // for the Mentor Profile page on LHS
-            $('.mentor').on('click', function() {
-            	showDiv($('.mentor-div'));
+            $('.director').on('click', function() {
+            	showDiv($('.director-div'));
             	changeActiveState($(this).parent('li'));
 
             	var email = $.cookie("email");
@@ -771,32 +772,32 @@
 	            		type: "GET",
 	            		url: "AJAXFunctions.php",
 	            		data: {
-	            			no: "14", email: email, id: id
+	            			no: "20", email: email, id: id
 	            		},
 	            		success: function(response) {
-	            			if(response.MentorName == "undefined" || response.MentorName == undefined || response.MentorName == "") {
-	            				$('.mentor-name').html("No Data Available");
+	            			if(response.DirectorName == "undefined" || response.DirectorName == undefined || response.DirectorName == "") {
+	            				$('.director-name').html("No Data Available");
             				}
             				else {
-            					$('.mentor-name').html(response.MentorName);
+            					$('.director-name').html(response.DirectorName);
             				}	
-            				if(response.MentorContact == "undefined" || response.MentorContact == undefined || response.MentorContact == "") {
-	            				$('.mentor-contact').html("No Data Available");
+            				if(response.DirectorContact == "undefined" || response.DirectorContact == undefined || response.DirectorContact == "") {
+	            				$('.director-contact').html("No Data Available");
             				}
             				else {
-            					$('.mentor-contact').html(response.MentorContact);
+            					$('.director-contact').html(response.DirectorContact);
             				}	
-            				if(response.MentorEmail == "undefined" || response.MentorEmail == undefined || response.MentorEmail == "") {
-	            				$('.mentor-email').html("No Data Available");
+            				if(response.DirectorEmail == "undefined" || response.DirectorEmail == undefined || response.DirectorEmail == "") {
+	            				$('.director-email').html("No Data Available");
             				}
             				else {
-            					$('.mentor-email').html(response.MentorEmail);
+            					$('.director-email').html(response.DirectorEmail);
             				}	
-            				if(response.MentorProfile == "undefined" || response.MentorProfile == undefined || response.MentorProfile == "") {
-	            				$('.mentor-profile').html("No Data Available");
+            				if(response.DirectorProfile == "undefined" || response.DirectorProfile == undefined || response.DirectorProfile == "") {
+	            				$('.director-profile').html("No Data Available");
             				}
             				else {
-            					$('.mentor-profile').html(response.MentorProfile);
+            					$('.director-profile').html(response.DirectorProfile);
             				}	
 	            		},
 	            		error: function() {
@@ -813,8 +814,8 @@
             	return false;
             });   // end of mentor link on LHS.
 			// for sending message button 
-			$('#btnSendMessageToMentorModal').on('click', function() {
-				var email = $('.mentor-email').html();   // to get the email for the mail to be send.
+			$('#btnSendMessageToDirectorModal').on('click', function() {
+				var email = $('.director-email').html();   // to get the email for the mail to be send.
 
 				if(email == "" || email == "No Data Available") {
 					$('#txtSendMessageEmail').val("Email Address not Available");
@@ -843,7 +844,7 @@
                         type: "GET",
                         url: "AJAXFunctions.php",
                         data: {
-                            no: "15", toEmail: toEmail, msg: msg, email: email
+                            no: "21", toEmail: toEmail, msg: msg, email: email
                         },
                         success: function(response) {
                             if(response[0]["status"] == "sent") {
@@ -871,7 +872,7 @@
                         complete: function() {
                             hideLoading();
                         }
-                   });                    
+                    });    
                 }   // end of else.
 				return false;
 			});
@@ -902,7 +903,7 @@
                             type: "GET",
                             url: "AJAXFunctions.php",
                             data: {
-                                no: "17", email: email, oldPassword: oldPassword, newPassword: newPassword, newPasswordConfirm: newPasswordConfirm, table: "Mentee"
+                                no: "17", email: email, oldPassword: oldPassword, newPassword: newPassword, newPasswordConfirm: newPasswordConfirm, table: "Mentor"
                             },
                             success: function(response) {
                                 if(response == "1") {
@@ -1005,7 +1006,7 @@
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="profile">Profile</a></li>
                     <li><a href="#" class="password">Change Password</a></li>
-                	<li><a href="#" class="mentor">Mentor Profile</a></li>
+                	<li><a href="#" class="director">Director Profile</a></li>
                 </ul>
             </div>
         </div>
@@ -1207,46 +1208,46 @@
 	        <!-- image of the calender will come from ajax -->
         </div>   <!-- end of Programme calender div -->
 
-        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div mentor-div">
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div director-div">
         	<h1 class="page-header">
-	        	Your Mentor Details
+	        	Your Director Details
 	        </h1>
 	        <table class="table">
 	        	<tr>
 	        		<td>
-	        			<label>Mentor Name: </label>
+	        			<label>Director Name: </label>
 	        		</td>
-	        		<td class="mentor-name">
-	        			
-	        		</td>
-	        	</tr>
-	        	<tr>
-	        		<td>
-	        			<label>Mentor Contact: </label>
-	        		</td>
-	        		<td class="mentor-contact">
-	        			
+	        		<td class="director-name">
+	        			<!-- from ajax -->
 	        		</td>
 	        	</tr>
 	        	<tr>
 	        		<td>
-	        			<label>Mentor Email Address: </label>
+	        			<label>Director Contact: </label>
 	        		</td>
-	        		<td class="mentor-email">
-	        			
+	        		<td class="director-contact">
+	        			<!-- from ajax -->
 	        		</td>
 	        	</tr>
 	        	<tr>
 	        		<td>
-	        			<label>Mentor Profile: </label>
+	        			<label>Director Email Address: </label>
 	        		</td>
-	        		<td class="mentor-profile">
-	        			
+	        		<td class="director-email">
+	        			<!-- from ajax -->
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<td>
+	        			<label>Director Profile: </label>
+	        		</td>
+	        		<td class="director-profile">
+	        			<!-- from ajax -->
 	        		</td>
 	        	</tr>
 	        	<tr>
 	        		<td colspan="2">
-	        			<button class="btn btn-lg btn-primary btn-block" id="btnSendMessageToMentorModal">Send Message</button>
+	        			<button class="btn btn-lg btn-primary btn-block" id="btnSendMessageToDirectorModal">Send Message</button>
 	        		</td>
 	        	</tr>
 	        </table>
@@ -1259,7 +1260,7 @@
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					<h4 class="modal-title">Send Message to Mentor</h4>
+					<h4 class="modal-title">Send Message to Director</h4>
 				</div>
 				<div class="modal-body">
 					<table class="table">

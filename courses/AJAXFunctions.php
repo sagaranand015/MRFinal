@@ -69,6 +69,34 @@ else if(isset($_GET["no"]) && $_GET["no"] == "20") {  // for getting the directo
 else if(isset($_GET["no"]) && $_GET["no"] == "21") {  // for sending the message from the mentor to the director.
 	SendMessageFromMentorToDirector($_GET["toEmail"], $_GET["msg"], $_GET["email"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "22") {  // to get the calender based on the Course ID.
+	GetCourseCalender($_GET["courseId"]);
+}
+
+// to get the calender based on the Course ID.
+// gives the link to the calender on success. -1 on error.
+function GetCourseCalender($courseId) {
+	$resp = "-1";
+	$calender = "";
+	try {
+		$query = "select * from Calender where CourseID='$courseId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				$calender = $res["Calender"];
+			}
+			$resp = "http://mentored-research.com/" . $calender;
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // for getting the mentor of a particular mentee.
 function GetDirectorDetailsOfMentor($email, $id) {

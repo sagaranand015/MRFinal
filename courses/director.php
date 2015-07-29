@@ -485,47 +485,77 @@
             	showDiv($('.CRP-div'));
             	changeActiveState($(this).parent('li'));
 
-            	// get the assignments drop down list from here.
-            	var email = $.cookie("email");
-            	var id = $.cookie("id");
-            	if($.cookie("email") == "undefined" || $.cookie("email") == undefined) {
-            		popup.children('p').remove();
-            		popup.append("<p>You have not logged in properly. Please logout and login again.</p>").fadeIn();
-            	}
-            	else {
-            		showLoading();
-	            	$.ajax({
-	            		type: "GET",
-	            		url: "AJAXFunctions.php",
-	            		data: {
-	            			no: "18", email: email, id: id
-	            		},
-	            		success: function(response) {
-	            			// to show the assignments drop down at appropriate place.
-	            			if(response == "-1") {
-								popup.children('p').remove();
-					        	popup.append("<p>We could not retrieve your assignments from the database. Please check your internet connection and try again.</p>").fadeIn();	            				
-	            			}
-	            			else if(response == "-2") {
-								popup.children('p').remove();
-					        	popup.append("<p>You have not been assigned any courses. Please try again or contact your mentor.</p>").fadeIn();	            				
-	            			}
-	            			else {
-	            				$('.assignment-crp').children('select').remove();
-	            				$('.assignment-crp').append(response);
-	            			}
-	            		}, 
-	            		error: function() {
-	            			alertMsg.children('p').remove();
-					        alertMsg.fadeOut();
-					        popup.children('p').remove();
-					        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
-	            		},
-	            		complete: function() {
-	            			hideLoading();
-	            		}
-	            	});	  // end of ajax.
-            	}   // end of else.
+            	// get all the courses from the database for the director to choose.
+                showLoading();
+                $.ajax({
+                    type: "GET",
+                    url: "AJAXFunctions.php",
+                    data: {
+                        no: "6"
+                    },
+                    success: function(response) {
+                        // to show the courses drop down at appropriate place.
+                        if(response == "-1") {
+                            popup.children('p').remove();
+                            popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                        }
+                        else {
+                            $('.course-crp').children('select').remove();
+                            $('.course-crp').append(response);
+                        }
+                    }, 
+                    error: function() {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });    // end of the courseList ajax request
+
+                // now, get the assignments based on the selected course.
+                $('.CRP-div').delegate('#ddl-course', 'change', function() {
+                    var courseId = $(this).val();
+
+                    if(courseId == "-1") {
+                        popup.children('p').remove();
+                        popup.append("<p>Please select a course before proceeding</p>").fadeIn();
+                    }
+                    else {
+                        showLoading();
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "10", courseAssPDF: courseId
+                            },
+                            success: function(response) {
+                                // to show the assignments drop down at appropriate place.
+                                if(response == "-1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>We could not retrieve the assignments from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                                }
+                                else {
+                                    $('.assignment-crp').children('select').remove();
+                                    $('.assignment-crp').append(response);
+                                }
+                            }, 
+                            error: function() {
+                                alertMsg.children('p').remove();
+                                alertMsg.fadeOut();
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                            },
+                            complete: function() {
+                                hideLoading();
+                            }
+                        });   // of of ajax request
+                    }   // end of else.
+                    return false;
+                });   // end of getting Assignments AJAX Request
+
             	return false;
             });
 			// for the delegate event of the assignments in CRP.
@@ -715,38 +745,68 @@
             	showDiv($('.calender-div'));
             	changeActiveState($(this).parent('li'));
 
-            	// get the image of the calender and show it in the html div created.
-            	var mentorEmail = $.cookie("email");
-            	if(mentorEmail == "" || mentorEmail == undefined) {
-            		popup.children('p').remove();
-            		popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
-            	}
-            	else {
-            		showLoading();
-	            	$.ajax({
-	            		type: "GET",
-	            		url: "AJAXFunctions.php",
-	            		data: {
-	            			no: "19", mentorEmail: mentorEmail
-	            		},
-	            		success: function(response) {
-	            			// show the course calender in the calender-div.
-            				$('.calender-div').children('img').remove();
-	            			$('.calender-div').append("<img src='" + response + "' />");
-	            		},
-	            		error: function() {
-							alertMsg.children('p').remove();
-	                        alertMsg.fadeOut();
-	                        popup.children('p').remove();
-	                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();            			
-	            		},
-	            		complete: function() {
-	            			hideLoading();
-	            		}
-	            	});
-            	}  // end of else.
+            	// get the course list from the database and show it on the calender div.
+                showLoading();
+                $.ajax({
+                    type: "GET",
+                    url: "AJAXFunctions.php",
+                    data: {
+                        no: "6"
+                    },
+                    success: function(response) {
+                        // to show the courses drop down at appropriate place.
+                        if(response == "-1") {
+                            popup.children('p').remove();
+                            popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                        }
+                        else {
+                            $('.courseList-calender').children('select').remove();
+                            $('.courseList-calender').append(response);
+                        }
+                    }, 
+                    error: function() {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });    // end of the courseList ajax request
+
+                // for the change event of the course, which will show the calender.
+                $('.calender-div').delegate('#ddl-course', 'change', function() {
+                    var courseId = $(this).val();
+                    if(courseId == "-1") {
+                        popup.children('p').remove();
+                        popup.append("<p>Please select a course for the Calender to be visible.</p>").fadeIn();
+                    }
+                    else {
+                        showLoading();
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "22", courseId: courseId
+                            },
+                            success: function(response) {
+                                $('.calender-div').children('img').remove();
+                                $('.calender-div').append("<img src='" + response + "' />");
+                            },
+                            error: function() {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();           
+                            },
+                            complete: function() {
+                                hideLoading();
+                            }
+                        });   // end of ajax request.
+                    }   // end of else.
+                    return false;
+                });
             	return false;
-            });
+            });   // end of calender click on LHS,
 
             // for the Profile page on LHS
             $('.profile').on('click', function() {
@@ -754,128 +814,6 @@
             	changeActiveState($(this).parent('li'));
             	return false;
             });
-
-            // for the Mentor Profile page on LHS
-            $('.director').on('click', function() {
-            	showDiv($('.director-div'));
-            	changeActiveState($(this).parent('li'));
-
-            	var email = $.cookie("email");
-            	var id = $.cookie("id");
-            	if($.cookie("email") == "undefined" || $.cookie("email") == undefined || $.cookie("email") == "") {
-            		popup.children('p').remove();
-            		popup.append("<p>You have not logged in properly. Please <a href='http://mentored-research.com/login' style='color: black;'>LOGIN AGAIN</a> to continue.</p>").fadeIn();
-            	}
-            	else {
-            		showLoading();
-	            	$.ajax({
-	            		type: "GET",
-	            		url: "AJAXFunctions.php",
-	            		data: {
-	            			no: "20", email: email, id: id
-	            		},
-	            		success: function(response) {
-	            			if(response.DirectorName == "undefined" || response.DirectorName == undefined || response.DirectorName == "") {
-	            				$('.director-name').html("No Data Available");
-            				}
-            				else {
-            					$('.director-name').html(response.DirectorName);
-            				}	
-            				if(response.DirectorContact == "undefined" || response.DirectorContact == undefined || response.DirectorContact == "") {
-	            				$('.director-contact').html("No Data Available");
-            				}
-            				else {
-            					$('.director-contact').html(response.DirectorContact);
-            				}	
-            				if(response.DirectorEmail == "undefined" || response.DirectorEmail == undefined || response.DirectorEmail == "") {
-	            				$('.director-email').html("No Data Available");
-            				}
-            				else {
-            					$('.director-email').html(response.DirectorEmail);
-            				}	
-            				if(response.DirectorProfile == "undefined" || response.DirectorProfile == undefined || response.DirectorProfile == "") {
-	            				$('.director-profile').html("No Data Available");
-            				}
-            				else {
-            					$('.director-profile').html(response.DirectorProfile);
-            				}	
-	            		},
-	            		error: function() {
-	            			alertMsg.children('p').remove();
-	                        alertMsg.fadeOut();
-	                        popup.children('p').remove();
-	                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();            			
-	            		},
-	            		complete: function() {
-	            			hideLoading();
-	            		}
-	            	});   // end of ajax request
-            	}  // end of else.
-            	return false;
-            });   // end of mentor link on LHS.
-			// for sending message button 
-			$('#btnSendMessageToDirectorModal').on('click', function() {
-				var email = $('.director-email').html();   // to get the email for the mail to be send.
-
-				if(email == "" || email == "No Data Available") {
-					$('#txtSendMessageEmail').val("Email Address not Available");
-				}
-				else {
-					$('#txtSendMessageEmail').val(email);  // show it to the user, but disabled.
-				}
-				// show the modal now.
-				$('#sendMessageModal').modal('show');
-				return false;
-			});
-			// for sending the mail from the Send Message button in the modal box.
-			$('#btnSendMessage').on('click', function() {
-				var toEmail = $('#txtSendMessageEmail').val().trim();
-				var msg = $('#txtSendMessage').val();
-				var email = $.cookie("email");
-
-                if(email == "" || email == "undefined" || email == undefined) {
-                    popup.children('p').remove();
-                    popup.append("<p>You have not logged in properly. Please <a href='http://mentored-research.com/login' style='color: black;'>LOGIN AGAIN</a> to continue.</p>").fadeIn();
-                }
-                else {
-                    showLoading();
-                    $('#sendMessageModal').modal('hide');
-                    $.ajax({
-                        type: "GET",
-                        url: "AJAXFunctions.php",
-                        data: {
-                            no: "21", toEmail: toEmail, msg: msg, email: email
-                        },
-                        success: function(response) {
-                            if(response[0]["status"] == "sent") {
-                                popup.children('p').remove();
-                                popup.append("<p>Your Message has been sent. Thank You.</p>").fadeIn();
-
-                                // remove the contents of the message box here.
-                                $('#txtSendMessage').val("");
-                            }
-                            else if(response[0]["status"] == "queued" || response[0]["status"] == "scheduled") {
-                                popup.children('p').remove();
-                                popup.append("<p>Your Message has been Queued. Sit back and relax while we send your message in sometime.</p>").fadeIn();
-                            }
-                            else if(response[0]["status"] == "rejected" || response[0]["status"] == "invalid") {
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! Your Message could not ben sent. Please try again.</p>").fadeIn();
-                            }
-                        },
-                        error: function() {
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();                                             
-                        },
-                        complete: function() {
-                            hideLoading();
-                        }
-                    });    
-                }   // end of else.
-				return false;
-			});
 
             // for the change password link on the LHS
             $('.password').on('click', function() {
@@ -903,7 +841,7 @@
                             type: "GET",
                             url: "AJAXFunctions.php",
                             data: {
-                                no: "17", email: email, oldPassword: oldPassword, newPassword: newPassword, newPasswordConfirm: newPasswordConfirm, table: "Mentor"
+                                no: "17", email: email, oldPassword: oldPassword, newPassword: newPassword, newPasswordConfirm: newPasswordConfirm, table: "Director"
                             },
                             success: function(response) {
                                 if(response == "1") {
@@ -1006,7 +944,6 @@
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="profile">Profile</a></li>
                     <li><a href="#" class="password">Change Password</a></li>
-                	<li><a href="#" class="director">Director Profile</a></li>
                 </ul>
             </div>
         </div>
@@ -1117,6 +1054,14 @@
 	        </h1>
 
 	        <table class="table">
+                <tr>
+                    <td>
+                        <label>Select Course: </label>
+                    </td>
+                    <td class="course-crp">
+                        <!-- data will come here from ajax -->
+                    </td>
+                </tr>
 	        	<tr>
 	        		<td>
 	        			<label>Select Assignment: </label>
@@ -1205,84 +1150,23 @@
         	<h1 class="page-header">
 	        	Programme Calender
 	        </h1>
+            <form class="formCalender">
+                <table class="table">
+                    <tr>
+                        <td>
+                            <label>Select Course: </label>
+                        </td>
+                        <td class="courseList-calender">
+                            <!-- course list will come from ajax here -->
+                        </td>
+                    </tr>
+                </table>
+            </form>
 	        <!-- image of the calender will come from ajax -->
         </div>   <!-- end of Programme calender div -->
 
-        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div director-div">
-        	<h1 class="page-header">
-	        	Your Director Details
-	        </h1>
-	        <table class="table">
-	        	<tr>
-	        		<td>
-	        			<label>Director Name: </label>
-	        		</td>
-	        		<td class="director-name">
-	        			<!-- from ajax -->
-	        		</td>
-	        	</tr>
-	        	<tr>
-	        		<td>
-	        			<label>Director Contact: </label>
-	        		</td>
-	        		<td class="director-contact">
-	        			<!-- from ajax -->
-	        		</td>
-	        	</tr>
-	        	<tr>
-	        		<td>
-	        			<label>Director Email Address: </label>
-	        		</td>
-	        		<td class="director-email">
-	        			<!-- from ajax -->
-	        		</td>
-	        	</tr>
-	        	<tr>
-	        		<td>
-	        			<label>Director Profile: </label>
-	        		</td>
-	        		<td class="director-profile">
-	        			<!-- from ajax -->
-	        		</td>
-	        	</tr>
-	        	<tr>
-	        		<td colspan="2">
-	        			<button class="btn btn-lg btn-primary btn-block" id="btnSendMessageToDirectorModal">Send Message</button>
-	        		</td>
-	        	</tr>
-	        </table>
-        </div>   <!-- end of Programme calender div -->
+        
     </div>   <!-- end of main container-fluid div -->
-
-    <!-- this is for sending the email to the mentor using the modal -->
-    <div class="modal fade" id="sendMessageModal">
-		<div class="modal-dialog modal-lg">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					<h4 class="modal-title">Send Message to Director</h4>
-				</div>
-				<div class="modal-body">
-					<table class="table">
-						<tr>
-							<td>
-								<input type="email" id="txtSendMessageEmail" placeholder="Email Address" required class="form-control" disabled="disabled" />
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<textarea id="txtSendMessage" placeholder="Type in your message" required class="form-control" rows="10"></textarea>
-							</td>
-						</tr>
-					</table>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-primary" id="btnSendMessage">Send Message</button>
-				</div>
-			</div><!-- /.modal-content -->
-		</div><!-- /.modal-dialog -->
-	</div><!-- /.modal -->
-
 
    <!--   <footer class="footer">
 	        <div class="container">

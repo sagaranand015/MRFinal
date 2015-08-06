@@ -1763,6 +1763,52 @@
                 return false;
             });   // end of .password on LHS.
 
+			// for the change password link on the LHS
+            $('.invite').on('click', function() {
+                showDiv($('.invite-div'));
+                changeActiveState($(this).parent('li'));
+
+                // for sending the invites to the email
+                $('#formSendInvite').submit(function() {
+                	var emailList = $('#txtSendInvite').val().trim();
+            		var list1 = new Array();
+            		list1 = emailList.split(',');
+            		var list = new Array();
+
+            		for(var i=0;i<list1.length;i++) {
+            			item = list1[i].trim();
+        				if(item == "") {
+        				}
+        				else {
+        					list.push(item);
+        				}
+            		}
+            		console.log(list);
+
+            		showLoading();
+                	$.ajax({
+                		type: "GET",
+                		url: "AJAXFunctions.php",
+                		data: {
+                			no: "23", list: list
+                		},
+                		success: function(response) {
+                			//alert(response);
+                			console.log(response);
+                		},
+                		error: function() {
+                			popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
+                		},
+                		complete: function() {
+                			hideLoading();
+                		}
+                	});
+                	return false;
+                });
+                return false;
+            });   // end of .invite on LHS.
+
             // hide all the divs on page load. Except for first div.
             $('.main-div').hide();
             $('.dashboard').trigger('click');
@@ -1856,6 +1902,7 @@
                 	<li><a href="#" class="dashboard">Admin Dashboard</a></li>
                     <li><a href="#" class="profile">Profile</a></li>
                     <li><a href="#" class="password">Change Password</a></li>
+					<li><a href="#" class="invite">Send Invites</a></li>                    
                 </ul>
                 <ul class="nav nav-sidebar">
             		<li><a href="#" class="course">Add a Course</a></li>
@@ -1876,6 +1923,26 @@
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div invite-div">
+            <h1 class="page-header">
+                Send Invites
+            </h1>
+            <form id="formSendInvite">
+                <table class="table">
+                    <tr>
+                    	<td>
+                    		<textarea id="txtSendInvite" class="form-control" placholder="Enter the list of Email Addresses, seprarated by commas" required></textarea>
+                    	</td>
+                    </tr>
+                    <tr>
+                    	<td>
+                    		<input type="submit" value="Send Invite(s)" class="btn btn-lg btn-block btn-primary" />
+                    	</td>
+                    </tr>
+                </table>
+            </form>
+        </div>  <!-- end of invite send div -->
 
           <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div password-div">
             <h1 class="page-header">

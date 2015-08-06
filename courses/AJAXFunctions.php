@@ -72,6 +72,24 @@ else if(isset($_GET["no"]) && $_GET["no"] == "21") {  // for sending the message
 else if(isset($_GET["no"]) && $_GET["no"] == "22") {  // to get the calender based on the Course ID.
 	GetCourseCalender($_GET["courseId"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "23") {  // to send the invites to the list of people.
+	SendInvite($_GET["list"]);
+}
+
+// to send the invites to the list of people.
+function SendInvite($list) {
+	try {
+		$j = 0;
+		for($i=0;$i<count($list);$i++)  {
+			SendInviteMessage($list[0], "User", "info@mentored-research.com", "Mentored-Research");
+			$j++;
+		}
+		echo $j;
+	}
+	catch(Exception $e) {
+		echo "-1";
+	}
+}
 
 // to get the calender based on the Course ID.
 // gives the link to the calender on success. -1 on error.

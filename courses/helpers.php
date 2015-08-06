@@ -174,7 +174,9 @@ text-shadow: none; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-
 	    $ip_pool = 'Main Pool';
 	    $send_at = null;
 	    $result = $mandrill->messages->send($message, $async, $ip_pool, $send_at);
-		return $result;
+	    $res = "1";
+	    return $res;
+		//return $result;
 	} 
 	catch(Mandrill_Error $e) {
 		$res = "-1";

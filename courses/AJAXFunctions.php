@@ -81,8 +81,10 @@ function SendInvite($list) {
 	try {
 		$j = 0;
 		for($i=0;$i<count($list);$i++)  {
-			SendInviteMessage($list[0], "User", "info@mentored-research.com", "Mentored-Research");
-			$j++;
+			$p = SendInviteMessage($list[0], "User", "info@mentored-research.com", "Mentored-Research");
+			if($p == "1") {
+				$j = $j+1;
+			}
 		}
 		echo $j;
 	}

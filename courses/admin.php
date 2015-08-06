@@ -1793,8 +1793,14 @@
                 			no: "23", list: list
                 		},
                 		success: function(response) {
-                			//alert(response);
-                			console.log(response);
+                			if(response == "-1") {
+                				popup.children('p').remove();
+                            	popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  	
+                			}
+                			else {
+                				popup.children('p').remove();
+                            	popup.append("<p>" + "<b>" + response + "</b>" + " mails have been sent. Thank You.</p>").fadeIn();  	
+                			}
                 		},
                 		error: function() {
                 			popup.children('p').remove();

@@ -73,15 +73,15 @@ else if(isset($_GET["no"]) && $_GET["no"] == "22") {  // to get the calender bas
 	GetCourseCalender($_GET["courseId"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "23") {  // to send the invites to the list of people.
-	SendInvite($_GET["list"]);
+	SendInvite($_GET["list"], $_GET["msg"]);
 }
 
 // to send the invites to the list of people.
-function SendInvite($list) {
+function SendInvite($list, $msg) {
 	try {
 		$j = 0;
 		for($i=0;$i<count($list);$i++)  {
-			$p = SendInviteMessage($list[0], "User", "info@mentored-research.com", "Mentored-Research");
+			$p = SendInviteMessage($list[$i], "User", "info@mentored-research.com", "Mentored-Research", "Spread the word and Treat Yourself!", $msg);
 			if($p == "1") {
 				$j = $j+1;
 			}

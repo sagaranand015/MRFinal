@@ -1770,11 +1770,11 @@
 
                 // for sending the invites to the email
                 $('#formSendInvite').submit(function() {
+                	var msg = $('#txtSendInviteMsg').val().trim();
                 	var emailList = $('#txtSendInvite').val().trim();
             		var list1 = new Array();
             		list1 = emailList.split(',');
             		var list = new Array();
-
             		for(var i=0;i<list1.length;i++) {
             			item = list1[i].trim();
         				if(item == "") {
@@ -1783,14 +1783,12 @@
         					list.push(item);
         				}
             		}
-            		console.log(list);
-
             		showLoading();
                 	$.ajax({
                 		type: "GET",
                 		url: "AJAXFunctions.php",
                 		data: {
-                			no: "23", list: list
+                			no: "23", list: list, msg: msg
                 		},
                 		success: function(response) {
                 			if(response == "-1") {
@@ -1936,13 +1934,24 @@
             </h1>
             <form id="formSendInvite">
                 <table class="table">
-                    <tr>
+                	<tr>
+                		<td style="max-width: 30%;width: 30%;">
+                			<label for="txtSendInvite">Add Email address, separated by commas: </label>
+                		</td>
                     	<td>
-                    		<textarea id="txtSendInvite" class="form-control" placholder="Enter the list of Email Addresses, seprarated by commas" required></textarea>
+                    		<textarea id="txtSendInvite" class="form-control" placholder="Enter the list of Email Addresses, seprarated by commas" rows="8" required></textarea>
                     	</td>
                     </tr>
+                	<tr>
+                		<td style="max-width: 30%;width: 30%;">
+                			<label for="txtSendInviteMsg">Add your comment to be shown above the coupon: </label>
+                		</td>
+                		<td>
+                    		<textarea id="txtSendInviteMsg" class="form-control" placholder="Write a line for the invite to be sent to the user..." rows="10"></textarea>
+                    	</td>
+                	</tr>
                     <tr>
-                    	<td>
+                    	<td colspan="2">
                     		<input type="submit" value="Send Invite(s)" class="btn btn-lg btn-block btn-primary" />
                     	</td>
                     </tr>

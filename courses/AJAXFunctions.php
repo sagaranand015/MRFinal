@@ -75,6 +75,9 @@ else if(isset($_GET["no"]) && $_GET["no"] == "22") {  // to get the calender bas
 else if(isset($_GET["no"]) && $_GET["no"] == "23") {  // to send the invites to the list of people.
 	SendInvite($_GET["list"], $_GET["msg"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "24") {  // to get the latest assignment for the mentee.
+	GetLatestAssignmentMentee($_GET["email"], $_GET["id"]);
+}
 
 // to send the invites to the list of people.
 function SendInvite($list, $msg) {

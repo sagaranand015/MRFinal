@@ -928,6 +928,42 @@
                 return false;
             });   // end of .password on LHS.
 
+            $('.submitSolution').on('click', function() {
+                showDiv($('.submitSolution-div'));
+                changeActiveState($(this).parent('li'));
+
+                // firstly, to get the latest assignment name and number to be submitted.
+                var email = $.cookie("email");
+                var id = $.cookie("id");
+
+                if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                    popup.children('p').remove();
+                    popup.append("Oops! Looks like you have not logged in properly. Please logout and try again.").fadeIn();
+                }
+                else {
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "24", email: email, id: id
+                        },
+                        success: function(response) {
+                            alert(response);
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }  // end of else.
+
+                return false;
+            });   // end of Submitsolution-div
+
         });    // end of ready function.
 
 	</script>
@@ -1007,12 +1043,37 @@
                     <li><a href="#" class="password">Change Password</a></li>
                 	<li><a href="#" class="mentor">Mentor Profile</a></li>
                 </ul>
+                <ul class="nav nav-sidebar">
+                    <li><a href="#" class="submitSolution">Submit Assignment Solution</a></li>
+                </ul>
             </div>
         </div>
 
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div submitSolution-div">
+            <h3 class="page-header">
+                Latest Pending Assignment:
+            </h3>
+            <form id="formSubmitSolution">
+                <table>
+                    <tr>
+                        <td>
+                            <h1 class="latest-solution-name">
+                                <!-- data from ajax -->
+                            </h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="submit" Value="" id="btnSubmitSolution" class="btn btn-primary btn-block btn-lg" />
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>  <!-- end of SubmitSolution div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div password-div">
             <h1 class="page-header">

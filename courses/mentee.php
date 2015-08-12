@@ -54,6 +54,9 @@
     <!-- For validation of the Form input elements -->
     <script src="js/validator.min.js"></script>
 
+    <!-- for the form jQuery plugin for uploading files -->
+    <script type="text/javascript" src="js/jquery.form.min.js"></script>
+
     <!-- for the cookies jQuery plugin -->
     <script src="js/jquery.cookie.js"></script>    
 
@@ -253,7 +256,7 @@
 			left: 45%;
 		}
 
-		.assignment-video, .assignment-report, .assignment-offtopic, .assignment-extra {
+		.assignment-video, .assignment-report, .assignment-offtopic, .assignment-extra, .latest-assignment-name {
 			cursor: pointer;
 		}
 		 
@@ -949,7 +952,76 @@
                             no: "24", email: email, id: id
                         },
                         success: function(response) {
-                            alert(response);
+                            if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No more Assignments exists.</p>").fadeIn();    
+
+                                // for the no more assignments.
+                                $('.latest-assignment-name').html("Nothing Pending");
+                                $('#btnSubmitSolution').attr('value', "You're done!");
+                                $('#btnSubmitSolution').attr('disabled', 'disabled');
+                            }
+                            else if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your request. Please try again.</p>").fadeIn();    
+                            }
+                            else {
+                                var assName = response.AssName;
+                                var assId = response.AssID;
+                                var assCourse = response.AssCourse;
+                                var assPdf = response.AssPdf;
+                                var assNo = response.AssNo;
+                                if(assName == "" || assName == undefined || assName == "undefined") {
+                                    $('.latest-assignment-name').html("No Assignment Name");
+                                }
+                                else {
+                                    $('.latest-assignment-name').html(assName);
+                                    $('#btnSubmitSolution').attr('value', "Submit " + assName);
+
+                                    // for srtting the cookies for uploading the files.
+                                    if(assId == "" || assId == "undefined" || assId == undefined) {
+                                        $('.latest-assignment-name').attr('data-id', "-1");   
+                                    }
+                                    else {
+                                        $('.latest-assignment-name').attr('data-id', assId);
+                                        $.cookie("assIdSolution", assId);
+                                    }
+                                    if(assCourse == "" || assCourse == "undefined" || assCourse == undefined) {
+                                        $('.latest-assignment-name').attr('data-assCourse', "-1");   
+                                    }
+                                    else {
+                                        $('.latest-assignment-name').attr('data-assCourse', assCourse);
+                                        $.cookie("assCourseSolution", assCourse);
+                                    }
+                                    if(assPdf == "" || assPdf == "undefined" || assPdf == undefined) {
+                                        $('.latest-assignment-name').attr('data-assPdf', "-1");   
+                                    }
+                                    else {
+                                        $('.latest-assignment-name').attr('data-assPdf', assPdf);
+                                        $.cookie("assPdfSolution", assPdf);
+                                    }
+                                    if(assNo == "" || assNo == "undefined" || assNo == undefined) {
+                                        $('.latest-assignment-name').attr('data-assNo', "-1");   
+                                    }
+                                    else {
+                                        $('.latest-assignment-name').attr('data-assNo', assNo);
+                                        $.cookie("assNoSolution", assNo);
+                                    }
+
+                                    // for the click event on the Assignment name that shows as the heading.
+                                    $('.latest-assignment-name').on('click', function() {
+                                        var pdf = $(this).attr('data-assPdf');
+                                        if(pdf == "" || pdf == "undefined" || pdf == undefined) {
+                                            popup.children('p').remove();
+                                            popup.append("<p>Please refresh the page and try again to donwload the Assignment.</p>");
+                                        }
+                                        else {
+                                            window.open(pdf, "_blank");
+                                        }
+                                        return false;
+                                    });
+                                }   // end of else.
+                            }   // end of else.
                         },
                         error: function() {
                             popup.children('p').remove();
@@ -960,6 +1032,112 @@
                         }
                     });
                 }  // end of else.
+
+
+                // for the helper functions for the file upload things.
+                //progress bar function
+                function OnProgress(event, position, total, percentComplete) {
+                    // show the loading overlay here, when the process of uploading starts.
+                    showLoading();
+                    popup.children('p').remove();
+                    popup.fadeIn();
+                    $('.progress').fadeIn();
+                    $('.progress-bar').width(percentComplete + '%') //update progressbar percent complete
+                    $('.progress-bar').html(percentComplete + '%'); //update status text
+                }
+                //function to format bites bit.ly/19yoIPO
+                function bytesToSize(bytes) {
+                   var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                   if (bytes == 0) return '0 Bytes';
+                   var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+                   return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+                }
+
+                //function to check file size before uploading.
+                function beforeSubmitAssignmentSolution() {
+                    alertMsg.children('p').remove();
+                    alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+                    //check whether browser fully supports all File API
+                    if (window.File && window.FileReader && window.FileList && window.Blob) {
+                        if( !$('#fileAssignmentSolution').val()) {   //check empty input filed 
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
+                            return false;
+                        }
+                        var fsize = $('#fileAssignmentSolution')[0].files[0].size; //get file size
+                        var ftype = $('#fileAssignmentSolution')[0].files[0].type; // get file type
+                        //allow file types 
+                        switch(ftype) {
+                            case 'image/png': 
+                            case 'image/gif': 
+                            case 'image/jpeg': 
+                            case 'image/pjpeg':
+                            case 'text/plain':
+                            case 'text/html':
+                            case 'application/x-zip-compressed':
+                            case 'application/pdf':
+                            case 'application/msword':
+                            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                            case 'application/vnd.ms-excel':
+                            case 'video/mp4':
+                                break;
+                            default:
+                                alertMsg.children('p').remove();
+                                alertMsg.fadeOut();
+                                popup.children('p').remove();
+                                popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
+                                return false;
+                        }
+                        //Allowed file size is less than 5 MB (1048576)
+                        if(fsize>5242880)   {
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
+                            return false;
+                        }
+                    }
+                    else  {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
+                        return false;
+                    }
+                    alertMsg.children('p').remove();
+                    alertMsg.fadeOut();
+                }   // end of beforeSubmitAssignmentSolution function.
+
+                function afterSuccessAssignmentSolution() {
+                    // to hide the loading overlay after the uploading is done.
+                    hideLoading();
+                    popup.children('p').remove();
+                    popup.fadeOut();
+                    $('.progress').fadeOut();
+                    alertMsg.fadeIn();
+                    // to fadeOut the alertMsg after 10 seconds.
+                    setTimeout(function() {
+                        alertMsg.fadeOut();
+                    }, 10000);
+                    //location.reload();
+                }     // end of afterSuccessAssignmentSolution function
+
+                // code for assignmentSolution File upload
+                var optionsAssignmentSolution = { 
+                    target:   '#alertMsg',   // target element(s) to be updated with server response 
+                    beforeSubmit:  beforeSubmitAssignmentSolution,  // pre-submit callback 
+                    success:       afterSuccessAssignmentSolution,  // post-submit callback 
+                    uploadProgress: OnProgress, //upload progress callback 
+                    resetForm: true        // reset the form after successful submit 
+                };
+
+                // for the submission of the assignment solution, through form submission model.
+                $('#formSubmitSolution').submit(function() {
+                    $(this).ajaxSubmit(optionsAssignmentSolution);
+                    return false;
+                });
 
                 return false;
             });   // end of Submitsolution-div
@@ -1057,13 +1235,18 @@
             <h3 class="page-header">
                 Latest Pending Assignment:
             </h3>
-            <form id="formSubmitSolution">
-                <table>
+            <form id="formSubmitSolution" action="assignmentSolution-upload.php" method="post" enctype="multipart/form-data">
+                <table class="table">
                     <tr>
                         <td>
-                            <h1 class="latest-solution-name">
+                            <h1 class="latest-assignment-name text-center">
                                 <!-- data from ajax -->
                             </h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="file" name="fileAssignmentSolution" id="fileAssignmentSolution" class="btn btn-lg btn-primary btn-block" required /> 
                         </td>
                     </tr>
                     <tr>

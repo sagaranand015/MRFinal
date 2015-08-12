@@ -8,6 +8,104 @@ include 'headers/databaseConn.php';
 // for mandrill mail sending API.
 require_once 'mandrill/Mandrill.php'; 
 
+// to register the submission into the table.
+function RegisterSubmission($email, $id, $mentorId, $assId, $assPdf, $assCourse, $assNo) {
+	$resp = "-1";
+	try {
+		$submissionQuery = "insert into SubmissionFeedback(MentorID, MenteeID, AssID, CourseID, Submission) values('$mentorId', '$id', '$assId', '$assCourse', '$assPdf');";
+		if($assNo == "1") {   // for the insertion into the LastSubmittedAssignment table.
+			$lastSubmittedQuery = "insert into LastSubmittedAssignment(MenteeID, MenteeCourse, MenteeLastSubmitted) values('$id', '$assCourse', '$assNo');";
+		}
+		else {
+			$lastSubmittedQuery = "update LastSubmittedAssignment set MenteeLastSubmitted='$assNo' where MenteeID='$id' and MenteeCourse='$assCourse';";
+		}
+		$rs1 = mysql_query($submissionQuery);
+		$rs2 = mysql_query($lastSubmittedQuery);
+		if(!$rs1 && !$rs2) {
+			$resp = "-1";
+		}
+		else if(!$rs1) {
+			$resp = "-1";
+		}
+		else if(!$rs2) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+} 
+
+// to get the assignment by assignment number and assignment course.
+function GetAssignmentByNumber($assNo, $courseID) {
+	$resp = "-1";
+	$assignment = array();
+	try {
+		$query = "select * from Assignment where AssNo='$assNo' and AssCourse='$courseID'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) == 0) {
+				$resp = "0";
+			}
+			else {
+				while ($res = mysql_fetch_array($rs)) {
+					$assignment["AssID"] = $res["AssID"];
+					$assignment["AssName"] = $res["AssName"];
+					$assignment["AssCourse"] = $res["AssCourse"];
+					$assignment["AssDesc"] = $res["AssDesc"];
+					$assignment["AssPostedOn"] = $res["AssPostedOn"];
+					$assignment["AssPostedBy"] = $res["AssPostedBy"];
+					$assignment["AssDeadline"] = $res["AssDeadline"];
+					$assignment["AssPdf"] = $res["AssPdf"];
+					$assignment["AssNo"] = $res["AssNo"];
+				}
+				$resp = $assignment;
+			}
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// to get the last submitted assignment number for the mentee
+// returns last submitted assignment number, else returns -1
+function GetMenteeLastSubmitted($id, $courseID) {
+	$resp = "-1";
+	try {
+		$query = "select * from LastSubmittedAssignment where MenteeID='$id' and MenteeCourse='$courseID'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) == 0) {
+				$resp = "0";
+			}
+			else {
+				while ($res = mysql_fetch_array($rs)) {
+					$resp = $res["MenteeLastSubmitted"];
+				}	
+			}
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // for sending the invites to the emails entered.
 function SendInviteMessage($to, $toName, $from, $fromName, $subject, $message) {
 	try {
@@ -4827,8 +4925,8 @@ function GetMenteeDetailsByEmail($menteeEmail) {
 				$mentee["MenteeOrgan"] = $res["MenteeOrgan"];
 				$mentee["MenteeMentor"] = $res["MenteeMentor"];
 			}
+			$resp = $mentee;
 		}
-		$resp = $mentee;
 		return $resp;
 	}
 	catch(Exception $e) {
@@ -4856,8 +4954,8 @@ function GetDirectorDetailsByEmail($directorEmail) {
 				$director["DirectorProfile"] = $res["DirectorProfile"];
 				$director["DirectorOrgan"] = $res["DirectorOrgan"];
 			}
+			$resp = $director;
 		}
-		$resp = $director;
 		return $resp;
 	}
 	catch(Exception $e) {
@@ -4887,8 +4985,8 @@ function GetMentorDetailsByEmail($mentorEmail) {
 				$mentor["MentorOrgan"] = $res["MentorOrgan"];
 				$mentor["MentorDirector"] = $res["MentorDirector"];
 			}
+			$resp = $mentor;
 		}
-		$resp = $mentor;
 		return $resp;
 	}
 	catch(Exception $e) {
@@ -4916,8 +5014,8 @@ function GetDirectorDetails($directorId) {
 				$director["DirectorProfile"] = $res["DirectorProfile"];
 				$director["DirectorOrgan"] = $res["DirectorOrgan"];
 			}
+			$resp = $director;
 		}
-		$resp = $director;
 		return $resp;
 	}
 	catch(Exception $e) {
@@ -4947,8 +5045,8 @@ function GetMentorDetails($mentorID) {
 				$mentor["MentorOrgan"] = $res["MentorOrgan"];
 				$mentor["MentorDirector"] = $res["MentorDirector"];
 			}
+			$resp = $mentor;
 		}
-		$resp = $mentor;
 		return $resp;
 	}
 	catch(Exception $e) {

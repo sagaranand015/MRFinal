@@ -79,6 +79,33 @@ else if(isset($_GET["no"]) && $_GET["no"] == "24") {  // to get the latest assig
 	GetLatestAssignmentMentee($_GET["email"], $_GET["id"]);
 }
 
+//to get the latest assignment for the mentee.
+function GetLatestAssignmentMentee($email, $id) {
+	$resp = "-1";
+	try {
+		$courseID = GetMenteeCourse($email);
+		$lastSubmitted = GetMenteeLastSubmitted($id, $courseID);
+		$assNo = intval($lastSubmitted) + 1;
+		$assignment = GetAssignmentByNumber($assNo, $courseID);
+		if($assignment == "-1") {
+			$resp = "-1";
+		}
+		else if($assignment == "0") {
+			$resp = "0";
+		}
+		else {
+			header('Content-Type: application/json');
+			$resp = json_encode($assignment);
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+
 // to send the invites to the list of people.
 function SendInvite($list, $msg) {
 	try {

@@ -8,6 +8,99 @@ include 'headers/databaseConn.php';
 // for mandrill mail sending API.
 require_once 'mandrill/Mandrill.php'; 
 
+// for registering the feedback for a particular assignment.
+function RegisterFeedback($mentorId, $menteeId, $assId, $courseId, $feedback) {
+	$resp = "-1";
+	try {
+		$query = "update SubmissionFeedback set Feedback='$feedback' where MentorID='$mentorId' and MenteeID='$menteeId' and AssID='$assId' and CourseID='$courseId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// to get the course of the mentee by id of the mentee.
+function GetMenteeCourseById($id) {
+	$resp = "-1";
+	try {
+		$query = "select * from Mentee where MenteeID='$id'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				while ($res = mysql_fetch_array($rs)) {
+					$resp = $res["MenteeCourse"];
+				}
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// to get the assignment name from the Assignment ID
+function GetAssignmentName($assId) {
+	$resp = "-1";
+	try {
+		$query = "select * from Assignment where AssID='$assId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				$res = mysql_fetch_array($rs);
+				$resp = $res["AssName"];
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// to update the submission of the assignment solution by the mentee 
+function updateSubmission($menteeId, $mentorId, $assId, $courseId, $updateAss) {
+	$resp = "-1";
+	try {
+		$query = "update SubmissionFeedback set Submission='$updateAss' where MenteeID='$menteeId' and MentorID='$mentorId' and AssID='$assId' and CourseID='$courseId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // to register the submission into the table.
 function RegisterSubmission($email, $id, $mentorId, $assId, $assPdf, $assCourse, $assNo) {
 	$resp = "-1";

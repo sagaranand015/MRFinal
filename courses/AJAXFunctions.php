@@ -78,6 +78,104 @@ else if(isset($_GET["no"]) && $_GET["no"] == "23") {  // to send the invites to 
 else if(isset($_GET["no"]) && $_GET["no"] == "24") {  // to get the latest assignment for the mentee.
 	GetLatestAssignmentMentee($_GET["email"], $_GET["id"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "25") {  // to get the list of all the assignments submitted by the mentee
+	GetMenteeLastSubmittedAssignmentList($_GET["email"], $_GET["id"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "26") {  // to get the list of all the mentees of a particular mentor.
+	GetMenteesOfMentor($_GET["email"], $_GET["id"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "27") {  // to get the list of all the assignments submitted by the mentee selected.
+	GetMenteeSubmittedAssignments($_GET["email"], $_GET["id"], $_GET["menteeId"]);
+}
+
+// to get the list of all the assignments submitted by the mentee selected.
+function GetMenteeSubmittedAssignments($email, $id, $menteeId) {
+	$resp = "-1";
+	$name = "";
+	try {
+		$query = "select * from SubmissionFeedback where MentorID='$id' and MenteeID='$menteeId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				$resp = "<select id='ddl-assignment' class='form-control'><option value='-1'> --Select Assignment-- </option>";
+				while ($res = mysql_fetch_array($rs)) {
+					$name = GetAssignmentName($res["AssID"]);
+					$resp .= "<option value='" . $res["AssID"] . "' data-submission='" . $res["Submission"] . "' data-feedback='" . $res["Feedback"] . "' >" . $name . "</option>";
+				}
+				$resp .= "</select>";
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+//to get the list of all the mentees of a particular mentor.
+function GetMenteesOfMentor($email, $id) {
+	$resp = "-1";
+	try {
+		$query = "select * from Mentee where MenteeMentor='$id'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				$resp = "<select id='ddl-mentee' class='form-control'><option value='-1'> --Select Mentee-- </option>";
+				while ($res = mysql_fetch_array($rs)) {
+					$resp .= "<option value='" . $res["MenteeID"] . "' >" . $res["MenteeName"] . "</option>";
+				}
+				$resp .= "</select>";
+			}
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// to get the list of all the assignments submitted by the mentee
+function GetMenteeLastSubmittedAssignmentList($email, $id) {
+	$resp = "-1";
+	try {
+		$courseID = GetMenteeCourse($email);
+		$lastSubmitted = GetMenteeLastSubmitted($id, $courseID);
+
+		$query = "select * from Assignment where AssCourse='$courseID' and AssNo<='$lastSubmitted'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				$resp = "<select id='ddl-assignment' class='form-control'><option value='-1'> --Select Assignment-- </option>";
+				while ($res = mysql_fetch_array($rs)) {
+					$resp .= "<option value='" . $res["AssID"] . "' >" . $res["AssName"] . "</option>";
+				}
+				$resp .= "</select>";
+			}
+			else {  // no record exists.
+				$resp = "0";
+			}
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 //to get the latest assignment for the mentee.
 function GetLatestAssignmentMentee($email, $id) {

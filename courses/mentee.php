@@ -978,7 +978,7 @@
                                     $('.latest-assignment-name').html(assName);
                                     $('#btnSubmitSolution').attr('value', "Submit " + assName);
 
-                                    // for srtting the cookies for uploading the files.
+                                    // for setting the cookies for uploading the files.
                                     if(assId == "" || assId == "undefined" || assId == undefined) {
                                         $('.latest-assignment-name').attr('data-id', "-1");   
                                     }
@@ -1020,8 +1020,27 @@
                                         }
                                         return false;
                                     });
-                                }   // end of else.
+                                }   // end of inner else.
                             }   // end of else.
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                        }
+                    });
+
+                    // now, write the AJAX Request to get the list of assignments submitted by the mentee already.
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "25", email: email, id: id
+                        },
+                        success: function(response) {
+                            $('.update-solution-assignment').html(response);
+                            $('#btnUpdateSolution').attr("value", "Update Submission");
                         },
                         error: function() {
                             popup.children('p').remove();
@@ -1031,8 +1050,8 @@
                             hideLoading();
                         }
                     });
-                }  // end of else.
 
+                }  // end of else that validates the logged in credentials
 
                 // for the helper functions for the file upload things.
                 //progress bar function
@@ -1117,12 +1136,14 @@
                     popup.fadeOut();
                     $('.progress').fadeOut();
                     alertMsg.fadeIn();
+                    // finally, trigger the solution button for reloading.
+                    $('.submitSolution').trigger('click');
                     // to fadeOut the alertMsg after 10 seconds.
                     setTimeout(function() {
                         alertMsg.fadeOut();
                     }, 10000);
-                    //location.reload();
                 }     // end of afterSuccessAssignmentSolution function
+
 
                 // code for assignmentSolution File upload
                 var optionsAssignmentSolution = { 
@@ -1135,7 +1156,99 @@
 
                 // for the submission of the assignment solution, through form submission model.
                 $('#formSubmitSolution').submit(function() {
-                    $(this).ajaxSubmit(optionsAssignmentSolution);
+                    if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                        popup.children('p').remove();
+                        popup.append("Oops! Looks like you have not logged in properly. Please logout and try again.").fadeIn();
+                    }
+                    else {
+                        $(this).ajaxSubmit(optionsAssignmentSolution);    
+                    }
+                    return false;
+                });
+
+                //for the delegate event of the change of the drop down list that contains the submitted assignments.
+                $('.submitSolution-div').delegate('#ddl-assignment', 'change', function() {
+                    var assID = $(this).val();
+                    $.cookie("assIdUpdate", assID);
+                    return false;
+                });
+
+                //function to check file size before uploading for the update Solution
+                function beforeSubmitUpdateSolution() {
+                    alertMsg.children('p').remove();
+                    alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+                    //check whether browser fully supports all File API
+                    if (window.File && window.FileReader && window.FileList && window.Blob) {
+                        if( !$('#fileUpdateSolution').val()) {   //check empty input filed 
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
+                            return false;
+                        }
+                        var fsize = $('#fileUpdateSolution')[0].files[0].size; //get file size
+                        var ftype = $('#fileUpdateSolution')[0].files[0].type; // get file type
+                        //allow file types 
+                        switch(ftype) {
+                            case 'image/png': 
+                            case 'image/gif': 
+                            case 'image/jpeg': 
+                            case 'image/pjpeg':
+                            case 'text/plain':
+                            case 'text/html':
+                            case 'application/x-zip-compressed':
+                            case 'application/pdf':
+                            case 'application/msword':
+                            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                            case 'application/vnd.ms-excel':
+                            case 'video/mp4':
+                                break;
+                            default:
+                                alertMsg.children('p').remove();
+                                alertMsg.fadeOut();
+                                popup.children('p').remove();
+                                popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
+                                return false;
+                        }
+                        //Allowed file size is less than 5 MB (1048576)
+                        if(fsize>5242880)   {
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
+                            return false;
+                        }
+                    }
+                    else  {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
+                        return false;
+                    }
+                    alertMsg.children('p').remove();
+                    alertMsg.fadeOut();
+                }   // end of beforeSubmitUpdateSolution function.
+
+                // code for updateSolution File upload
+                var optionsUpdateSolution = { 
+                    target:   '#alertMsg',   // target element(s) to be updated with server response 
+                    beforeSubmit:  beforeSubmitUpdateSolution,  // pre-submit callback 
+                    success:       afterSuccessAssignmentSolution,  // post-submit callback 
+                    uploadProgress: OnProgress, //upload progress callback 
+                    resetForm: true        // reset the form after successful submit 
+                };
+
+                // now, for the uploading of the file that contains the updated assignment solution
+                $('#formUpdateSolution').submit(function() {
+                    var assID = $('.update-solution-assignment').children('select').val();
+                    if(assID == "-1") {
+                        popup.children('p').remove();
+                        popup.append("<p>Please select the assignment before updating the submitted solution. Thank You.</p>").fadeIn();
+                    }
+                    else {   // upload the updated solution here
+                        $(this).ajaxSubmit(optionsUpdateSolution);
+                    }
                     return false;
                 });
 
@@ -1252,6 +1365,29 @@
                     <tr>
                         <td>
                             <input type="submit" Value="" id="btnSubmitSolution" class="btn btn-primary btn-block btn-lg" />
+                        </td>
+                    </tr>
+                </table>
+            </form>
+
+            <form id="formUpdateSolution" action="updateSolution-upload.php" method="post" enctype="multipart/form-data">
+                <h3 class="page-header">
+                    Update Assignment Solution
+                </h3>
+                <table class="table">
+                    <tr>
+                        <td class="update-solution-assignment">
+                            <!-- list of assignments submitted by mentee will come from ajax -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="file" name="fileUpdateSolution" id="fileUpdateSolution" class="btn btn-lg btn-primary btn-block" required /> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="submit" Value="" id="btnUpdateSolution" class="btn btn-primary btn-block btn-lg" />
                         </td>
                     </tr>
                 </table>

@@ -54,6 +54,9 @@
     <!-- For validation of the Form input elements -->
     <script src="js/validator.min.js"></script>
 
+    <!-- for the form jQuery plugin for uploading files -->
+    <script type="text/javascript" src="js/jquery.form.min.js"></script>
+
     <!-- for the cookies jQuery plugin -->
     <script src="js/jquery.cookie.js"></script>    
 
@@ -389,6 +392,24 @@
             }
             else {
              	
+            }
+
+            //progress bar function
+            function OnProgress(event, position, total, percentComplete) {
+                // show the loading overlay here, when the process of uploading starts.
+                showLoading();
+                popup.children('p').remove();
+                popup.fadeIn();
+                $('.progress').fadeIn();
+                $('.progress-bar').width(percentComplete + '%') //update progressbar percent complete
+                $('.progress-bar').html(percentComplete + '%'); //update status text
+            }
+            //function to format bites bit.ly/19yoIPO
+            function bytesToSize(bytes) {
+               var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+               if (bytes == 0) return '0 Bytes';
+               var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+               return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
             }
 
             // for showing the menu on the mobile site.
@@ -929,6 +950,214 @@
                 return false;
             });   // end of .password on LHS.
 
+            // for download the assignment and uploading the feedback for an assignment.
+            $('.feedback').on('click', function() {
+                showDiv($('.feedback-div'));
+                changeActiveState($(this).parent('li'));
+
+                var id = $.cookie("id");
+                var email = $.cookie("email");
+
+                if(id == "" || id == undefined || id == "undefined" || email == "" || email == undefined || email == "undefined") {
+                    popup.children('p').remove();
+                    popup.append("Looks like you have not logged in properly. Please login back and try again."). fadeIn();
+                }
+                else {   // get all the submissions and upload feedbacks.
+                    // firstly, get the list of mentees
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "26", email: email, id: id
+                        },
+                        success: function(response) {
+                            if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No suitable mentees found.</p>").fadeIn();
+                            }
+                            else if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
+                            }
+                            else {
+                                $('.feedback-mentee').html(response);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }   // end of the else if logging in.
+
+                // now, for the showing of the assignment ddl when a mentee is selected.
+                $('.feedback-div').delegate('#ddl-mentee', 'change', function() {
+                    var menteeId = $(this).val();
+                    $.cookie("menteeId", menteeId);
+                    if(menteeId == "-1") {
+                        popup.children('p').remove();
+                        popup.append("<p>Please select a mentee to get the submitted assignments</p>").fadeIn();
+                    }
+                    else {
+                        showLoading();
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "27", email: email, id: id, menteeId: menteeId
+                            },
+                            success: function(response) {
+                                if(response == "0") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>No Matching Assignments found.</p>").fadeIn();
+                                }
+                                else if(response == "-1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
+                                }
+                                else {
+                                    $('.feedback-assignment').html(response);
+                                }
+                            },
+                            error: function() {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
+                            },
+                            complete: function() {
+                                hideLoading();
+                            }
+                        });
+                    }   // end of else.
+                    return false;
+                });    // end of feedback-div delegate change event.
+
+                $('.feedback-div').delegate('#ddl-assignment', 'change', function() {
+                    var assId = $(this).val();
+                    $.cookie("assId", assId);
+                    var submission = $(this).find('option:selected').attr('data-submission');
+                    var feedback = $(this).find('option:selected').attr('data-feedback');
+                    if(assId == "-1") {
+                        popup.children('p').remove();
+                        popup.append("<p>Please select the Assignment to show the Submission and Feedback Details.</p>").fadeIn();
+                    }
+                    else {
+                        $('.feedback-submission').html("<a href='" + submission + "' target='_blank'>Download Submission here</a>");
+
+                        if(feedback == "") {
+                            $('.feedback-feedback').html("<a href='#'>No Feedback uploaded yet.</a>");                            
+                        }
+                        else {
+                            $('.feedback-feedback').html("<a href='" + feedback + "' target='_blank'>Download Feedback here</a>");                            
+                        }
+                    }
+                    return false;
+                });
+
+                // for the helper functions for the file upload things.
+                //function to check file size before uploading.
+                function beforeSubmitAssignmentFeedback() {
+                    alertMsg.children('p').remove();
+                    alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+                    //check whether browser fully supports all File API
+                    if (window.File && window.FileReader && window.FileList && window.Blob) {
+                        if( !$('#fileUploadFeedback').val()) {   //check empty input filed 
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
+                            return false;
+                        }
+                        var fsize = $('#fileUploadFeedback')[0].files[0].size; //get file size
+                        var ftype = $('#fileUploadFeedback')[0].files[0].type; // get file type
+                        //allow file types 
+                        switch(ftype) {
+                            case 'image/png': 
+                            case 'image/gif': 
+                            case 'image/jpeg': 
+                            case 'image/pjpeg':
+                            case 'text/plain':
+                            case 'text/html':
+                            case 'application/x-zip-compressed':
+                            case 'application/pdf':
+                            case 'application/msword':
+                            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                            case 'application/vnd.ms-excel':
+                            case 'video/mp4':
+                                break;
+                            default:
+                                alertMsg.children('p').remove();
+                                alertMsg.fadeOut();
+                                popup.children('p').remove();
+                                popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
+                                return false;
+                        }
+                        //Allowed file size is less than 5 MB (1048576)
+                        if(fsize>5242880)   {
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
+                            return false;
+                        }
+                    }
+                    else  {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
+                        return false;
+                    }
+                    alertMsg.children('p').remove();
+                    alertMsg.fadeOut();
+                }   // end of beforeSubmitAssignmentSolution function.
+
+                function afterSuccessAssignmentFeedback() {
+                    // to hide the loading overlay after the uploading is done.
+                    hideLoading();
+                    popup.children('p').remove();
+                    popup.fadeOut();
+                    $('.progress').fadeOut();
+                    alertMsg.fadeIn();
+                    // finally, trigger the solution button for reloading.
+                    $('.feedback').trigger('click');
+                    // to fadeOut the alertMsg after 10 seconds.
+                    setTimeout(function() {
+                        alertMsg.fadeOut();
+                    }, 10000);
+                }     // end of afterSuccessAssignmentSolution function
+
+                // code for assignmentSolution File upload
+                var optionsAssignmentFeedback = { 
+                    target:   '#alertMsg',   // target element(s) to be updated with server response 
+                    beforeSubmit:  beforeSubmitAssignmentFeedback,  // pre-submit callback 
+                    success:       afterSuccessAssignmentFeedback,  // post-submit callback 
+                    uploadProgress: OnProgress, //upload progress callback 
+                    resetForm: true        // reset the form after successful submit 
+                };
+
+                // for uploading the feedback as file from the mentor.
+                $('#formUploadFeedback').submit(function() {
+                    if($.cookie("assId") == "undefined" || $.cookie("assId") == undefined || $.cookie("assId") == "" || $.cookie("assId") == "-1") {
+                        popup.children('p').remove();
+                        popup.append("<p>The Assignment has not been selected. Please do so first.</p>").fadeIn();
+                    }
+                    else if($.cookie("menteeId") == "undefined" || $.cookie("menteeId") == undefined || $.cookie("menteeId") == "" || $.cookie("menteeId") == "-1") {
+                        popup.children('p').remove();
+                        popup.append("<p>The Mentee has not been selected. Please do so first.</p>").fadeIn();
+                    }
+                    else {
+                        $(this).ajaxSubmit(optionsAssignmentFeedback);     
+                    }
+                    return false;
+                });   // end of formUploadFeedback
+
+                return false;
+            });    // end of the feedback div
+
         });    // end of ready function.
 
 	</script>
@@ -1008,12 +1237,75 @@
                     <li><a href="#" class="password">Change Password</a></li>
                 	<li><a href="#" class="director">Director Profile</a></li>
                 </ul>
+                <ul class="nav nav-sidebar">
+                    <li><a href="#" class="feedback">Give Feedback</a></li>
+                </ul>
             </div>
         </div>
 
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <!-- for giving the feedback to the mentee assignments -->
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div feedback-div">
+            <h1 class="page-header">
+                Upload Feedback
+            </h1>
+
+            <table class="table">
+                <tr>
+                    <td>
+                        <label>Select Mentee: </label>
+                    </td>
+                    <td class="feedback-mentee">
+                        <!-- mentee data will come from ajax -->
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Select Assignment: </label>
+                    </td>
+                    <td class="feedback-assignment">
+                        <!-- Assignment data will come from ajax -->
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Download Mentee Submission: </label>
+                    </td>
+                    <td class="feedback-submission">
+                        <!-- link to download the submission of the mentee -->
+                    </td>
+                </tr>
+                 <tr>
+                    <td>
+                        <label>Download Previous Feedback: </label>
+                    </td>
+                    <td class="feedback-feedback">
+                        <!-- link to download the submission of the mentee -->
+                    </td>
+                </tr>
+            </table>
+
+            <form id="formUploadFeedback" action="feedback-upload.php" method="post" enctype="multipart/form-data">
+                <h2 class="page-header text-center">
+                    Upload Assignment Feedback
+                </h2>
+                <table class="table">
+                    <tr>
+                        <td>
+                            <input type="file" name="fileUploadFeedback" id="fileUploadFeedback" class="btn btn-lg btn-primary btn-block" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="submit" id="btnSubmitFeedback" class="btn btn-lg btn-primary btn-block"  />
+                        </td>
+                    </tr>   
+                </table>    
+            </form>
+        </div>  <!-- end of change-password div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div password-div">
             <h1 class="page-header">

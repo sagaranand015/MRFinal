@@ -972,6 +972,7 @@
                             no: "26", email: email, id: id
                         },
                         success: function(response) {
+                            alert(response);
                             if(response == "0") {
                                 popup.children('p').remove();
                                 popup.append("<p>No suitable mentees found.</p>").fadeIn();

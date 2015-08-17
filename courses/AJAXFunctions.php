@@ -93,7 +93,8 @@ function GetMenteeSubmittedAssignments($email, $id, $menteeId) {
 	$resp = "-1";
 	$name = "";
 	try {
-		$query = "select * from SubmissionFeedback where MentorID='$id' and MenteeID='$menteeId'";
+		$courseId = GetMenteeCourseById($menteeId);
+		$query = "select * from SubmissionFeedback where MentorID='$id' and MenteeID='$menteeId' and CourseID='$courseId'";
 		$rs = mysql_query($query);
 		if(!$rs) {
 			$resp = "-1";
@@ -123,7 +124,8 @@ function GetMenteeSubmittedAssignments($email, $id, $menteeId) {
 function GetMenteesOfMentor($email, $id) {
 	$resp = "-1";
 	try {
-		$query = "select * from Mentee where MenteeMentor='$id'";
+		$courseId = GetMentorCourseById($id);
+		$query = "select * from Mentee where MenteeMentor='$id' and MenteeCourse='$courseId'";
 		$rs = mysql_query($query);
 		if(!$rs) {
 			$resp = "-1";
@@ -135,6 +137,9 @@ function GetMenteesOfMentor($email, $id) {
 					$resp .= "<option value='" . $res["MenteeID"] . "' >" . $res["MenteeName"] . "</option>";
 				}
 				$resp .= "</select>";
+			}
+			else {
+				$resp = "0";
 			}
 		}
 		echo $resp;

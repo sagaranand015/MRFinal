@@ -8,6 +8,33 @@ include 'headers/databaseConn.php';
 // for mandrill mail sending API.
 require_once 'mandrill/Mandrill.php'; 
 
+// to get the course of the mentee by id of the mentee.
+function GetMentorCourseById($id) {
+	$resp = "-1";
+	try {
+		$query = "select * from Mentor where MentorID='$id'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				while ($res = mysql_fetch_array($rs)) {
+					$resp = $res["MentorCourse"];
+				}
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // for registering the feedback for a particular assignment.
 function RegisterFeedback($mentorId, $menteeId, $assId, $courseId, $feedback) {
 	$resp = "-1";

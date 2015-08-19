@@ -8,6 +8,55 @@ include 'headers/databaseConn.php';
 // for mandrill mail sending API.
 require_once 'mandrill/Mandrill.php'; 
 
+// to add the user to the spoecified table with the course and organisartion valuels.
+function AddToTable($email, $organ, $course, $table) {
+	$resp = "-1";
+	try {	
+		$query = "";
+		if($table == "Mentee") {
+			$query = "insert into Mentee(MenteeEmail, MenteeOrgan, MenteeCourse) values('$email', '$organ', '$course')";
+		}
+		else if($table == "Mentor") {
+			$query = "insert into Mentor(MentorEmail, MentorOrgan, MentorCourse) values('$email', '$organ', '$course')";
+		}
+		else if($table == "Director") {
+			$query = "insert into Director(DirectorEmail, DirectorOrgan) values('$email', '$organ')";
+		}
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// to add a particular email address to the user table with the type of the entry
+function AddToUsers($email, $level) {
+	$resp = "-1";
+	try {
+		$query = "insert into User(UserEmail, UserLevel) values('$email', '$level')";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // to get the course of the mentee by id of the mentee.
 function GetMentorCourseById($id) {
 	$resp = "-1";

@@ -1512,7 +1512,7 @@
                 }   // end of else
             });  // end of change (delegate) function in guide-div courses list
 
-			 // for the add organisation link on LHS
+			 // for the add user link on LHS
             $('.user').on('click', function() {
             	showDiv($('.user-div'));
             	changeActiveState($(this).parent('li'));
@@ -1707,9 +1707,116 @@
 						});
 					}
 					return false;
-				});
-            	return false;
-            });
+				});   // end of submit() of form-add-mentee
+                
+                //function to check file size before uploading for the update Solution
+                function beforeSubmitMenteeExcel() {
+                    alertMsg.children('p').remove();
+                    alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+                    //check whether browser fully supports all File API
+                    if (window.File && window.FileReader && window.FileList && window.Blob) {
+                        if( !$('#fileAddMentee').val()) {   //check empty input filed 
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
+                            return false;
+                        }
+                        var fsize = $('#fileAddMentee')[0].files[0].size; //get file size
+                        var ftype = $('#fileAddMentee')[0].files[0].type; // get file type
+                        //allow file types 
+                        switch(ftype) {
+                            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                            case 'application/vnd.ms-excel':
+                            case 'application/msexcel':
+                            case 'application/x-msexcel':
+                            case 'application/x-ms-excel':
+                            case 'application/x-excel':
+                            case 'application/x-dos_ms_excel':
+                            case 'application/xls':
+                            case 'application/x-xls':
+                            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                                break;
+                            default:
+                                alertMsg.children('p').remove();
+                                alertMsg.fadeOut();
+                                popup.children('p').remove();
+                                popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the Excel format only.</p>").fadeIn();
+                                return false;
+                        }
+                        //Allowed file size is less than 5 MB (1048576)
+                        if(fsize>5242880)   {
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
+                            return false;
+                        }
+                    }
+                    else  {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
+                        return false;
+                    }
+                    alertMsg.children('p').remove();
+                    alertMsg.fadeOut();
+                }   // end of beforeSubmitMenteeExcel function.
+
+                function afterSuccessMenteeExcel() {
+                    // to hide the loading overlay after the uploading is done.
+                    hideLoading();
+                    popup.children('p').remove();
+                    popup.fadeOut();
+                    $('.progress').fadeOut();
+                    alertMsg.fadeIn();
+                    // finally, remove the courseID cookie here.
+                    $('.user').trigger('click');
+                    // to fadeOut the alertMsg and reload the page after 3 seconds.
+                    setTimeout(function() {
+                        alertMsg.fadeOut();
+                        //location.reload();
+                    }, 10000);
+                }     // end of afterSuccessAssignmentSolution function
+
+                // code for updateSolution File upload
+                var optionsMenteeExcel = { 
+                    target:   '#alertMsg',   // target element(s) to be updated with server response 
+                    beforeSubmit:  beforeSubmitMenteeExcel,  // pre-submit callback 
+                    success:       afterSuccessMenteeExcel,  // post-submit callback 
+                    uploadProgress: OnProgress, //upload progress callback 
+                    resetForm: true        // reset the form after successful submit 
+                };
+
+                // for adding the mentees through the excel sheets.
+                $('#form-add-mentee-excel').submit(function() {
+                    var organ1 = $('.add-mentee-organ').children('select').val();
+                    var course1 = $('.add-mentee-course').children('select').val();
+                    $.cookie("addMenteeOrgan", organ1);
+                    $.cookie("addMenteeCourse", course1);
+
+                    var email = $.cookie("email");
+                    var id = $.cookie("id");
+
+                    //alert($.cookie("addMenteeCourse") + " --> " + $.cookie("addMenteeOrgan"));
+                    if(organ1 == "-1" || course1 == "-1") {
+                        popup.children('p').remove();
+                        popup.append("<p>Please select the organisation and course before uploading files. Thank You.</p>").fadeIn();
+                    }
+                    else if(email == "-1" || id == "-1" || email == undefined || email == "undefined" || id == "undefined" || id == undefined) {
+                        popup.children('p').remove();
+                        popup.append("<p>Looks like you have not logged in properly. Please login again and try again.</p>").fadeIn();
+                    }
+                    else {
+                        $(this).ajaxSubmit(optionsMenteeExcel);
+                    }
+                    return false;
+                });   // end of submit() of form-add-mentee-excel
+
+                return false;
+            });   // end of user link on LHS.
 
             // for the change password link on the LHS
             $('.password').on('click', function() {
@@ -2107,6 +2214,28 @@
 							</tr>
 						</table>
 					</form>
+
+                    <!-- for adding the mentee through the excel sheets -->
+                    <form id="form-add-mentee-excel" action="userMentee-upload.php" method="post" enctype="multipart/form-data">
+                        <h1 class="page-header">
+                            Excel Upload
+                        </h1>
+                        <table class="table">
+                            <tr>
+                                <td>
+                                    <label>Select File to Upload:</label>
+                                </td>
+                                <td>
+                                    <input type="file" name="fileAddMentee" id="fileAddMentee" class="btn btn-lg btn-primary btn-block" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <input type="submit" id="btnAddMenteeExcel" class="btn btn-lg btn-primary btn-block" />
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
 				</div>
 			</div>
 

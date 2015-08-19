@@ -85,11 +85,45 @@ else if(isset($_GET["no"]) && $_GET["no"] == "26") {  // to get the list of all 
 	GetMenteesOfMentor($_GET["email"], $_GET["id"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "27") {  // to get the list of all the assignments submitted by the mentee selected.
-	GetMenteeSubmittedAssignments($_GET["email"], $_GET["id"], $_GET["menteeId"]);
+	GetMenteeSubmittedAssignmentsForMentor($_GET["email"], $_GET["id"], $_GET["menteeId"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "28") {  // to get the list of all the assignments submitted by the mentee on the mentee page.
+	GetMenteeAssignments($_GET["email"], $_GET["id"]);
+}
+
+// to get the list of all the assignments submitted by the mentee on the mentee page.
+function GetMenteeAssignments($email, $id) {
+	$resp = "-1";
+	try {
+		$courseId = GetMenteeCourse($email);
+		$query = "select * from SubmissionFeedback where MenteeID='$id' and CourseID='$courseId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				$resp = "<select id='ddl-assignment' class='form-control'><option value='-1'> --Select Assignment-- </option>";
+				while ($res = mysql_fetch_array($rs)) {
+					$name = GetAssignmentName($res["AssID"]);
+					$resp .= "<option value='" . $res["AssID"] . "' data-submission='" . $res["Submission"] . "' data-feedback='" . $res["Feedback"] . "' >" . $name . "</option>";
+				}
+				$resp .= "</select>";
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
 }
 
 // to get the list of all the assignments submitted by the mentee selected.
-function GetMenteeSubmittedAssignments($email, $id, $menteeId) {
+function GetMenteeSubmittedAssignmentsForMentor($email, $id, $menteeId) {
 	$resp = "-1";
 	$name = "";
 	try {

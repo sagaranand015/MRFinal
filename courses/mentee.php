@@ -1255,6 +1255,75 @@
                 return false;
             });   // end of Submitsolution-div
 
+            // for the showing feedback button on the LHS
+            $('.feedback').on('click', function() {
+                showDiv($('.feedback-div'));
+                changeActiveState($(this).parent('li'));
+
+                // firstly, get all the assignments submitted by the mentee.
+                var email = $.cookie("email");
+                var id = $.cookie("id");
+                if(email == "undefined" || email == "" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not logged in properly. Please do so before continuing.</p>").fadeIn();
+                }
+                else {
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "28", email: email, id: id
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your request. Please try again.</p>").fadeIn();    
+                            }
+                            else if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No Assignments found.</p>").fadeIn();
+                            }
+                            else {
+                                $('.feedback-assignment').html(response);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });  // end of ajax request.
+                }   // end of else.
+
+                // for showing the submission and feedback on the change of drop down list.
+                $('.feedback-div').delegate('#ddl-assignment', 'change', function() {
+                    var assId = $(this).val();
+                    var submission = $(this).find('option:selected').attr('data-submission');
+                    var feedback = $(this).find('option:selected').attr('data-feedback');
+
+                    // for showing the feedbacks of the assignment.
+                    if(feedback == "") {
+                        $('.feedback-feedback').html("<a href='#' class='btn btn-lg btn-primary btn-block' >No Feedback Yet.</a>");    
+                    } else {
+                        $('.feedback-feedback').html("<a href='" + feedback + "' class='btn btn-lg btn-primary btn-block' target='_blank' >Download Feedback</a>");
+                    }
+
+                    // for showing the submissions of the assignments.
+                    if(submission == "") {
+                        $('.feedback-submission').html("<a href='#' class='btn btn-lg btn-primary btn-block' >No Submission Yet.</a>");    
+                    } else {
+                        $('.feedback-submission').html("<a href='" + submission + "' class='btn btn-lg btn-primary btn-block' target='_blank' >Download Latest Submission</a>");
+                    }
+                    return false;
+                });
+
+                return false;
+            });   // end of feedback-div on LHS
+
+
         });    // end of ready function.
 
 	</script>
@@ -1336,6 +1405,7 @@
                 </ul>
                 <ul class="nav nav-sidebar">
                     <li><a href="#" class="submitSolution">Submit Assignment Solution</a></li>
+                    <li><a href="#" class="feedback">Show Feedbacks</a></li>
                 </ul>
             </div>
         </div>
@@ -1343,6 +1413,33 @@
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <!-- for showing the assignment feedbacks -->
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div feedback-div">
+            <h1 class="page-header">
+                Assignment Feedbacks
+            </h1>
+            <table class="table">
+                <tr>
+                    <td>
+                        <label>Select Assignment</label>
+                    </td>
+                    <td class="feedback-assignment">
+                        <!-- assignment data will come from ajax -->
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="feedback-feedback">
+
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="feedback-submission">
+
+                    </td>
+                </tr>
+            </table>
+        </div>  <!-- end of feedback div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div submitSolution-div">
             <h3 class="page-header">

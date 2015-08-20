@@ -8,6 +8,26 @@ include 'headers/databaseConn.php';
 // for mandrill mail sending API.
 require_once 'mandrill/Mandrill.php'; 
 
+// to assign a mentorID to the mentee passed as paramters.
+function AssignMentor($mentorId, $menteeId) {
+	$resp = "-1";
+	try {
+		$query = "update Mentee set MenteeMentor='$mentorId' where MenteeID='$menteeId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // to add the user to the spoecified table with the course and organisartion valuels.
 function AddToTable($email, $organ, $course, $table) {
 	$resp = "-1";

@@ -90,6 +90,93 @@ else if(isset($_GET["no"]) && $_GET["no"] == "27") {  // to get the list of all 
 else if(isset($_GET["no"]) && $_GET["no"] == "28") {  // to get the list of all the assignments submitted by the mentee on the mentee page.
 	GetMenteeAssignments($_GET["email"], $_GET["id"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "29") {  // to get the list of all the mentors based on organisation and courses.
+	GetMentorsFromOrganCourse($_GET["organ"], $_GET["course"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "30") {  // to get the list of all the mentees based on organisation and courses.
+	GetMenteesFromOrganCourse($_GET["organ"], $_GET["course"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "31") {  // to assign the mentor to the mentees selected.
+	AssignMentorToMentees($_GET["mentorId"], $_GET["mentees"]);
+}
+
+// to assign the mentor to the mentees selected.
+function AssignMentorToMentees($mentorId, $mentees) {
+	$resp = "-1";
+	$i = 0;
+	try {
+		$mentee = json_decode($mentees, true);
+		foreach ($mentee as $key => $v) {
+			$resp = AssignMentor($mentorId, $v);
+			if($resp == "1") {
+				$i++;
+			} 
+		}
+		$resp = $i . " mentees have been assigned to the Selected Mentor.";
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// to get the list of all the mentees based on organisation and courses.
+function GetMenteesFromOrganCourse($organ, $course) {
+	$resp = "-1";
+	try {
+		$query = "select * from Mentee where MenteeOrgan='$organ' and MenteeCourse='$course' and MenteeMentor='0'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				$resp = "";
+				while ($res = mysql_fetch_array($rs)) {
+					$resp .= "<input type='checkbox' class='assign-checkbox' value='" . $res["MenteeEmail"] . "' name='" . $res["MenteeID"] . "' id='" . $res["MenteeID"] . "' />&nbsp;&nbsp;<label for='" . $res["MenteeID"] . "'>" . $res["MenteeEmail"] . " (" . $res["MenteeName"] . ")" .  "</label><br />";
+				}
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// to get the list of all the mentees based on organisation and courses.
+function GetMentorsFromOrganCourse($organ, $course) {
+	$resp = "-1";
+	try {
+		$query = "select * from Mentor where MentorOrgan='$organ' and MentorCourse='$course'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				$resp = "<select id='ddl-mentor' class='form-control'><option value='-1'> --Select Mentor-- </option>";
+				while ($res = mysql_fetch_array($rs)) {
+					$resp .= "<option value='" . $res["MentorID"] . "' >" . $res["MentorEmail"] . " (" . $res["MentorName"] . ")</option>";
+				}
+				$resp .= "</select>";
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // to get the list of all the assignments submitted by the mentee on the mentee page.
 function GetMenteeAssignments($email, $id) {

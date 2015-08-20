@@ -1815,6 +1815,96 @@
                     return false;
                 });   // end of submit() of form-add-mentee-excel
 
+                //function to check file size before uploading for the update Solution
+                function beforeSubmitMentorExcel() {
+                    alertMsg.children('p').remove();
+                    alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+                    //check whether browser fully supports all File API
+                    if (window.File && window.FileReader && window.FileList && window.Blob) {
+                        if( !$('#fileAddMentor').val()) {   //check empty input filed 
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
+                            return false;
+                        }
+                        var fsize = $('#fileAddMentor')[0].files[0].size; //get file size
+                        var ftype = $('#fileAddMentor')[0].files[0].type; // get file type
+                        //allow file types 
+                        switch(ftype) {
+                            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                            case 'application/vnd.ms-excel':
+                            case 'application/msexcel':
+                            case 'application/x-msexcel':
+                            case 'application/x-ms-excel':
+                            case 'application/x-excel':
+                            case 'application/x-dos_ms_excel':
+                            case 'application/xls':
+                            case 'application/x-xls':
+                            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                                break;
+                            default:
+                                alertMsg.children('p').remove();
+                                alertMsg.fadeOut();
+                                popup.children('p').remove();
+                                popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the Excel format only.</p>").fadeIn();
+                                return false;
+                        }
+                        //Allowed file size is less than 5 MB (1048576)
+                        if(fsize>5242880)   {
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
+                            return false;
+                        }
+                    }
+                    else  {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
+                        return false;
+                    }
+                    alertMsg.children('p').remove();
+                    alertMsg.fadeOut();
+                }   // end of beforeSubmitMentorExcel function.
+
+
+                // code for updateSolution File upload
+                var optionsMentorExcel = { 
+                    target:   '#alertMsg',   // target element(s) to be updated with server response 
+                    beforeSubmit:  beforeSubmitMentorExcel,  // pre-submit callback 
+                    success:       afterSuccessMenteeExcel,  // post-submit callback 
+                    uploadProgress: OnProgress, //upload progress callback 
+                    resetForm: true        // reset the form after successful submit 
+                };
+
+                // for adding the mentees through the excel sheets.
+                $('#form-add-mentor-excel').submit(function() {
+                    var organ1 = $('.add-mentor-organ').children('select').val();
+                    var course1 = $('.add-mentor-course').children('select').val();
+                    $.cookie("addMentorOrgan", organ1);
+                    $.cookie("addMentorCourse", course1);
+
+                    var email = $.cookie("email");
+                    var id = $.cookie("id");
+
+                    if(organ1 == "-1" || course1 == "-1") {
+                        popup.children('p').remove();
+                        popup.append("<p>Please select the organisation and course before uploading files. Thank You.</p>").fadeIn();
+                    }
+                    else if(email == "-1" || id == "-1" || email == undefined || email == "undefined" || id == "undefined" || id == undefined) {
+                        popup.children('p').remove();
+                        popup.append("<p>Looks like you have not logged in properly. Please login again and try again.</p>").fadeIn();
+                    }
+                    else {
+                        $(this).ajaxSubmit(optionsMentorExcel);
+                    }
+                    return false;
+                });   // end of submit() of form-add-mentor-excel
+
                 return false;
             });   // end of user link on LHS.
 
@@ -1919,6 +2009,275 @@
                 });
                 return false;
             });   // end of .invite on LHS.
+
+            // for the assign-mentees div on the LHS
+            $('.assign-mentee').on('click', function() {
+                showDiv($('.assign-mentee-div'));
+                changeActiveState($(this).parent('li'));
+
+                // remove the previous elements.
+                $('.assign-mentee-mentor').children('select').remove();
+                $('.assign-mentee-mentee').children('input, label').remove();
+
+                // firslty, get all the organisations and the courses.
+                showLoading();
+                $.ajax({
+                    type: "GET",
+                    url: "AJAXFunctions.php",
+                    data: {
+                        no: "3"
+                    },
+                    success: function(response) {
+                        if(response == "-1") {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                        }
+                        else {
+                            $('.assign-mentee-organ').html(response);
+                        }
+                    },
+                    error: function() {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                    },
+                    complete: function() {
+                    }
+                });
+                // to get all the courses for the admin page.
+                showLoading();
+                $.ajax({
+                    type: "GET",
+                    url: "AJAXFunctions.php",
+                    data: {
+                        no: "6"
+                    },
+                    success: function(response) {
+                        if(response == "-1") {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                        }
+                        else if(response == "0") {
+                            popup.children('p').remove();
+                            popup.append("<p>No Courses found in the database. Please try again.</p>").fadeIn();   
+                        }
+                        else {
+                            $('.assign-mentee-course').html(response);
+                        }
+                    },
+                    error: function() {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });   // end of getting all the courses on the admin page.
+
+                var assignOrgan = "-1";
+                var assignCourse = "-1";
+
+                // for the change event of the organization in ddl
+                $('.assign-mentee-div').delegate('#ddl-organisation', 'change', function() {
+                    assignOrgan = $(this).val();
+                    assignCourse = $('.assign-mentee-course').children('select').val();
+                    if(assignCourse == "-1" || assignOrgan == "-1") {
+                    }
+                    else if(assignCourse != "-1" && assignOrgan != "-1") {
+                        // for getting the mentors of the given organisation and course.
+                        $('.assign-mentee-mentor').children('select').remove();  // to remove the previous one.
+                        showLoading();
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "29", organ: assignOrgan, course: assignCourse
+                            },
+                            success: function(response) {
+                                if(response == "-1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                                }
+                                else if(response == "0") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>No Mentors found in the database. Please try again.</p>").fadeIn();   
+                                }
+                                else {
+                                    $('.assign-mentee-mentor').append(response);
+                                }
+                            },
+                            error: function() {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                            },
+                            complete: function() {
+                            }
+                        });
+                        // for getting the mentees of the given organisation and course.
+                        $('.assign-mentee-mentee').children('input, label').remove();
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "30", organ: assignOrgan, course: assignCourse
+                            },
+                            success: function(response) {
+                                if(response == "-1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
+                                }
+                                else if(response == "0" || response == "") {
+                                    popup.append("<p>No mentees could be found in the database.</p>").fadeIn();
+                                }
+                                else {
+                                    $('.assign-mentee-mentee').append(response);
+                                }
+                            },
+                            error: function() {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                            },
+                            complete: function() {
+                                hideLoading();
+                            }
+                        });  // end of the second ajax call.
+
+                    }   // end of else if.
+                    return false;
+                });    // end of delegate event for Organisation ddl.
+
+                // for the change event of the course in ddl
+                $('.assign-mentee-div').delegate('#ddl-course', 'change', function() {
+                    assignCourse = $(this).val();
+                    assignOrgan = $('.assign-mentee-organ').children('select').val();
+                    if(assignCourse == "-1" || assignOrgan == "-1") {
+                    }
+                    else if(assignCourse != "-1" && assignOrgan != "-1") {
+                        // for getting the mentors of the given organisation and course.
+                        $('.assign-mentee-mentor').children('select').remove();  // to remove the previous one.
+                        showLoading();
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "29", organ: assignOrgan, course: assignCourse
+                            },
+                            success: function(response) {
+                                if(response == "-1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                                }
+                                else if(response == "0") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>No Mentors found in the database. Please try again.</p>").fadeIn();   
+                                }
+                                else {
+                                    $('.assign-mentee-mentor').append(response);
+                                }
+                            },
+                            error: function() {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                            },
+                            complete: function() {
+                            }
+                        });
+                        // for getting the mentees of the given organisation and course.
+                        $('.assign-mentee-mentee').children('input, label').remove();
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "30", organ: assignOrgan, course: assignCourse
+                            },
+                            success: function(response) {
+                                if(response == "-1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
+                                }
+                                else if(response == "0" || response == "") {
+                                    popup.append("<p>No mentees could be found in the database.</p>").fadeIn();
+                                }
+                                else {
+                                    $('.assign-mentee-mentee').append(response);
+                                }
+                            },
+                            error: function() {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                            },
+                            complete: function() {
+                                hideLoading();
+                            }
+                        });  // end of second ajax request.
+
+                    }   // end of else if for checking assignOrgan and assignCourse
+                    return false;
+                });   // end of delegate event for Course ddl.
+
+                // for the button click for assignment of mentors to the mentees.
+                $('#formAssignMentee').submit(function() {
+                    // get the selected mentees first.
+                    var selected = [];
+                    $('.assign-checkbox').each(function() {
+                        var item = $(this);
+                        if(item.is(':checked')) {
+                            selected.push(item.attr('name'));
+                        }
+                    });
+
+                    // now, the mentor selected.
+                    var mentor = $('.assign-mentee-mentor').children('select').val();
+                    var mentees = JSON.stringify(selected);
+
+                    if(mentor == "-1" || mentor == "") {
+                        popup.children('p').remove();
+                        popup.append("<p>Please select a mentor before assigning. Thank You.</p>").fadeIn();
+                    }
+                    else if(selected.length == 0) {
+                        popup.children('p').remove();
+                        popup.append("<p>Please select at least one mentee to be assigned to. Thank You.</p>").fadeIn();
+                    }
+                    else {
+                        //now, the ajax request to assign the mentors to the selected mentees.
+                        showLoading();
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "31", mentorId: mentor, mentees: mentees
+                            },
+                            success: function(response) {
+                                if(response == "-1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
+                                }
+                                else {
+                                    popup.children('p').remove();
+                                    popup.append("<p>" + response + "</p>").fadeIn();
+
+                                    // click the assign mentee button here.
+                                    $('.assign-mentee').trigger('click');
+                                }
+                            },
+                            error: function() {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                            },
+                            complete: function() {
+                                hideLoading();
+                            }
+                        });
+                    }
+
+                    return false;
+                });
+
+                return false;
+            });   // end of the assign-mentees div on LHS.
 
             // hide all the divs on page load. Except for first div.
             $('.main-div').hide();
@@ -2027,6 +2386,7 @@
                 </ul>
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="user">Add User</a></li>
+                    <li><a href="#" class="assign-mentee">Assign Mentees</a></li>
                 </ul>
             </div>
         </div>
@@ -2034,6 +2394,56 @@
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <!-- for the assign mentees div -->
+         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div assign-mentee-div">
+            <h1 class="page-header">
+                Assign Mentees
+            </h1>
+
+            <form id="formAssignMentee">
+                <table class="table">
+                    <tr>
+                        <td>
+                            <label>Select Organisation: </label>
+                        </td>
+                        <td class="assign-mentee-organ">
+                            <!-- from ajax -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Select Course: </label>
+                        </td>
+                        <td class="assign-mentee-course">
+                            <!-- from ajax -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Select Mentor: </label>
+                        </td>
+                        <td class="assign-mentee-mentor">
+                            <!-- from ajax -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Select Mentees: </label>
+                        </td>
+                        <td class="assign-mentee-mentee">
+                            <!-- from ajax -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="submit" value="Assign Mentees" class="btn btn-lg btn-primary btn-block" id="btnAssignMentee" />
+                        </td>
+                    </tr>
+                </table>
+            </form>
+
+        </div>  <!-- end of assign-mentees div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div invite-div">
             <h1 class="page-header">
@@ -2179,7 +2589,31 @@
 							</tr>
 						</table>
 					</form>
-				</div>
+
+                    <!-- for adding the mentee through the excel sheets -->
+                    <form id="form-add-mentor-excel" action="userMentor-upload.php" method="post" enctype="multipart/form-data">
+                        <h1 class="page-header">
+                            Mentor Excel Upload
+                        </h1>
+                        <table class="table">
+                            <tr>
+                                <td>
+                                    <label>Select File to Upload:</label>
+                                </td>
+                                <td>
+                                    <input type="file" name="fileAddMentor" id="fileAddMentor" class="btn btn-lg btn-primary btn-block" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <input type="submit" id="btnAddMentorExcel" class="btn btn-lg btn-primary btn-block" />
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+
+				</div>   <!-- end of mentor div -->
+
 				<div role="tabpanel" class="tab-pane" id="mentee">
 					<form id="form-add-mentee">
 						<table class="table">
@@ -2218,7 +2652,7 @@
                     <!-- for adding the mentee through the excel sheets -->
                     <form id="form-add-mentee-excel" action="userMentee-upload.php" method="post" enctype="multipart/form-data">
                         <h1 class="page-header">
-                            Excel Upload
+                            Mentee Excel Upload
                         </h1>
                         <table class="table">
                             <tr>

@@ -60,6 +60,10 @@
     <!-- for the cookies jQuery plugin -->
     <script src="js/jquery.cookie.js"></script>    
 
+    <!-- for the video CDN for showing custom videos -->
+    <link href="http://vjs.zencdn.net/4.11/video-js.css" rel="stylesheet">
+    <script src="http://vjs.zencdn.net/4.11/video.js"></script>
+
     <style type="text/css">
 
         @font-face {
@@ -133,6 +137,11 @@
 		    	margin: 25% 0% 0% 0%;	
 		    	display: block;
 		    }
+
+             iframe {
+                width: 100%;
+                height: 200px;
+            }
         }   
 
         /*for the tablets and all*/
@@ -158,6 +167,11 @@
 		    	margin: 10% 0% 0% 0%;	
 		    	display: block;
 		    }
+
+            iframe {
+                width: 100%;
+                height: 300px;
+            }
         }
 
         /*for medium screens and desktops*/
@@ -181,6 +195,11 @@
 		    .menu-show {
 		    	display: none;
 		    }
+
+            iframe {
+                width: 100%;
+                height: 400px;
+            }
         }
 
         /*for large screens*/ 
@@ -204,6 +223,11 @@
 		    .menu-show {
 		    	display: none;
 		    }
+
+            iframe {
+                width: 100%;
+                height: 500px;
+            }
         }
 
         /* Sidebar navigation */
@@ -674,8 +698,17 @@
 					alert("No defined.");
 				}
 				else {
-					window.open(url, "_blank");
+                    $('#lecture-video-modal-body').html("<iframe src='" + url + "'></iframe>");
+				    $('#lectureVideoModal').modal('show');	
 				}
+
+                // to hide the modal on click of the hide buttin
+                $('#lectureVideoModal').on('hide.bs.modal', function (event) {
+                    // for pausing the video that is playing.
+                    var iframe = $('#lecture-video-modal-body').children('iframe');
+                    iframe.attr('src', iframe.attr('src'));
+                });
+
 				return false;
 			});
 			// for the delegate function of the lecture Sample Reports
@@ -732,9 +765,19 @@
 	            			no: "7", menteeEmail: menteeEmail
 	            		},
 	            		success: function(response) {
-	            			// show the course calender in the calender-div.
-            				$('.calender-div').children('img').remove();
-	            			$('.calender-div').append("<img src='" + response + "' />");
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();                     
+                            }
+                            else if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No Calender Exists in the database. Please contact your mentor for the Calender. Thank You.</p>").fadeIn();                     
+                            }
+                            else {
+                                // show the course calender in the calender-div.
+                                $('.calender-div').children('img').remove();
+                                $('.calender-div').append("<img src='" + response + "' />");
+                            }
 	            		},
 	            		error: function() {
 							alertMsg.children('p').remove();
@@ -1039,7 +1082,17 @@
                             no: "25", email: email, id: id
                         },
                         success: function(response) {
-                            $('.update-solution-assignment').html(response);
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your request. Please try again.</p>").fadeIn();        
+                            }
+                            else if(response == "0") {
+                                $('.update-solution-assignment').html("No Assignments Submitted yet!");    
+                            }
+                            else {
+                                $('.update-solution-assignment').html(response);
+                            }
+                            // for the value to be shown on the button.
                             $('#btnUpdateSolution').attr("value", "Update Submission");
                         },
                         error: function() {
@@ -1759,32 +1812,24 @@
 		</div><!-- /.modal-dialog -->
 	</div><!-- /.modal -->
 
+     <!-- this is for showing the custom video using the video.js plugin inside the modal -->
+    <div class="modal fade" id="lectureVideoModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Lecture Videos</h4>
+                </div>
+                <div class="modal-body" id="lecture-video-modal-body">
+                    <!-- for the video tag -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
 
-   <!--   <footer class="footer">
-	        <div class="container">
-	            <div class="row">
-	                <div class="col-md-4">
-	                    <span class="copyright">Copyright &copy; Mentored-Research 2015</span>
-	                </div>
-	                <div class="col-md-4">
-	                    <ul class="list-inline social-buttons">
-	                        <li><a href="https://www.facebook.com/pages/Mentored-Researchs-Equity-Research-Initiative/313860081992430?ref=br_tf" target="_blank"><i class="fa fa-facebook"></i></a>
-	                        </li>
-	                        <li><a href="https://www.linkedin.com/company/2217419?trk=tyah&trkInfo=tarId%3A1401993298521%2Ctas%3Amentored%2Cidx%3A1-3-3" target="_blank"><i class="fa fa-linkedin"></i></a>
-	                        </li>
-	                    </ul>
-	                </div>
-	                <div class="col-md-4">  
-	                    <ul class="list-inline social-buttons">
-	                        <li><a href="https://www.facebook.com/pages/Mentored-Researchs-Equity-Research-Initiative/313860081992430?ref=br_tf" target="_blank"><i class="fa fa-facebook"></i></a>
-	                        </li>
-	                        <li><a href="https://www.linkedin.com/company/2217419?trk=tyah&trkInfo=tarId%3A1401993298521%2Ctas%3Amentored%2Cidx%3A1-3-3" target="_blank"><i class="fa fa-linkedin"></i></a>
-	                        </li>
-	                    </ul>
-	                </div>
-	            </div>
-	        </div>
-	    </footer> -->
 
     <!-- Bootstrap Core JavaScript -->
     <script src="js/bootstrap.min.js"></script>

@@ -791,8 +791,19 @@
                                 no: "22", courseId: courseId
                             },
                             success: function(response) {
-                                $('.calender-div').children('img').remove();
-                                $('.calender-div').append("<img src='" + response + "' />");
+                                if(response == "-1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();                     
+                                }
+                                else if(response == "0") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>No Calender Exists in the database. Please contact your director for the Calender. Thank You.</p>").fadeIn();                     
+                                }
+                                else {
+                                    // show the course calender in the calender-div.
+                                    $('.calender-div').children('img').remove();
+                                    $('.calender-div').append("<img src='" + response + "' />");
+                                }
                             },
                             error: function() {
                                 popup.children('p').remove();

@@ -70,7 +70,7 @@ if(isset($_FILES["fileAssignmentExtra"]) && $_FILES["fileAssignmentExtra"]["erro
 	else {
 		if(move_uploaded_file($_FILES['fileAssignmentExtra']['tmp_name'], $UploadDirectory.$NewFileName )) {
 			// save the link to the database.
-			$register = RegisterAssignmentExtra($assignmentAssPDF, $courseAssPDF, "courses/".$UploadDirectory.$NewFileName);
+			$register = RegisterAssignmentExtra($assignmentAssPDF, $courseAssPDF, $UploadDirectory.$NewFileName);
 			if($register == "-1") {
 				die("Oops! We encountered an error while uploading your Assignment PDF. Please try again.");
 			}

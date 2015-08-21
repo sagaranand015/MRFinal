@@ -70,7 +70,7 @@ if(isset($_FILES["fileAssignmentOffTopic"]) && $_FILES["fileAssignmentOffTopic"]
 	else {
 		if(move_uploaded_file($_FILES['fileAssignmentOffTopic']['tmp_name'], $UploadDirectory.$NewFileName )) {
 			// save the link to the database.
-			$register = RegisterAssignmentOffTopic($assignmentAssPDF, $courseAssPDF, "courses/".$UploadDirectory.$NewFileName);
+			$register = RegisterAssignmentOffTopic($assignmentAssPDF, $courseAssPDF, $UploadDirectory.$NewFileName);
 			if($register == "-1") {
 				die("Oops! We encountered an error while uploading your Assignment Off Topic Read. Please try again.");
 			}

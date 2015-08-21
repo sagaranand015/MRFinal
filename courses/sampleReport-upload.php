@@ -41,6 +41,17 @@ if(isset($_FILES["fileAssignmentSampleReport"]) && $_FILES["fileAssignmentSample
 			case 'application/msword':
 			case 'application/vnd.ms-excel':
 			case 'video/mp4':
+			case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+			case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+	        case 'application/vnd.ms-excel':
+	        case 'application/msexcel':
+	        case 'application/x-msexcel':
+	        case 'application/x-ms-excel':
+	        case 'application/x-excel':
+	        case 'application/x-dos_ms_excel':
+	        case 'application/xls':
+	        case 'application/x-xls':
+	        case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
 				break;
 			default:
 				die('Unsupported File!'); //output error
@@ -70,7 +81,7 @@ if(isset($_FILES["fileAssignmentSampleReport"]) && $_FILES["fileAssignmentSample
 	else {
 		if(move_uploaded_file($_FILES['fileAssignmentSampleReport']['tmp_name'], $UploadDirectory.$NewFileName )) {
 			// save the link to the database.
-			$register = RegisterAssignmentSampleReport($assignmentAssPDF, $courseAssPDF, "courses/".$UploadDirectory.$NewFileName);
+			$register = RegisterAssignmentSampleReport($assignmentAssPDF, $courseAssPDF, $UploadDirectory.$NewFileName);
 			if($register == "-1") {
 				die("Oops! We encountered an error while uploading your Assignment PDF. Please try again.");
 			}

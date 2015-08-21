@@ -359,10 +359,15 @@ function GetCourseCalender($courseId) {
 			$resp = "-1";
 		}
 		else {
-			while ($res = mysql_fetch_array($rs)) {
-				$calender = $res["Calender"];
+			if(mysql_num_rows($rs) > 0) {
+				while ($res = mysql_fetch_array($rs)) {
+					$calender = $res["Calender"];
+				}
+				$resp = "http://mentored-research.com/courses/" . $calender;
 			}
-			$resp = "http://mentored-research.com/" . $calender;
+			else {
+				$resp = "0";
+			}
 		}
 		echo $resp;
 	}
@@ -415,10 +420,15 @@ function GetMentorCalender($mentorEmail) {
 				$resp = "-1";
 			}
 			else {
-				while ($res = mysql_fetch_array($rs)) {
-					$calender = $res["Calender"];
+				if(mysql_num_rows($rs) > 0) {
+					while ($res = mysql_fetch_array($rs)) {
+						$calender = $res["Calender"];
+					}
+					$resp = "http://mentored-research.com/courses/" . $calender;
 				}
-				$resp = "http://mentored-research.com/" . $calender;
+				else {
+					$resp = "0";
+				}
 			}
 		}
 		echo $resp;
@@ -869,10 +879,15 @@ function GetCalender($menteeEmail) {
 				$resp = "-1";
 			}
 			else {
-				while ($res = mysql_fetch_array($rs)) {
-					$calender = $res["Calender"];
+				if(mysql_num_rows($rs) > 0) {
+					while ($res = mysql_fetch_array($rs)) {
+						$calender = $res["Calender"];
+					}
+					$resp = "http://mentored-research.com/courses/" . $calender;
 				}
-				$resp = "http://mentored-research.com/" . $calender;
+				else {
+					$resp = "0";
+				}
 			}
 		}
 		echo $resp;

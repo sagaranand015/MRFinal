@@ -1013,23 +1013,33 @@
 		                    var ftype = $('#fileAssignmentSampleReport')[0].files[0].type; // get file type
 		                    //allow file types 
 		                    switch(ftype) {
-								case 'image/png': 
 								case 'image/gif': 
-								case 'image/jpeg': 
-								case 'image/pjpeg':
-								case 'text/plain':
-								case 'text/html':
-								case 'application/x-zip-compressed':
-								case 'application/pdf':
-								case 'application/msword':
-								case 'application/vnd.ms-excel':
-								case 'video/mp4':
+                                case 'image/jpeg': 
+                                case 'image/pjpeg':
+                                case 'text/plain':
+                                case 'text/html': //html file
+                                case 'application/x-zip-compressed':
+                                case 'application/pdf':
+                                case 'application/msword':
+                                case 'application/vnd.ms-excel':
+                                case 'video/mp4':
+                                case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                                case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                                case 'application/vnd.ms-excel':
+                                case 'application/msexcel':
+                                case 'application/x-msexcel':
+                                case 'application/x-ms-excel':
+                                case 'application/x-excel':
+                                case 'application/x-dos_ms_excel':
+                                case 'application/xls':
+                                case 'application/x-xls':
+                                case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
 		                            break;
 		                        default:
 		                            alertMsg.children('p').remove();
 		                        	alertMsg.fadeOut();
 		                            popup.children('p').remove();
-		                            popup.append("<p>The file uploaded is not supported by the server. Please upload the file in PDF format only.</p>").fadeIn();
+		                            popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
 		                            return false;
 		                    }
 		                    //Allowed file size is less than 5 MB (1048576)
@@ -2645,7 +2655,7 @@
 							</tr>
 							<tr>
 								<td colspan="2">
-									<input type="submit" value="Add Mentor" class="btn btn-lg btn-primary btn-block" />
+									<input type="submit" value="Add Mentee" class="btn btn-lg btn-primary btn-block" />
 								</td>
 							</tr>
 						</table>
@@ -2908,10 +2918,10 @@
     		    	</tr>
     		    	<tr>
     		    		<td>
-    		    			<label>Guide Name: </label>
+    		    			<label>Guide Content/Name: </label>
     		    		</td>
     		    		<td>
-    		    			<input type="text" placeholder="Course Guide Name" id="txtGuideName" class="form-control" required />
+    		    			<input type="text" placeholder="Course Guide Content/Name" id="txtGuideName" class="form-control" required />
     		    		</td>
     		    	</tr>
                     <tr>

@@ -72,7 +72,7 @@ if(isset($_FILES["fileGuide"]) && $_FILES["fileGuide"]["error"]== UPLOAD_ERR_OK)
 	else {
 		if(move_uploaded_file($_FILES['fileGuide']['tmp_name'], $UploadDirectory.$NewFileName )) {
 			// put url of the calender file here.
-			$register = RegisterGuideUrl($courseID, $guideName, "courses/".$UploadDirectory.$NewFileName);
+			$register = RegisterGuideUrl($courseID, $guideName, $UploadDirectory.$NewFileName);
 			if($register == "1") {
 				die('Your File has been successfully uploaded.');
 			}

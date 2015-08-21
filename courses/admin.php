@@ -2257,10 +2257,12 @@
                                 }
                                 else {
                                     popup.children('p').remove();
-                                    popup.append("<p>" + response + "</p>").fadeIn();
+                                    popup.append("<p>" + response + ". Please wait while we reload the page for you.</p>").fadeIn();
 
-                                    // click the assign mentee button here.
-                                    $('.assign-mentee').trigger('click');
+                                    // reload the page for no problems afterwards.
+                                    setTimeout(function() {
+                                        location.reload();
+                                    }, 5000);
                                 }
                             },
                             error: function() {
@@ -2723,7 +2725,7 @@
 	        				<label>Assignment Posted On: </label>
 	        			</td>
 	        			<td>
-	        				<input type="date" id="txtAssPostedOn" class="form-control" placeholder="mm/dd/yyyy" required />
+	        				<input type="text" id="txtAssPostedOn" class="form-control" placeholder="mm/dd/yyyy" required />
 	        			</td>
 	        		</tr>
 	        		<tr>
@@ -2731,7 +2733,7 @@
 	        				<label>Assignment Deadline: </label>
 	        			</td>
 	        			<td>
-	        				<input type="date" id="txtAssDeadline" class="form-control" placeholder="mm/dd/yyyy" required />
+	        				<input type="text" id="txtAssDeadline" class="form-control" placeholder="mm/dd/yyyy" required />
 	        			</td>
 	        		</tr>
 	        		<tr>

@@ -810,8 +810,8 @@ function GetAssignmentsDropDown($assCourse) {
 // for adding the assignment details to the database table
 function AddAssignmentDetails($assCourse, $assName, $assDesc, $assPostedOn, $assPostedBy, $assDeadline, $assNo) {
 	$resp = "-1";
-	$assPostedOn = strtotime($assPostedOn);
-	$assDeadline = strtotime($assDeadline);
+	// $assPostedOn = strtotime($assPostedOn);
+	// $assDeadline = strtotime($assDeadline);
 	try {
 		$query = "insert into Assignment(AssCourse, AssName, AssDesc, AssPostedOn, AssPostedBy, AssDeadline, AssNo) values('$assCourse', '$assName', '$assDesc', '$assPostedOn', '$assPostedBy', '$assDeadline', '$assNo')";
 		$rs = mysql_query($query);

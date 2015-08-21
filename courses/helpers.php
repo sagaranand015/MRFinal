@@ -68,6 +68,7 @@ function AddToUsers($email, $level) {
 		}
 		else {
 			$resp = "1";
+			SendNewUserMail($email);   // to send the mail to the user.
 		}
 		return $resp;
 	}

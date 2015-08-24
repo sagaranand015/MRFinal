@@ -41,7 +41,6 @@ if(isset($_FILES["fileAddMentor"]) && $_FILES["fileAddMentor"]["error"]== UPLOAD
         case 'application/x-dos_ms_excel':
         case 'application/xls':
         case 'application/x-xls':
-        case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
 			break;
 		default:
 			die('Unsupported File!'); //output error

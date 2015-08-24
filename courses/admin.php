@@ -1746,7 +1746,6 @@
                             case 'application/x-dos_ms_excel':
                             case 'application/xls':
                             case 'application/x-xls':
-                            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
                                 break;
                             default:
                                 alertMsg.children('p').remove();
@@ -1852,7 +1851,6 @@
                             case 'application/x-dos_ms_excel':
                             case 'application/xls':
                             case 'application/x-xls':
-                            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
                                 break;
                             default:
                                 alertMsg.children('p').remove();

@@ -635,7 +635,7 @@
 								else {
 									reportDiv += "data-url='" + reports[i] +  "'>";
 								}
-								reportDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
+								reportDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-pdf-o fa-stack-1x fa-inverse'></i></span>";
 								reportDiv += "<p class='text-muted'>" + "Sample Report " + (i+1) + "</p>";
 								reportDiv += "</div>";
 							}
@@ -653,7 +653,7 @@
 								else {
 									offTopicDiv += "data-url='" + offtopics[i] +  "'>";
 								}
-								offTopicDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
+								offTopicDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-excel-o fa-stack-1x fa-inverse'></i></span>";
 								offTopicDiv += "<p class='text-muted'>" + "Off Topic Read " + (i+1) + "</p>";
 								offTopicDiv += "</div>";
 							}
@@ -671,7 +671,7 @@
 								else {
 									extraDiv += "data-url='" + extras[i] +  "'>";
 								}
-								extraDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
+								extraDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-word-o fa-stack-1x fa-inverse'></i></span>";
 								extraDiv += "<p class='text-muted'>" + "Extra Material " + (i+1) + "</p>";
 								extraDiv += "</div>";
 							}
@@ -1638,7 +1638,7 @@
                     </tr>
                 </table>  
             </form>              
-        </div>  <!-- end of CRP-div -->
+        </div>  <!-- end of profile-div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div CRP-div">
 	        <h1 class="page-header">
@@ -1812,7 +1812,7 @@
 		</div><!-- /.modal-dialog -->
 	</div><!-- /.modal -->
 
-     <!-- this is for showing the custom video using the video.js plugin inside the modal -->
+    <!-- this is for showing the custom video using the video.js plugin inside the modal -->
     <div class="modal fade" id="lectureVideoModal">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">

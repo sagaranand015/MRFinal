@@ -99,6 +99,56 @@ else if(isset($_GET["no"]) && $_GET["no"] == "30") {  // to get the list of all 
 else if(isset($_GET["no"]) && $_GET["no"] == "31") {  // to assign the mentor to the mentees selected.
 	AssignMentorToMentees($_GET["mentorId"], $_GET["mentees"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "32") {  // to get directors, mentors and mentees from the organisation.
+	GetAllUsersByOrgan($_GET["organ"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "33") {  // to send a message from the admin to any of the users.
+	SendAdminMessage($_GET["email"], $_GET["msg"]);
+}
+
+// to send a message from the admin to any of the users.
+function SendAdminMessage($email, $msg) {
+	$resp = "-1";
+	try {
+		$subject = "Message from Admin Mentored-Research";
+		$message = "Dear " . $email . "<br /><br />";
+		$message .= "The admin from Mentored-Research has the following message for you: <br /><br />";
+		$message .= "<b>" . $msg . "</b><br /><br />";
+
+		$message .= "Team Mentored-Research<br />";
+		$message .= "info@mentored-research.com<br /><br />";
+		$message .= "Please do not reply to this automated mail.<br />";
+
+		$res = SendMessage($email, $email, "info@mentored-research.com", "Mentored-Research", $subject, $message);
+		if($res == "-1") {
+			echo $res;
+		}
+		else {
+			header('Content-Type: application/json');
+			echo json_encode($res);
+		}		
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// to get directors, mentors and mentees from the organisation.
+function GetAllUsersByOrgan($organ) {
+	$resp = "-1";
+	$users = array();
+	try {
+		$users[0] = GetDirectorDetailsByOrgan($organ);
+		$users[1] = GetMentorDetailsByOrgan($organ);
+		$users[2] = GetMenteeDetailsByOrgan($organ);
+		echo json_encode($users);
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // to assign the mentor to the mentees selected.
 function AssignMentorToMentees($mentorId, $mentees) {

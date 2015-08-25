@@ -256,6 +256,9 @@
 			left: 45%;
             color: #fff;
 		}
+        .assignment-video, .assignment-report, .assignment-offtopic, .assignment-extra, .latest-assignment-name {
+            cursor: pointer;
+        }
 
     </style>
 
@@ -661,7 +664,6 @@
 
             	// to show the list of organization on clicking of the dashboard button.
             	showLoading();
-            	$('#ddl-organisation').remove();   // to remove the previous one
 				$.ajax({
 				    type: "GET",
 				    url: "AJAXFunctions.php",
@@ -674,7 +676,7 @@
 				        	popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
 				    	}
 				    	else {
-				    		$('.dashboard-div').append(response);
+				    		$('.dashboard-organ').html(response);
 				    	}
 				    },
 				    error: function() {
@@ -688,8 +690,123 @@
 				    }
 				});
 
+                // for the delegate event of the change of the organisation drop down on dashboard.
+                // show all the directors and mentors and mentees here on this page.
+                $('.dashboard-div').delegate('#ddl-organisation', 'change', function() {
+                    var organ = $(this).val();
+
+                    // this is to get the directors, mentors and mentees on the admin dashboard.
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "32", organ: organ
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
+                            }
+                            else {
+                                var res = $.parseJSON(response);
+                                console.log(res);
+
+                                // firstly, get the directors(index: 0)
+                                var temp = "<h3>Directors: </h3>";
+                                for(var i = 0;i<res[0].length;i++) {
+                                    temp += "<tr><td>" + res[0][i].DirectorName + "</td><td>" + res[0][i].DirectorEmail + "</td><td><a href='#' data-email='" + res[0][i].DirectorEmail + "' class='btnDashboardSendMessage'>Send Messsage</a></td></tr>";
+                                }
+                                $('.dashboard-director').html(temp);
+
+                                // for the mentor display
+                                temp = "<h3>Mentors: </h3>";
+                                for(var i = 0;i<res[1].length;i++) {
+                                    temp += "<tr><td>" + res[1][i].MentorName + "</td><td>" + res[1][i].MentorEmail + "</td><td><a href='#' data-email='" + res[1][i].MentorEmail + "' class='btnDashboardSendMessage'>Send Messsage</a></td></tr>";
+                                }
+                                $('.dashboard-mentor').html(temp);
+
+                                // for the mentee display
+                                temp = "<h3>Mentees: </h3>";
+                                for(var i = 0;i<res[2].length;i++) {
+                                    temp += "<tr><td>" + res[2][i].MenteeName + "</td><td>" + res[2][i].MenteeEmail + "</td><td><a href='#' data-email='" + res[2][i].MenteeEmail + "' class='btnDashboardSendMessage'>Send Messsage</a></td></tr>";
+                                }
+                                $('.dashboard-mentee').html(temp);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+
+                });   // end of delegate event.
+
+                // for the send Message button that shows the modal for sending message.
+                $('.dashboard-div').delegate('.btnDashboardSendMessage', 'click', function() {
+                    var email = $(this).attr('data-email');
+                    $('#txtSendMessageEmail').val(email);
+                    $('#sendMessageModal').modal('show');
+                    return false;
+                });
+
+                // for sending the message from the modal box.
+                $('#btnSendMessage').on('click', function() {
+                    var msg = $('#txtSendMessage').val();
+
+                    var email = $('#txtSendMessageEmail').val();
+
+                    if(msg == "") {
+                        popup.children('p').remove();
+                        popup.append("<p>Please Enter a message to be sent</p>").fadeIn();
+                    }
+                    else if(email == "" || email == "undefined" || email == undefined) {
+                        popup.children('p').remove();
+                        popup.append("<p>Unexpected Error Occured. Please login again.</p>").fadeIn();   
+                    }
+                    else {   // ajax request to send the message to the email
+                        $('#sendMessageModal').modal('hide');
+                        showLoading();
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "33", email: email, msg: msg
+                            },
+                            success: function(response) {
+                                console.log(response);
+                                if(response[0]["status"] == "sent") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Your Message has been sent. Thank You.</p>").fadeIn();
+                                    // remove the contents of the message box here.
+                                    $('#txtSendMessage').val("");
+                                }
+                                else if(response[0]["status"] == "queued" || response[0]["status"] == "scheduled") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Your Message has been Queued. Sit back and relax while we send your message in sometime.</p>").fadeIn();
+                                }
+                                else if(response[0]["status"] == "rejected" || response[0]["status"] == "invalid") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! Your Message could not ben sent. Please try again.</p>").fadeIn();
+                                }
+                            },
+                            error: function() {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                            },
+                            complete: function() {
+                                hideLoading();
+                            }
+                        });   // end of ajax Request
+                    }  // end of else.
+                    return false;
+                });  // end of #btnSendMessage click.
+
             	return false;
-            });
+            });    // end of dashboard click link on LHS.
 
 			// for the assignment link on LHS
 			$('.assignment').on('click', function() {
@@ -1786,8 +1903,8 @@
                     // to fadeOut the alertMsg and reload the page after 3 seconds.
                     setTimeout(function() {
                         alertMsg.fadeOut();
-                        //location.reload();
-                    }, 10000);
+                        location.reload();
+                    }, 3000);
                 }     // end of afterSuccessAssignmentSolution function
 
                 // code for updateSolution File upload
@@ -2285,18 +2402,282 @@
 
                     return false;
                 });
-
                 return false;
             });   // end of the assign-mentees div on LHS.
 
+            // for the Central Resources page on LHS
+            $('.CRP').on('click', function() {
+                showDiv($('.CRP-div'));
+                changeActiveState($(this).parent('li'));
+
+                // get the assignments drop down list from here.
+                var email = $.cookie("email");
+                var id = $.cookie("id");
+
+                // to get all the courses as a drop down list
+                showLoading();
+                $.ajax({
+                    type: "GET",
+                    url: "AJAXFunctions.php",
+                    data: {
+                        no: "6"
+                    },
+                    success: function(response) {
+                        // to show the courses drop down at appropriate place.
+                        if(response == "-1") {
+                            popup.children('p').remove();
+                            popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                        }
+                        else {
+                            $('.course-crp').children('select').remove();
+                            $('.course-crp').append(response);
+                        }
+                    }, 
+                    error: function() {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+                return false;
+            });   // end of click on LHS CRP link.
+
+            $('.CRP-div').delegate('#ddl-course', 'change', function() {
+                var courseId = $(this).val();
+                showLoading();
+                $.ajax({
+                    type: "GET",
+                    url: "AJAXFunctions.php",
+                    data: {
+                        no: "10", courseAssPDF: courseId
+                    },
+                    success: function(response) {
+                        // to show the assignments drop down at appropriate place.
+                        if(response == "-1") {
+                            popup.children('p').remove();
+                            popup.append("<p>We could not retrieve your assignments from the database. Please check your internet connection and try again.</p>").fadeIn();                             
+                        }
+                        else if(response == "-2") {
+                            popup.children('p').remove();
+                            popup.append("<p>You have not been assigned any courses. Please try again or contact your mentor.</p>").fadeIn();                               
+                        }
+                        else {
+                            $('.assignment-crp').children('select').remove();
+                            $('.assignment-crp').append(response);
+                        }
+                    }, 
+                    error: function() {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });   // end of ajax.
+                return false;
+            });   // end of delegate event of the course change drop down.
+
+            // for the delegate event of the assignments in CRP.
+            $('.CRP-div').delegate('#ddl-assignment', 'change', function() {
+                var assID = $(this).val();
+
+                // ajax request to get the assignment PDF and assignment materials.
+                if(assID == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select an assignment before proceeding.</p>").fadeIn();
+                }
+                else {
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "13", assID: assID
+                        },
+                        success: function(response) {
+                            console.log(response);
+                            // now, parse the data and show all the results.
+                            if(response.AssName == "" || response.AssName == undefined) { 
+                                $('.assignment-name').html("No Assignment Name");   
+                            }
+                            else {
+                                $('.assignment-name').html("<b>" + response.AssName + "</b>");
+                            }
+                            if(response.AssDesc == "" || response.AssDesc == undefined) { 
+                                $('.assignment-desc').html("No Assignment Description");    
+                            }
+                            else {
+                                $('.assignment-desc').html(response.AssDesc);
+                            }
+                            if(response.AssPostedOn == "" || response.AssPostedOn == undefined) { 
+                                $('.assignment-postedon').html("No Assignment Date");   
+                            }
+                            else {
+                                $('.assignment-postedon').html(response.AssPostedOn);
+                            }
+                            if(response.AssDeadline == "" || response.AssDeadline == undefined) { 
+                                $('.assignment-deadline').html("No Assignment Deadline Date");  
+                            }
+                            else {
+                                $('.assignment-deadline').html(response.AssDeadline);
+                            }
+                            if(response.AssPdf == "" || response.AssPdf == undefined) { 
+                                $('.assignment-question').html("No Question Uploaded"); 
+                            }
+                            else {
+                                $('.assignment-question').html("<a href='" + response.AssPdf + "' target='_blank'>Click to download Assignment</a>");
+                            }
+
+                            // now, for the assignment Video tabs.
+                            $('.videos').children('.assignment-video').remove();
+                            var videos = response.AssVideo;
+                            var videoDiv = "";
+                            for(var i=0;i<videos.length;i++) {
+                                videoDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 assignment-video'";
+                                if(videos[i] == undefined || videos[i] == "undefined" || videos[i] == "") {
+                                    videoDiv += "data-url='" + "" +  "'>";
+                                }
+                                else {
+                                    videoDiv += "data-url='" + videos[i] +  "'>";
+                                }
+                                videoDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
+                                videoDiv += "<p class='text-muted'>" + "Video Lecture " + (i+1) + "</p>";
+                                videoDiv += "</div>";
+                            }
+                            $('.videos').append(videoDiv);
+
+                            // now, for the assignment Sample Reports
+                            $('.reports').children('.assignment-report').remove();
+                            var reports = response.AssSampleReport;
+                            var reportDiv = "";
+                            for(var i=0;i<reports.length;i++) {
+                                reportDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 assignment-report'";
+                                if(reports[i] == undefined || reports[i] == "undefined" || reports[i] == "") {
+                                    reportDiv += "data-url='" + "" +  "'>";
+                                }
+                                else {
+                                    reportDiv += "data-url='" + reports[i] +  "'>";
+                                }
+                                reportDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-pdf-o fa-stack-1x fa-inverse'></i></span>";
+                                reportDiv += "<p class='text-muted'>" + "Sample Report " + (i+1) + "</p>";
+                                reportDiv += "</div>";
+                            }
+                            $('.reports').append(reportDiv);
+
+                            // now, for the assignment Off Topics
+                            $('.offtopics').children('.assignment-offtopic').remove();
+                            var offtopics = response.AssOffTopic;
+                            var offTopicDiv = "";
+                            for(var i=0;i<offtopics.length;i++) {
+                                offTopicDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 assignment-offtopic'";
+                                if(offtopics[i] == undefined || offtopics[i] == "undefined" || offtopics[i] == "") {
+                                    offTopicDiv += "data-url='" + "" +  "'>";
+                                }
+                                else {
+                                    offTopicDiv += "data-url='" + offtopics[i] +  "'>";
+                                }
+                                offTopicDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-excel-o fa-stack-1x fa-inverse'></i></span>";
+                                offTopicDiv += "<p class='text-muted'>" + "Off Topic Read " + (i+1) + "</p>";
+                                offTopicDiv += "</div>";
+                            }
+                            $('.offtopics').append(offTopicDiv);
+
+                            // now, for the assignment Extras
+                            $('.extras').children('.assignment-extra').remove();
+                            var extras = response.AssExtra;
+                            var extraDiv = "";
+                            for(var i=0;i<extras.length;i++) {
+                                extraDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 assignment-extra'";
+                                if(extras[i] == undefined || extras[i] == "undefined" || extras[i] == "") {
+                                    extraDiv += "data-url='" + "" +  "'>";
+                                }
+                                else {
+                                    extraDiv += "data-url='" + extras[i] +  "'>";
+                                }
+                                extraDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-word-o fa-stack-1x fa-inverse'></i></span>";
+                                extraDiv += "<p class='text-muted'>" + "Extra Material " + (i+1) + "</p>";
+                                extraDiv += "</div>";
+                            }
+                            $('.extras').append(extraDiv);
+
+                        },
+                        error: function() {
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }  // end of else.
+                return false;
+            });   // end of delegate function of the assigment ddl in CRP.
+            // for the delegate function of the lecture videos.
+            $('.videos').delegate('.assignment-video', 'click', function() {
+                var url = $(this).attr('data-url');
+                if(url == "" || url == undefined) {
+                    alert("No defined.");
+                }
+                else {
+                    $('#lecture-video-modal-body').html("<iframe src='" + url + "'></iframe>");
+                    $('#lectureVideoModal').modal('show');  
+                }
+
+                // to hide the modal on click of the hide buttin
+                $('#lectureVideoModal').on('hide.bs.modal', function (event) {
+                    // for pausing the video that is playing.
+                    var iframe = $('#lecture-video-modal-body').children('iframe');
+                    iframe.attr('src', iframe.attr('src'));
+                });
+
+                return false;
+            });
+            // for the delegate function of the lecture Sample Reports
+            $('.reports').delegate('.assignment-report', 'click', function() {
+                var url = $(this).attr('data-url');
+                if(url == "" || url == undefined) {
+                    alert("No defined.");
+                }
+                else {
+                    window.open(url, "_blank");
+                }
+                return false;
+            });
+            // for the delegate function of the lecture Off Topic Reads
+            $('.offtopics').delegate('.assignment-offtopic', 'click', function() {
+                var url = $(this).attr('data-url');
+                if(url == "" || url == undefined) {
+                    alert("No defined.");
+                }
+                else {
+                    window.open(url, "_blank");
+                }
+                return false;
+            });
+            // for the delegate function of the lecture Off Topic Reads
+            $('.extras').delegate('.assignment-extra', 'click', function() {
+                var url = $(this).attr('data-url');
+                if(url == "" || url == undefined) {
+                    alert("No defined.");
+                }
+                else {
+                    window.open(url, "_blank");
+                }
+                return false;
+            });
+
+
             // hide all the divs on page load. Except for first div.
             $('.main-div').hide();
-            $('.dashboard').trigger('click');
-
-            // for the delegate event of the change of the organisation drop down on dashboard.
-            $('.dashboard-div').delegate('#ddl-organisation', 'change', function() {
-            	alert($(this).val());
-            });
+            $('.CRP').trigger('click');
 
         });    // end of ready function.
 
@@ -2379,6 +2760,7 @@
                 <i class="fa fa-remove fa-lg hidden-lg hidden-md" id="btnCloseMenu"></i>
 
                 <ul class="nav nav-sidebar">
+                    <li><a href="#" class="CRP">Central Resources</a></li>
                 	<li><a href="#" class="dashboard">Admin Dashboard</a></li>
                     <li><a href="#" class="profile">Profile</a></li>
                     <li><a href="#" class="password">Change Password</a></li>
@@ -2404,6 +2786,106 @@
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <!-- for the central resource page -->
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div CRP-div">
+            <h1 class="page-header">
+                Central Resource Page
+            </h1>
+
+            <table class="table">
+                <tr>
+                    <td>
+                        <label>Select Course: </label>
+                    </td>
+                    <td class="course-crp">
+                        <!-- data will come here from ajax -->
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Select Assignment: </label>
+                    </td>
+                    <td class="assignment-crp">
+                        <!-- data will come here from ajax -->
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Assignment Name: </label>
+                    </td>
+                    <td class="assignment-name">
+                        <!-- data will come here from ajax -->
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Assignment Description: </label>
+                    </td>
+                    <td class="assignment-desc">
+                        <!-- data will come here from ajax -->
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Assignment Posted On: </label>
+                    </td>
+                    <td class="assignment-postedon">
+                        <!-- data will come from ajax here -->
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Assignment Deadline: </label>
+                    </td>
+                    <td class="assignment-deadline">
+                        <!-- data will come from ajax here -->
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Assignment Question: </label>
+                    </td>
+                    <td class="assignment-question">
+                        <!-- data will come from ajax here -->
+                    </td>
+                </tr>
+            </table>
+
+            <!-- for assignment videos -->
+            <div class="row text-center videos">
+                <h3 class="page-header">
+                    Assignment Video Lectures
+                </h3>
+                <!-- data will come from ajax here -->
+            </div>
+
+            <!-- for assignment Sample Reports -->
+            <div class="row text-center reports">
+                <h3 class="page-header">
+                    Assignment Sample Reports
+                </h3>
+                <!-- data will come from ajax here -->
+            </div>
+
+            <!-- for assignment Off Topics -->
+            <div class="row text-center offtopics">
+                <h3 class="page-header">
+                    Assignment Off Topic Reads
+                </h3>
+                <!-- data will come from ajax here -->
+            </div>
+
+            <!-- for assignment Extras -->
+            <div class="row text-center extras">
+                <h3 class="page-header">
+                    Assignment Extras
+                </h3>
+                <!-- data will come from ajax here -->
+            </div>
+            
+        </div>  <!-- end of CRP-div -->
+
 
         <!-- for the assign mentees div -->
          <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div assign-mentee-div">
@@ -2944,7 +3426,25 @@
 	        	Admin Dashboard
 	        </h1>
 
-	        <!-- Data will come from the AJAX here -->
+            <table class="table">
+                <tr>
+                    <td colspan="2" class="dashboard-organ">
+                        <!-- Data will come from the AJAX here -->
+                    </td>
+                </tr>
+            </table>
+
+            <table class="table dashboard-director">
+                <!-- data will come from ajax -->
+            </table>
+
+            <table class="table dashboard-mentor">
+                <!-- data will come from ajax -->
+            </table>
+
+            <table class="table dashboard-mentee">
+                <!-- data will come from ajax -->
+            </table>
         </div>  <!-- end of dashboard div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div profile-div">
@@ -3126,31 +3626,52 @@
 
     </div>
 
-   <!--   <footer class="footer">
-	        <div class="container">
-	            <div class="row">
-	                <div class="col-md-4">
-	                    <span class="copyright">Copyright &copy; Mentored-Research 2015</span>
-	                </div>
-	                <div class="col-md-4">
-	                    <ul class="list-inline social-buttons">
-	                        <li><a href="https://www.facebook.com/pages/Mentored-Researchs-Equity-Research-Initiative/313860081992430?ref=br_tf" target="_blank"><i class="fa fa-facebook"></i></a>
-	                        </li>
-	                        <li><a href="https://www.linkedin.com/company/2217419?trk=tyah&trkInfo=tarId%3A1401993298521%2Ctas%3Amentored%2Cidx%3A1-3-3" target="_blank"><i class="fa fa-linkedin"></i></a>
-	                        </li>
-	                    </ul>
-	                </div>
-	                <div class="col-md-4">  
-	                    <ul class="list-inline social-buttons">
-	                        <li><a href="https://www.facebook.com/pages/Mentored-Researchs-Equity-Research-Initiative/313860081992430?ref=br_tf" target="_blank"><i class="fa fa-facebook"></i></a>
-	                        </li>
-	                        <li><a href="https://www.linkedin.com/company/2217419?trk=tyah&trkInfo=tarId%3A1401993298521%2Ctas%3Amentored%2Cidx%3A1-3-3" target="_blank"><i class="fa fa-linkedin"></i></a>
-	                        </li>
-	                    </ul>
-	                </div>
-	            </div>
-	        </div>
-	    </footer> -->
+     <!-- this is for sending the email to the mentor using the modal -->
+    <div class="modal fade" id="sendMessageModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Send Message</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <tr>
+                            <td>
+                                <input type="email" id="txtSendMessageEmail" placeholder="Email Address" required class="form-control" disabled="disabled" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <textarea id="txtSendMessage" placeholder="Type in your message" required class="form-control" rows="10"></textarea>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-lg btn-primary" id="btnSendMessage">Send Message</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <!-- this is for showing the custom video using the video.js plugin inside the modal -->
+    <div class="modal fade" id="lectureVideoModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Lecture Videos</h4>
+                </div>
+                <div class="modal-body" id="lecture-video-modal-body">
+                    <!-- for the video tag -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
 
     <!-- Bootstrap Core JavaScript -->
     <script src="js/bootstrap.min.js"></script>

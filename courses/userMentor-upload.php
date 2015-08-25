@@ -119,7 +119,7 @@ if(isset($_FILES["fileAddMentor"]) && $_FILES["fileAddMentor"]["error"]== UPLOAD
 				    	}
 				    }   // end of foreach
 				}
-				$response = $i . " user(s) have been Added. <br />Not Added: " . $userDefault . "<br /><br />" . " Mentor(s) have also been added. <br />Not Added: " . $menteeDefault . "<br /><br />";
+				$response = $i . " user(s) have been Added. <br />Not Added: " . $userDefault . "<br /><br />" . " Mentor(s) have also been added. <br />Not Added: " . $menteeDefault . ".<br /><br /> Please wait while we reload the page for you.";
 				die($response);
 				//die($i . " Email Addresses have been added to the Users Table. " . $j . " have not been added.");
 			} 

@@ -8,6 +8,81 @@ include 'headers/databaseConn.php';
 // for mandrill mail sending API.
 require_once 'mandrill/Mandrill.php'; 
 
+// for getting the mentee details in a json response based on mentee organ
+// returns -1 on error. array of mentee details on success.
+function GetMenteeDetailsByOrgan($organ) {
+	$resp = "-1";
+	$mentee = array();
+	try {
+		$query = "select * from Mentee where MenteeOrgan='$organ'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				array_push($mentee, $res);
+			}
+			$resp = $mentee;
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// for getting the mentor details in a json response based on mentor organ
+// returns -1 on error. array of mentor details on success.
+function GetMentorDetailsByOrgan($organ) {
+	$resp = "-1";
+	$mentor = array();
+	try {
+		$query = "select * from Mentor where MentorOrgan='$organ'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				array_push($mentor, $res);
+			}
+			$resp = $mentor;
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// for getting the mentor details in a json response based on mentor ID
+// returns -1 on error. array of mentor details on success.
+function GetDirectorDetailsByOrgan($organ) {
+	$resp = "-1";
+	$director = array();
+	try {
+		$query = "select * from Director where DirectorOrgan='$organ'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				array_push($director, $res);
+			}
+			$resp = $director;
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // to assign a mentorID to the mentee passed as paramters.
 function AssignMentor($mentorId, $menteeId) {
 	$resp = "-1";

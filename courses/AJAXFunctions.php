@@ -105,6 +105,182 @@ else if(isset($_GET["no"]) && $_GET["no"] == "32") {  // to get directors, mento
 else if(isset($_GET["no"]) && $_GET["no"] == "33") {  // to send a message from the admin to any of the users.
 	SendAdminMessage($_GET["email"], $_GET["msg"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "34") {  // to set all the questions, answers and options to the database.
+	AddQuiz($_GET["courseId"], $_GET["assId"], $_GET["quizName"], $_GET["deadline"], $_GET["questions"], $_GET["answers"], $_GET["options"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "35") {  // to get the quiz details to be shown on the Attempt quiz page.
+	GetQuizDetailsByAssignment($_GET["assId"], $_GET["menteeId"], $_GET["menteeEmail"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "36") {  // to get the quiz questions and options to be shown to the mentee.
+	GetQuizQuestionsAndOptions($_GET["quizId"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "37") {  // to evaluate the basic quiz
+	SubmitAndEvaluateBasicQuiz($_GET["ans"], $_GET["quizId"], $_GET["assId"], $_GET["menteeId"], $_GET["menteeEmail"]);
+}
+
+// to evaluate the basic quiz. Returns the score on evaluation.
+function SubmitAndEvaluateBasicQuiz($givenAns, $quizId, $assId, $menteeId, $menteeEmail) {
+	$resp = "-1";
+	$answers = json_decode($givenAns, true);
+	$ans = array();
+	$correct = 0;
+	try {
+		// firstly, get the answers in the array.
+		$ans = GetQuizAnswers($quizId);
+		if($ans == "-1") {
+			$resp = "-1";
+		}
+		else if($ans == "0") {
+			$resp = "0";   // no responses are found.
+		}
+		else {	
+			for ($i=0; $i < count($ans); $i++) { 
+				if($ans[$i] == $answers[$i]) {
+					$correct++;
+				}
+			}
+			$resp = RegisterQuizResponse($quizId, $assId, $menteeId, $menteeEmail, $givenAns, $correct);
+
+			// now, send the mail to the mentee.
+			$mail = SendQuizResponseMail($quizId, $assId, $menteeId, $menteeEmail, $givenAns, $ans, $correct);
+		}	
+		echo $resp . " ~ " . $correct;
+	}	
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+
+// to get the quiz questions and options to be shown to the mentee.
+function GetQuizQuestionsAndOptions($quizId) {
+	$resp = "";
+	$ques = array();
+	$op = array();
+	try {
+		$query = "select * from QuizQuestion where QuizID='$quizId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				while ($res = mysql_fetch_array($rs)) {
+					array_push($ques, $res["Q1"]);
+					array_push($ques, $res["Q2"]);
+					array_push($ques, $res["Q3"]);
+					array_push($ques, $res["Q4"]);
+					array_push($ques, $res["Q5"]);
+
+					// for all the options.
+					array_push($op, $res["Qop11"]);
+					array_push($op, $res["Qop12"]);
+					array_push($op, $res["Qop13"]);
+					array_push($op, $res["Qop14"]);
+
+					array_push($op, $res["Qop21"]);
+					array_push($op, $res["Qop22"]);
+					array_push($op, $res["Qop23"]);
+					array_push($op, $res["Qop24"]);
+
+					array_push($op, $res["Qop31"]);
+					array_push($op, $res["Qop32"]);
+					array_push($op, $res["Qop33"]);
+					array_push($op, $res["Qop34"]);
+
+					array_push($op, $res["Qop41"]);
+					array_push($op, $res["Qop42"]);
+					array_push($op, $res["Qop43"]);
+					array_push($op, $res["Qop44"]);
+
+					array_push($op, $res["Qop51"]);
+					array_push($op, $res["Qop52"]);
+					array_push($op, $res["Qop53"]);
+					array_push($op, $res["Qop54"]);
+				}
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		if($resp == "-1" || $resp == "0") {
+			echo $resp;
+		}
+		else {
+			$resp = json_encode($ques) . " ~ " . json_encode($op);
+			echo $resp;
+		}
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// to get the quiz details to be shown on the Attempt quiz page.
+function GetQuizDetailsByAssignment($assId, $menteeId, $menteeEmail) {
+	$resp = "-1";
+	$attempt = array();
+	try {
+		$query = "select * from Quiz where AssID='$assId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				$resp = "";
+				while ($res = mysql_fetch_array($rs)) {
+					$attempt = IsQuizAttempted($menteeId, $res["QuizID"]);
+					if($attempt["Error"] == "1") {
+						$resp .= GetQuizNameById($res["QuizID"]) . " could not be loaded. Please try again.";
+					}
+					else {
+						if($attempt["IsAttempted"] == "1") {  // quiz has been attempted.
+							$resp .= "<tr><td colspan='2'><h3>" . $res["QuizName"] . "</h3></td></tr>  <tr><td>Quiz Posted On: </td><td>" . $res["QuizPostedOn"] . "</td></tr>  <tr><td>Quiz Deadline: </td><td>" . $res["QuizDeadline"] . "</td></tr>  <tr><td colspan='2'><p>" . $res["QuizName"] . " has already been attempted. Your Score is: " . $attempt["CorrectAns"] . "/5. </p></td></tr>";
+						}
+						else {
+							$resp .= "<tr><td colspan='2'><h3>" . $res["QuizName"] . "</h3></td></tr>  <tr><td>Quiz Posted On: </td><td>" . $res["QuizPostedOn"] . "</td></tr>  <tr><td>Quiz Deadline: </td><td>" . $res["QuizDeadline"] . "</td></tr>  <tr><td colspan='2'><input type='button' class='btn btn-lg btn-primary btn-block btnAttemptQuiz' value='Attempt " . $res["QuizName"] . "' data-id='" . $res["QuizID"] . "' data-name='" . $res["QuizName"] . "' /></td></tr>";
+						}
+					}
+				}
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// to set all the questions, answers and options to the database.
+function AddQuiz($courseId, $assId, $quizName, $deadline, $questions, $answers, $options) {
+	$resp = "-1";
+	try {
+		$date = date("Y-m-d");
+		$id = "-1";
+		$query = "insert into Quiz(CourseID, AssID, QuizPostedOn, QuizDeadline, QuizName, QuizType) values('$courseId', '$assId', '$date', '$deadline', '$quizName', 'A')";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+			$id = mysql_insert_id();  // last inserted id.
+			$res = AddQuizQuestions($id, $questions, $answers, $options);
+		}
+		echo $resp . " ~ " . $res;
+	}	
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // to send a message from the admin to any of the users.
 function SendAdminMessage($email, $msg) {

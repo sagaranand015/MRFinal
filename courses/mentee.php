@@ -1372,9 +1372,257 @@
                     }
                     return false;
                 });
-
                 return false;
             });   // end of feedback-div on LHS
+
+            // for the quiz link on LHS
+            $('.quiz').on('click', function() {
+                showDiv($('.quiz-div'));
+                changeActiveState($(this).parent('li'));
+
+                // to remove the previous table.
+                $('.quiz-table').html("");
+
+                var email = $.cookie("email");
+                var id = $.cookie("id");
+
+                // firstly, get the assignments for the mentee.
+                if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
+                }
+                else {
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "12", email: email, id: id
+                        },
+                        success: function(response) {
+                            // to show the assignments drop down at appropriate place.
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>We could not retrieve your assignments from the database. Please check your internet connection and try again.</p>").fadeIn();                             
+                            }
+                            else if(response == "-2") {
+                                popup.children('p').remove();
+                                popup.append("<p>You have not been assigned any courses. Please try again or contact your mentor.</p>").fadeIn();                               
+                            }
+                            else {
+                                $('.quiz-assignment').children('select').remove();
+                                $('.quiz-assignment').append(response);
+                            }
+                        }, 
+                        error: function() {
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });   // end of ajax.
+                }    // end of else.
+
+                // for the delegate event of the change of assignment.
+                $('.quiz-div').delegate('#ddl-assignment', 'change', function() {
+                    var assId = $(this).val();
+                    var id = $.cookie("id");
+                    var email = $.cookie("email");
+                    // now, get the quizzes in the table form.
+                    if(assId == "" || assId == "undefined" || assId == undefined) {
+                        popup.children('p').remove();
+                        popup.append("<p>Please select the Assignment first and then try again.</p>").fadeIn();
+                    }
+                    else if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                        popup.children('p').remove();
+                        popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
+                    }
+                    else {
+                        showLoading();
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "35", assId: assId, menteeId: id, menteeEmail: email
+                            },
+                            success: function(response) {
+                                if(response == "-1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                                }
+                                else if(response == "0") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>No Quizzes has yet been uploaded for this assignment.</p>").fadeIn();
+                                }
+                                else {
+                                    $('.quiz-table').html(response);
+                                }
+                            },
+                            error: function() {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                            },
+                            complete: function() {
+                                hideLoading();
+                            }
+                        });  // end of ajax
+                    }     // end of else
+                    return false;
+                });   // end of delegate event of the change of assignment ddl.
+
+                // for the click event of the attempt button.
+                $('.quiz-table').delegate('.btnAttemptQuiz', 'click', function() {
+                    var quizId = $(this).attr('data-id');
+                    var quizName = $(this).attr('data-name');
+
+                    if(quizId == "-1" || quizId == "undefined" || quizId == undefined || quizId == "") {
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error. Please refresh and select the assignment again.</p>").fadeIn();
+                    }
+                    else {
+                        $('.basic-quiz-modal-title').html("<h3>Attempt " + quizName + "</h3>");
+                        // to get all the questions and options from the database.
+                        showLoading();
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "36", quizId: quizId
+                            },
+                            success: function(response) {
+                                if(response == "-1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();     
+                                }
+                                else if(response == "0") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>No quiz questions found in this course. Please try again.</p>").fadeIn();
+                                }
+                                else {
+                                    var res = response.split(" ~ ");
+                                    var ques = $.parseJSON(res[0]);
+                                    var op = $.parseJSON(res[1]);
+
+                                    // for all the questions to be shown
+                                    $('.q1').html("Q1: " + ques[0]);
+                                    $('.q2').html("Q2: " + ques[1]);
+                                    $('.q3').html("Q3: " + ques[2]);
+                                    $('.q4').html("Q4: " + ques[3]);
+                                    $('.q5').html("Q5: " + ques[4]);
+
+                                    // for showing all the options.
+                                    var item = "";
+                                    var p = 0;
+                                    for(var i=1;i<=5;i++) {
+                                        for(var j=1;j<=4;j++) {
+                                            item = "#ans" + i.toString() + j.toString();
+                                            $(item).html(op[p]);   // showing the options to the radio buttons.
+                                            p++;
+                                        }
+                                    }
+
+                                    // show the modal with the response embedded here.
+                                    $('#basicQuizModal').modal('show');
+                                }
+                            },
+                            error: function() {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                            },
+                            complete: function() {
+                                hideLoading();
+                            }
+                        });   // end of ajax request
+                    }
+                    return false;
+                });   // end of click delegate event of the attempt quiz button.
+
+                // for the submit event of the form for basic quiz.
+                $('#formSubmitBasicQuiz').submit(function() {
+                    var quizId = $('.btnAttemptQuiz').attr('data-id');
+                    var assId = $('.quiz-assignment').children('select').val();
+                    var id = $.cookie("id");
+                    var email = $.cookie("email");
+                    // to get all the answers selected.
+                    var ans = [];
+                    $.each($('.ans-radio'), function() {
+                        var item = $(this).is(':checked');
+                        if(item == true) {   // for all the checked radio buttons.
+                            ans.push($(this).attr('for'));
+                        }
+                    });
+                    var j = "";
+                    var answers = [];
+                    for(var i=0;i<ans.length;i++) {
+                        j = "";
+                        j += "#" + ans[i];
+                        answers.push($(j).html());
+                    }
+                    jsonAns = JSON.stringify(answers);
+
+                    // now, send the selected answers to the server for evaluation.
+                    var desc = false;
+                    if(ans.length < 5) {
+                        desc = confirm("You have not asnwered all the questions. Are you sure you want to submit?");
+                    }
+                    else {
+                        desc = true;
+                    }
+
+                    if(desc == true) {
+                        // make the ajax request for evaluation.
+                        if(quizId == "-1" || quizId == "undefined" || quizId == undefined || quizId == "") {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error. Please reload the page and try again.</p>").fadeIn();
+                        }
+                        else {
+                            if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                                popup.children('p').remove();
+                                popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
+                            }
+                            else {
+                                $('#basicQuizModal').modal('hide');
+                                showLoading();
+                                $.ajax({
+                                    type: "GET",
+                                    url: "AJAXFunctions.php",
+                                    data: {
+                                        no: "37", ans: jsonAns, quizId: quizId, assId: assId, menteeId: id, menteeId: id, menteeEmail: email
+                                    },
+                                    success: function(response) {
+                                        var res = response.split(" ~ ");
+                                        if(res[0] == "1") {
+                                            popup.children('p').remove();
+                                            popup.append("<p>Your quiz has been submitted and evaluated successfully. <b>Your Score is: " + res[1] + "/5. </b> Please check your mail for more details</p>").fadeIn();
+
+                                            // now, remove all the html content in the attempt quiz page. and make the link trigger click.
+                                            $('.quiz-table').html("");
+                                            $('.quiz').trigger('click');
+                                        }
+                                        else {
+                                            popup.children('p').remove();
+                                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();     
+                                        }
+                                    },
+                                    error: function() {
+                                        popup.children('p').remove();
+                                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                                    },
+                                    complete: function() {
+                                        hideLoading();
+                                    }
+                                });   // end of ajax.
+                            }   // end of else.
+                        }   // end of else.
+                    }   // end of if.
+                    return false;
+                });   // end of the form submit function.
+
+                return false;
+            });   // end of LHS link of Quiz
 
 
         });    // end of ready function.
@@ -1460,12 +1708,39 @@
                     <li><a href="#" class="submitSolution">Submit Assignment Solution</a></li>
                     <li><a href="#" class="feedback">Show Feedbacks</a></li>
                 </ul>
+                <ul class="nav nav-sidebar">
+                    <li><a href="#" class="quiz">Attempt Quiz</a></li>
+                </ul>
             </div>
         </div>
 
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <!-- for attempting the quizzes -->
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div quiz-div">
+            <h1 class="page-header">
+                Attempt your Quiz
+            </h1>
+
+            <table class="table">
+                <tr>
+                    <td>
+                        <label>Select Assignment: </label>
+                    </td>   
+                    <td class="quiz-assignment">
+                        <!-- data will come from ajax here -->
+                    </td>
+                </tr>
+            </table>
+
+            <!-- table for showing the quizzes info -->
+            <table class="table quiz-table">
+
+            </table>
+
+        </div>
 
         <!-- for showing the assignment feedbacks -->
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div feedback-div">
@@ -1822,6 +2097,122 @@
                 </div>
                 <div class="modal-body" id="lecture-video-modal-body">
                     <!-- for the video tag -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <!-- this is for showing the custom video using the video.js plugin inside the modal -->
+    <div class="modal fade" id="basicQuizModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="basic-quiz-modal-title">Attempt Basic Quiz</h4>
+                </div>
+                <div class="modal-body" id="basic-quiz-modal-body">
+                    <!-- for the table containing all the questions -->
+                    <form id="formSubmitBasicQuiz">
+                        <table class="table">
+                            <tr>
+                                <td class="q1">
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="radio" name="answer1" for="ans11" class="ans-radio" />
+                                    <label class="ans" id="ans11"></label>  <br />
+                                    <input type="radio" name="answer1" for="ans12" class="ans-radio" />
+                                    <label class="ans" id="ans12"></label>  <br />
+                                    <input type="radio" name="answer1" for="ans13" class="ans-radio" />
+                                    <label class="ans" id="ans13"></label>  <br />
+                                    <input type="radio" name="answer1" for="ans14" class="ans-radio" />
+                                    <label class="ans" id="ans14"></label>  <br />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="q2">
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="radio" name="answer2" for="ans21" class="ans-radio" />
+                                    <label class="ans" id="ans21"></label>  <br />
+                                    <input type="radio" name="answer2" for="ans22" class="ans-radio" />
+                                    <label class="ans" id="ans22"></label>  <br />
+                                    <input type="radio" name="answer2" for="ans23" class="ans-radio" />
+                                    <label class="ans" id="ans23"></label>  <br />
+                                    <input type="radio" name="answer2" for="ans24" class="ans-radio" />
+                                    <label class="ans" id="ans24"></label>  <br />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="q3">
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="radio" name="answer3" for="ans31" class="ans-radio" />
+                                    <label class="ans" id="ans31"></label>  <br />
+                                    <input type="radio" name="answer3" for="ans32" class="ans-radio" />
+                                    <label class="ans" id="ans32"></label>  <br />
+                                    <input type="radio" name="answer3" for="ans33" class="ans-radio" />
+                                    <label class="ans" id="ans33"></label>  <br />
+                                    <input type="radio" name="answer3" for="ans34" class="ans-radio" />
+                                    <label class="ans" id="ans34"></label>  <br />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="q4">
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="radio" name="answer4" for="ans41" class="ans-radio" />
+                                    <label class="ans" id="ans41"></label>  <br />
+                                    <input type="radio" name="answer4" for="ans42" class="ans-radio" />
+                                    <label class="ans" id="ans42"></label>  <br />
+                                    <input type="radio" name="answer4" for="ans43" class="ans-radio" />
+                                    <label class="ans" id="ans43"></label>  <br />
+                                    <input type="radio" name="answer4" for="ans44" class="ans-radio" />
+                                    <label class="ans" id="ans44"></label>  <br />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="q5">
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="radio" name="answer5" for="ans51" class="ans-radio" />
+                                    <label class="ans" id="ans51"></label>  <br />
+                                    <input type="radio" name="answer5" for="ans52" class="ans-radio" />
+                                    <label class="ans" id="ans52"></label>  <br />
+                                    <input type="radio" name="answer5" for="ans53" class="ans-radio" />
+                                    <label class="ans" id="ans53"></label>  <br />
+                                    <input type="radio" name="answer5" for="ans54" class="ans-radio" />
+                                    <label class="ans" id="ans54"></label>  <br />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <input type="submit" value="Submit Quiz" id="btnSubmitBasicQuiz" class="btn btn-lg btn-primary btn-block" />
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

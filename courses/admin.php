@@ -2674,6 +2674,177 @@
                 return false;
             });
 
+            // for the adding of the quizzes.
+            $('.quiz').on('click', function() {
+                showDiv($('.quiz-div'));
+                changeActiveState($(this).parent('li'));
+
+                // for showing the correct tab on the quiz page.
+                $('#quiz-tab').tab('show');
+                $('#quiz-tab a').click(function (e) {
+                    e.preventDefault();
+                    $(this).tab('show');
+                });
+
+                // to get the courses and the assignments on the add Quiz page.                
+                showLoading();
+                $.ajax({
+                    type: "GET",
+                    url: "AJAXFunctions.php",
+                    data: {
+                        no: "6"
+                    },
+                    success: function(response) {
+                        // to show the courses drop down at appropriate place.
+                        if(response == "-1") {
+                            popup.children('p').remove();
+                            popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                        }
+                        else {
+                            $('.quiz-course').children('select').remove();
+                            $('.quiz-course').append(response);
+                        }
+                    }, 
+                    error: function() {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+                // to get the assignments on the Quiz Page on change of the course.
+                $('.quiz-div').delegate('#ddl-course', 'change', function() {
+                    var courseId = $(this).val();
+                    if(courseId == "" || courseId == "undefined" || courseId == undefined) {
+                        popup.children('p').remove();
+                        popup.append("<p>Please select the course properly or try again.</p>").fadeIn();
+                    }
+                    else {
+                        showLoading();
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "10", courseAssPDF: courseId
+                            },
+                            success: function(response) {
+                                // to show the assignments drop down at appropriate place.
+                                if(response == "-1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>We could not retrieve your assignments from the database. Please check your internet connection and try again.</p>").fadeIn();                             
+                                }
+                                else if(response == "-2") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>You have not been assigned any courses. Please try again or contact your mentor.</p>").fadeIn();                               
+                                }
+                                else {
+                                    $('.quiz-assignment').children('select').remove();
+                                    $('.quiz-assignment').append(response);
+                                }
+                            }, 
+                            error: function() {
+                                alertMsg.children('p').remove();
+                                alertMsg.fadeOut();
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                            },
+                            complete: function() {
+                                hideLoading();
+                            }
+                        });   // end of ajax.
+                    }  // end of else.
+                    return false;    
+                });  // end of the course delegate function.
+
+                // for the submit event of the basic course form.
+                $('#form-add-basic-quiz').submit(function() {
+                    var email = $.cookie("email");
+                    var id = $.cookie("id");
+
+                    var courseId = $('.quiz-course').children('select').val();
+                    var assId = $('.quiz-assignment').children('select').val();
+
+                    var quizName = $('#txtQuizName').val();
+                    var deadline = $('#txtQuizDeadline').val();
+
+                    // to get all the questions.
+                    var question = [$('#txtQ1').val(), $('#txtQ2').val(), $('#txtQ3').val(), $('#txtQ4').val(), $('#txtQ5').val()];
+                    var jsonQues = JSON.stringify(question);
+
+                    // to get all the options.
+                    var options = [];
+                    $.each($('.ans-op'), function() {
+                        options.push($(this).val());
+                    });
+                    var jsonOp = JSON.stringify(options);
+
+                    // to get all the answers selected.
+                    var ans = [];
+                    $.each($('.ans-radio'), function() {
+                        var item = $(this).is(':checked');
+                        if(item == true) {   // for all the checked radio buttons.
+                            ans.push($(this).attr('for'));
+                        }
+                    });
+                    var j = "";
+                    var answers = [];
+                    for(var i=0;i<ans.length;i++) {
+                        j = "";
+                        j += "#" + ans[i];
+                        answers.push($(j).val());
+                    }
+                    jsonAns = JSON.stringify(answers);
+
+                    if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                        popup.children('p').remove();
+                        popup.append("<p>Looks like you have not logged in properly. Please login and try again.</p>").fadeIn();
+                    }
+                    else if(quizName == "" || deadline == "") {
+                        popup.children('p').remove();
+                        popup.append("<p>Looks like you missed either the Quiz Name or Quiz Deadline. Please recheck and try again.</p>");
+                    }
+                    else {
+                        // make the ajax request to save the quiz details nd questions
+                        showLoading();
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "34", courseId: courseId, assId: assId, quizName: quizName, deadline: deadline, questions: jsonQues, answers: jsonAns, options: jsonOp
+                            },
+                            success: function(response) {
+                                console.log(response);
+                                var r = response.split(" ~ ");
+                                if(r[0] == "1" && r[1] == "1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Quiz Added Successfully. Thank You.</p>").fadeIn();
+                                }
+                                else if(r[0] == "-1" || r[1] == "-1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error adding the Quiz. Please try again.</p>").fadeIn();
+                                }
+                                else {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error adding the Quiz. Please try again.</p>").fadeIn();   
+                                }
+                            },
+                            error: function() {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                            },
+                            complete: function() {
+                                hideLoading();
+                            }
+                        });
+                    }
+                    return false;
+                });  //end of submit function.
+
+                return false;
+            });   // end of Quiz link on the LHS.
 
             // hide all the divs on page load. Except for first div.
             $('.main-div').hide();
@@ -2780,12 +2951,205 @@
                 	<li><a href="#" class="user">Add User</a></li>
                     <li><a href="#" class="assign-mentee">Assign Mentees</a></li>
                 </ul>
+                <ul class="nav nav-sidebar">
+                    <li><a href="#" class="quiz">Add Quiz</a></li>
+                </ul>
             </div>
         </div>
 
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <!-- for adding the quiz --> 
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div quiz-div">
+            <h1 class="page-header">
+                Add Quiz
+            </h1>
+
+            <table class="table">
+                <tr>
+                    <td>
+                        <label>Select Course: </label>
+                    </td>
+                    <td class="quiz-course">
+                        <!-- data will come from ajax -->
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Select Assignment: </label>
+                    </td>
+                    <td class="quiz-assignment">
+                        <!-- data will come from ajax -->
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Quiz Name: </label>
+                    </td>
+                    <td>
+                        <input type="text" id="txtQuizName" class="form-control" placeholder="Enter Quiz Name" required />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Quiz Deadline: </label>
+                    </td>
+                    <td>
+                        <input type="text" id="txtQuizDeadline" class="form-control" placeholder="mm/dd/yyyy" required />
+                    </td>
+                </tr>
+            </table>
+
+            <!-- for the Basic and Advanced Tabs on the quiz page -->
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+                <li role="presentation" class="active"><a href="#basic" id="quiz-tab" aria-controls="basic" role="tab" data-toggle="tab">Basic Quiz</a></li>
+                <li role="presentation"><a href="#advanced" aria-controls="advanced" role="tab" data-toggle="tab">Advanced Quiz</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="basic">
+                    <form id="form-add-basic-quiz">
+                        <table class="table">
+                            <tr>
+                                <td>
+                                    <textarea id="txtQ1" class="form-control" placeholder="Question No. 1" rows="8"></textarea>
+                                </td>
+                                <td>
+                                    <input type="radio" name="answer1" for="ans11" class="ans-radio" />
+                                    <input type="text" id="ans11" class="form-control ans-op" placeholder="Option 1 for Question 1"  />
+                                    <input type="radio" name="answer1" for="ans12" class="ans-radio" />
+                                    <input type="text" id="ans12" class="form-control ans-op" placeholder="Option 2 for Question 1"  />
+                                    <input type="radio" name="answer1" for="ans13" class="ans-radio" />
+                                    <input type="text" id="ans13" class="form-control ans-op" placeholder="Option 3 for Question 1"  />
+                                    <input type="radio" name="answer1" for="ans14" class="ans-radio" />
+                                    <input type="text" id="ans14" class="form-control ans-op" placeholder="Option 4 for Question 1"  />
+                                </td>
+                            </tr>
+                             <tr>
+                                <td>
+                                    <textarea id="txtQ2" class="form-control" placeholder="Question No. 2" rows="8"></textarea>
+                                </td>
+                                <td>
+                                    <input type="radio" name="answer2" for="ans21" class="ans-radio" />
+                                    <input type="text" id="ans21" class="form-control ans-op" placeholder="Option 1 for Question 2"  />
+                                    <input type="radio" name="answer2" for="ans22" class="ans-radio" />
+                                    <input type="text" id="ans22" class="form-control ans-op" placeholder="Option 2 for Question 2"  />
+                                    <input type="radio" name="answer2" for="ans23" class="ans-radio" />
+                                    <input type="text" id="ans23" class="form-control ans-op" placeholder="Option 3 for Question 2"  />
+                                    <input type="radio" name="answer2" for="ans24" class="ans-radio" />
+                                    <input type="text" id="ans24" class="form-control ans-op" placeholder="Option 4 for Question 2"  />
+                                </td>
+                            </tr>
+                             <tr>
+                                <td>
+                                    <textarea id="txtQ3" class="form-control" placeholder="Question No. 3" rows="8" ></textarea>
+                                </td>
+                                <td>
+                                    <input type="radio" name="answer3" for="ans31" class="ans-radio"/>
+                                    <input type="text" id="ans31" class="form-control ans-op" placeholder="Option 1 for Question 3"  />
+                                    <input type="radio" name="answer3" for="ans32" class="ans-radio" />
+                                    <input type="text" id="ans32" class="form-control ans-op" placeholder="Option 2 for Question 3"  />
+                                    <input type="radio" name="answer3" for="ans33" class="ans-radio"/>
+                                    <input type="text" id="ans33" class="form-control ans-op" placeholder="Option 3 for Question 3"  />
+                                    <input type="radio" name="answer3" for="ans34" class="ans-radio" />
+                                    <input type="text" id="ans34" class="form-control ans-op" placeholder="Option 4 for Question 3"  />
+                                </td>
+                            </tr>
+                             <tr>
+                                <td>
+                                    <textarea id="txtQ4" class="form-control" placeholder="Question No. 4" rows="8"></textarea>
+                                </td>
+                                <td>
+                                    <input type="radio" name="answer4" for="ans41" class="ans-radio" />
+                                    <input type="text" id="ans41" class="form-control ans-op" placeholder="Option 1 for Question 4"  />
+                                    <input type="radio" name="answer4" for="ans42" class="ans-radio" />
+                                    <input type="text" id="ans42" class="form-control ans-op" placeholder="Option 2 for Question 4"  />
+                                    <input type="radio" name="answer4" for="ans43" class="ans-radio"/>
+                                    <input type="text" id="ans43" class="form-control ans-op" placeholder="Option 3 for Question 4"  />
+                                    <input type="radio" name="answer4" for="ans44" class="ans-radio" />
+                                    <input type="text" id="ans44" class="form-control ans-op" placeholder="Option 4 for Question 4"  />
+                                </td>
+                            </tr>
+                             <tr>
+                                <td>
+                                    <textarea id="txtQ5" class="form-control" placeholder="Question No. 5" rows="8"></textarea>
+                                </td>
+                                <td>
+                                    <input type="radio" name="answer5" for="ans51" class="ans-radio" />
+                                    <input type="text" id="ans51" class="form-control ans-op" placeholder="Option 1 for Question 5"  />
+                                    <input type="radio" name="answer5" for="ans52" class="ans-radio" />
+                                    <input type="text" id="ans52" class="form-control ans-op" placeholder="Option 2 for Question 5"  />
+                                    <input type="radio" name="answer5" for="ans53" class="ans-radio" />
+                                    <input type="text" id="ans53" class="form-control ans-op" placeholder="Option 3 for Question 5"  />
+                                    <input type="radio" name="answer5" for="ans54" class="ans-radio" />
+                                    <input type="text" id="ans54" class="form-control ans-op" placeholder="Option 4 for Question 5"  />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <input type="submit" value="Add Basic Quiz" class="btn btn-lg btn-primary btn-block" id="btnAddBasicQuiz" />
+                                </td>
+                            </tr>
+                        </table> 
+                    </form>
+                </div>  <!-- end of Add Director -->
+
+                <div role="tabpanel" class="tab-pane active" id="advanced">
+                    <form id="form-add-advanced-quiz">
+                        <table class="table">
+                            <tr>
+                                <td>
+                                    <textarea id="txtadvQ1" class="form-control" placeholder="Advanced Question no. 1" rows="6"></textarea>
+                                </td>
+                                <td>
+                                    <input type="text" id="txtAdvA1" placeholder="Advanced Answer 1" class="form-control" />
+                                </td>   
+                            </tr>
+                            <tr>
+                                <td>
+                                    <textarea id="txtadvQ2" class="form-control" placeholder="Advanced Question no. 2" rows="6"></textarea>
+                                </td>
+                                <td>
+                                    <input type="text" id="txtAdvA2" placeholder="Advanced Answer 2" class="form-control" />
+                                </td>   
+                            </tr>
+                            <tr>
+                                <td>
+                                    <textarea id="txtadvQ3" class="form-control" placeholder="Advanced Question no. 3" rows="6"></textarea>
+                                </td>
+                                <td>
+                                    <input type="text" id="txtAdvA3" placeholder="Advanced Answer 3" class="form-control" />
+                                </td>   
+                            </tr>
+                            <tr>
+                                <td>
+                                    <textarea id="txtadvQ4" class="form-control" placeholder="Advanced Question no. 4" rows="6"></textarea>
+                                </td>
+                                <td>
+                                    <input type="text" id="txtAdvA4" placeholder="Advanced Answer 4" class="form-control" />
+                                </td>   
+                            </tr>
+                            <tr>
+                                <td>
+                                    <textarea id="txtadvQ5" class="form-control" placeholder="Advanced Question no. 5" rows="6"></textarea>
+                                </td>
+                                <td>
+                                    <input type="text" id="txtAdvA5" placeholder="Advanced Answer 5" class="form-control" />
+                                </td>   
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <input type="submit" class="btn btn-lg btn-primary btn-block" id="btnAddAdvancedQuiz" />
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>  <!-- end of Add Director -->
+            </div>   <!-- end of the enclosing tab-content div -->
+
+        </div>   <!-- end of the quiz-div -->
 
         <!-- for the central resource page -->
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div CRP-div">
@@ -2888,7 +3252,7 @@
 
 
         <!-- for the assign mentees div -->
-         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div assign-mentee-div">
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div assign-mentee-div">
             <h1 class="page-header">
                 Assign Mentees
             </h1>
@@ -3013,7 +3377,7 @@
 	        	Add Users
 	        </h1>
 
-		     <ul class="nav nav-tabs nav-justified" role="tablist">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
 				<li role="presentation" class="active"><a href="#director" id="director-tab" aria-controls="director" role="tab" data-toggle="tab">Add Director</a></li>
 				<li role="presentation"><a href="#mentor" aria-controls="mentor" role="tab" data-toggle="tab">Add Mentor</a></li>
 				<li role="presentation"><a href="#mentee" aria-controls="mentee" role="tab" data-toggle="tab">Add Mentee</a></li>
@@ -3164,8 +3528,6 @@
                     </form>
 				</div>
 			</div>
-
-
         </div>  <!-- end of add user div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div assignment-div">

@@ -8,6 +8,199 @@ include 'headers/databaseConn.php';
 // for mandrill mail sending API.
 require_once 'mandrill/Mandrill.php'; 
 
+// to check if the quiz has been attempted or not.
+function IsQuizAttempted($menteeId, $quizId) {
+	$resp = "-1";
+	$attempt = array();
+	$attempt["Error"] = "1";   // 1 says that there is an error. 0 says that there is no error.
+	$attempt["IsAttempted"] = "0";
+	$attempt["QuizId"] = "-1";
+	$attempt["CorrectAns"] = "-1";
+	try {
+		$query = "select * from QuizResponse where MenteeID='$menteeId' and QuizID='$quizId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$attempt["Error"] = "0";
+			if(mysql_num_rows($rs) > 0) {   // response exists.
+				while ($res = mysql_fetch_array($rs)) {
+					$attempt["IsAttempted"] = "1";
+					$attempt["QuizId"] = $quizId;
+					$attempt["CorrectAns"] = $res["CorrectAns"];
+				}
+			}
+			else {
+				$attempt["IsAttempted"] = "0";
+			}
+		}
+		return $attempt;
+	}
+	catch(Exception $e) {
+		$attempt["Error"] = "1";
+		return $attempt;
+	}
+}
+
+// for sending the Quiz Response Mail to the mentee.
+function SendQuizResponseMail($quizId, $assId, $menteeId, $menteeEmail, $givenAns, $ans, $correct) {
+	$resp = "-1";
+	$givenAnswers = json_decode($givenAns, true);
+	//$correctAnswers = json_decode($ans, true);
+	$correctAnswers = $ans;
+	$mentee = GetMenteeDetailsByEmail($menteeEmail);
+	try {
+		$subject = "Quiz Submitted - Mentored-Research";
+		$msg = "Dear " . $mentee["MenteeName"] . ",";
+		$msg .= "You have submitted your Quiz(" . GetQuizNameById($quizId) . ") in the assignment(" . GetAssignmentName($assId) . "). <br /> ";
+		$msg .= "<b>Your score is: " . $correct . "</b><br /><br />";
+		$msg .= "The answers given by you were: <br />1. " . $givenAnswers[0] . "<br />2. " . $givenAnswers[1] . "<br />3. " . $givenAnswers[2] . "<br />4. " . $givenAnswers[3] . "<br />5. " . $givenAnswers[4] . "<br /><br />";
+		$msg .= "The correct answers are: <br />1. " . $correctAnswers[0] . "<br />2. " . $correctAnswers[1] . "<br />3. " . $correctAnswers[2] . "<br />4. " . $correctAnswers[3] . "<br />5. " . $correctAnswers[4] . "<br /><br />";
+
+		$msg .= "Please contact your mentor in case of any doubts.<br /><br />";
+		$msg .= "Team Mentored-Research<br />";
+		$msg .= "info@mentored-research.com<br /><br />";
+		$msg .= "Please do not reply to this automated mail.<br /><br />";
+
+		//write the mail sending if else condition here.
+		$res = SendMessage($menteeEmail, $mentee["MenteeName"], "info@mentored-research.com", "Mentored-Research", $subject, $msg);
+		return $res;		
+	}	
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// for registering the quiz response.
+function RegisterQuizResponse($quizId, $assId, $menteeId, $menteeEmail, $givenAns, $correct) {
+	$resp = "-1";
+	$ans = json_decode($givenAns, true);
+	$courseId = GetMenteeCourseById($menteeId);
+	$date = date("Y-m-d M:i:s");
+	try {
+		$query = "insert into QuizResponse(QuizID, CourseID, AssID, MenteeID, A1, A2, A3, A4, A5, CorrectAns, AttemptedOn) values('$quizId', '$courseId', '$assId', '$menteeId', '$ans[0]', '$ans[1]', '$ans[2]', '$ans[3]', '$ans[4]', '$correct', '$date')";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		} 
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// for getting the answers to a particular quizId
+function GetQuizAnswers($quizId) {
+	$resp = "-1";
+	$ans = array();
+	try {
+		$query = "select * from QuizQuestion where QuizID='$quizId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				while ($res = mysql_fetch_array($rs)) {
+					array_push($ans, $res["A1"]);
+					array_push($ans, $res["A2"]);
+					array_push($ans, $res["A3"]);
+					array_push($ans, $res["A4"]);
+					array_push($ans, $res["A5"]);
+				}
+				$resp = $ans;
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// to get the course name from courseID
+function GetCourseNameById($courseId) {
+	$resp = "-1";
+	try {
+		$query = "select * from Course where CourseID='$courseId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				$resp = $res["CourseName"];
+			}
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// to get the quiz name by the Quiz id
+function GetQuizNameById($quizId) {
+	$resp = "-1";
+	try {
+		$query = "select * from Quiz where QuizID='$quizId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				$resp = $res["QuizName"];
+			}
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// for adding the questions to the database.
+function AddQuizQuestions($quizId, $questions, $answers, $options) {
+	$resp = "-1";
+	$ques = json_decode($questions);
+	$ans = json_decode($answers);
+	$op = json_decode($options);
+	try {
+		$query = "insert into QuizQuestion(QuizID, Q1, Q2, Q3, Q4, Q5, ";
+		$query .= "A1, A2, A3, A4, A5, ";
+		$query .= "Qop11, Qop12, Qop13, Qop14, Qop21, Qop22, Qop23, Qop24, Qop31, Qop32, Qop33, Qop34, Qop41, Qop42, Qop43, Qop44, Qop51, Qop52, Qop53, Qop54) ";
+		$query .= "values('$quizId', '$ques[0]', '$ques[1]', '$ques[2]', '$ques[3]', '$ques[4]', '$ans[0]', '$ans[1]', '$ans[2]', '$ans[3]', '$ans[4]', ";
+		$query .= "'$op[0]', '$op[1]', '$op[2]', '$op[3]', '$op[4]', '$op[5]', '$op[6]', '$op[7]', '$op[8]', '$op[9]', '$op[10]', '$op[11]', '$op[12]', '$op[13]', '$op[14]', '$op[15]', '$op[16]', '$op[17]', '$op[18]', '$op[19]')";	
+		//return $query;
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // for getting the mentee details in a json response based on mentee organ
 // returns -1 on error. array of mentee details on success.
 function GetMenteeDetailsByOrgan($organ) {

@@ -136,6 +136,32 @@
 
 	<script type="text/javascript">
         
+        $(window).load(function() {
+
+            var alertMsg = $('#alertMsg').fadeOut();
+            var popup = $('#popup').fadeOut();    
+
+            $('#btnExitPopup').on('click', function() {
+                popup.children('p').remove();
+                popup.fadeOut();
+                return false;
+            });
+
+            // for checking the query string and all.
+            var qs = getQueryStrings();
+
+            // for different query strings
+            if(qs["logout"] == "1") {
+                popup.children('p').remove();
+                popup.append("<p>You have successfully logged out. Thank You.</p>").fadeIn();
+            }
+            else if(qs["signup"] == "1") {
+                popup.children('p').remove();
+                popup.append("<p>You have successfully Signed up. Please login with your credentials to continue.</p>").fadeIn();
+            }
+        });
+
+
         $(document).ready(function() {
 
             var alertMsg = $('#alertMsg').fadeOut();

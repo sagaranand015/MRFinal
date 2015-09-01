@@ -15,7 +15,7 @@ function SendMail($to, $toName, $from, $fromName, $subject, $message) {
 		$message = array(
 	        'html' => $message,
 	        'subject' => $subject,
-	        'from_email' => 'sagar.anand015@gmail.com',
+	        'from_email' => 'info@mentored-research.com',
 	        'from_name' => 'Mentored-Research',
 	        'to' => array(
 	            array(

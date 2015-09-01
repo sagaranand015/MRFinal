@@ -373,6 +373,33 @@ function GetMentorCourseById($id) {
 	}
 }
 
+// for sending a mail to the mentee saying that the feedback has been uploaded by the mentor.
+function SendFeedbackMail($mentorId, $menteeId, $assId, $courseId, $feedback) {
+	$resp = "-1";
+	$mentor = GetMentorDetails($mentorId);
+	$mentee = GetMenteeDetails($menteeId);
+	try {
+		$subject = "Feedback Uploaded by " . $mentor["MentorName"] . " - Mentored-Research";
+		$msg = "Dear " . $mentee["MenteeName"] . ", <br /><br />";
+		$msg .= "The Assignment(" . GetAssignmentName($assId) . ") has been evaluated and the feedback for the same has been uploaded by your mentor under the " . GetCourseNameById($courseId) . " course.";
+		$msg .= "You can find the feedback <a href='http://www.mentored-research.com/courses/" . $feedback . "' target='_blank'>HERE</a>. <br /><br />";
+		$msg .= "Please contact your mentor<" . $mentor["MentorName"] . ", " . $mentor["MentorEmail"] . "> with the changes as suggested. <br /><br />";
+
+		$msg .= "Thanks & Regards, <br />";
+		$msg .= "Team Mentored-Research<br />";
+		$msg .= "info@mentored-research.com<br /><br />";
+		$msg .= "Please do not reply to this automated mail.<br /><br />"; 
+
+		//write the mail sending if else condition here.
+		$res = SendMessage($mentee["MenteeEmail"], $mentee["MenteeName"], "info@mentored-research.com", "Mentored-Research", $subject, $msg);
+		return $res;		
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // for registering the feedback for a particular assignment.
 function RegisterFeedback($mentorId, $menteeId, $assId, $courseId, $feedback) {
 	$resp = "-1";
@@ -383,6 +410,8 @@ function RegisterFeedback($mentorId, $menteeId, $assId, $courseId, $feedback) {
 			$resp = "-1";
 		}
 		else {
+			// now, send a mail to the mentee saying that the feedback for the assignment has been uploaded.
+			$res = SendFeedbackMail($mentorId, $menteeId, $assId, $courseId, $feedback);
 			$resp = "1";
 		}
 		return $resp;
@@ -466,6 +495,33 @@ function updateSubmission($menteeId, $mentorId, $assId, $courseId, $updateAss) {
 	}
 }
 
+// to send the mail to the mentor saying that the assignment has been submitted by the mentee.
+function SendAssignmentSubmissionMail($menteeId, $mentorId, $assId, $assPdf, $assCourse) {
+	$resp = "-1";
+	$mentee = GetMenteeDetails($menteeId);
+	$mentor = GetMentorDetails($mentorId);
+	try {
+		$subject = "Assignment Submitted by Mentee - Mentored-Research";
+		$msg = "Dear " . $mentor["MentorName"] . ", <br /><br />";
+		$msg .= "Your mentee " . $mentee["MenteeName"] . "(" . $mentee["MenteeEmail"] . ") has submitted the assignment named " . GetAssignmentName($assId) . " under the course " . GetCourseNameById($assCourse) . ". <br /><br />";
+		$msg .= "You can find the uploaded Assignment Solution <a href='http://www.mentored-research.com/courses/" . $assPdf . "' target='_blank' >HERE</a>.";
+		$msg .= "Please get in touch with your mentor for further correspondence.<br /><br />";
+
+		$msg .= "Thanks & Regards, <br />";
+		$msg .= "Team Mentored-Research<br />";
+		$msg .= "info@mentored-research.com<br /><br />";
+		$msg .= "Please do not reply to this automated mail.<br /><br />"; 
+
+		//write the mail sending if else condition here.
+		$res = SendMessage($mentor["MentorEmail"], $mentor["MentorName"], "info@mentored-research.com", "Mentored-Research", $subject, $msg);
+		return $res;		
+	}	
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // to register the submission into the table.
 function RegisterSubmission($email, $id, $mentorId, $assId, $assPdf, $assCourse, $assNo) {
 	$resp = "-1";
@@ -489,6 +545,8 @@ function RegisterSubmission($email, $id, $mentorId, $assId, $assPdf, $assCourse,
 			$resp = "-1";
 		}
 		else {
+			// now, send mail to the mentor saying that the assignment has been submitted by the mentee.
+			$res = SendAssignmentSubmissionMail($id, $mentorId, $assId, $assPdf, $assCourse);
 			$resp = "1";
 		}
 		return $resp;
@@ -5473,6 +5531,37 @@ function GetDirectorDetails($directorId) {
 				$director["DirectorOrgan"] = $res["DirectorOrgan"];
 			}
 			$resp = $director;
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// for getting the mentor details in a json response based on mentor ID
+// returns -1 on error. array of mentor details on success.
+function GetMenteeDetails($menteeID) {
+	$resp = "-1";
+	$mentee = array();
+	try {
+		$query = "select * from Mentee where MenteeID='$menteeID'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			while ($res = mysql_fetch_array($rs)) {
+				$mentee["MenteeName"] = $res["MenteeName"];
+				$mentee["MenteeEmail"] = $res["MenteeEmail"];
+				$mentee["MenteeContact"] = $res["MenteeContact"];
+				$mentee["MenteeProfile"] = $res["MenteeProfile"];
+				$mentee["MenteeCourse"] = $res["MenteeCourse"];
+				$mentee["MenteeOrgan"] = $res["MenteeOrgan"];
+				$mentee["MenteeDirector"] = $res["MenteeDirector"];
+			}
+			$resp = $mentee;
 		}
 		return $resp;
 	}

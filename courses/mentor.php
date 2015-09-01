@@ -1164,9 +1164,125 @@
                     }
                     return false;
                 });   // end of formUploadFeedback
-
                 return false;
             });    // end of the feedback div
+
+            // for the mentee status div
+            $('.status').on('click', function() {
+                showDiv($('.status-div'));
+                changeActiveState($(this).parent('li'));
+
+                var email = $.cookie("email");
+                var id = $.cookie("id");
+
+                // remove the previous tables and headings.
+                $('.status-div').children('table, h3').remove();
+
+                if(id == "undefined" || id == "" || id == undefined || email == "" || email == "undefined" || email == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not logged in properly. Please login again.</p>").fadeIn();
+                }
+                else {
+                    // firstly, get the mentee names and the submissions and feedbacks and the send msg options.
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "38", mentorId: id, mentorEmail: email
+                        },
+                        success: function(response) {
+                            if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No Submission/Feedback Records found.</p>").fadeIn();
+                            }
+                            else if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();      
+                            }
+                            else {
+                                $('.status-div').append(response);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });  // end of ajax request
+                }  // end of else.
+
+                // for the click event of the send message.
+                $('.status-div').delegate('.mentee-status-message', 'click', function() {
+                    var sendEmail = $(this).attr('data-email');
+                    var sendId = $(this).attr('data-id');
+
+                    if(sendEmail == "" || sendEmail == "No Data Available") {
+                        $('#txtSendStatusMessageEmail').val("Email Address not Available");
+                    }
+                    else {
+                        $('#txtSendStatusMessageEmail').val(sendEmail);  // show it to the user, but disabled.
+                    }
+                    // show the modal now.
+                    $('#sendStatusMessageModal').modal('show');
+
+                    return false;
+                });
+
+                // for sending the message from the mentee status page.
+                $('#btnSendStatusMessage').on('click', function() {
+                    var toEmail = $('#txtSendStatusMessageEmail').val().trim();
+                    var msg = $('#txtSendStatusMessage').val();
+                    var email = $.cookie("email");
+
+                    if(email == "" || email == "undefined" || email == undefined) {
+                        popup.children('p').remove();
+                        popup.append("<p>You have not logged in properly. Please <a href='http://mentored-research.com/login' style='color: black;'>LOGIN AGAIN</a> to continue.</p>").fadeIn();
+                    }
+                    else {
+                        showLoading();
+                        $('#sendStatusMessageModal').modal('hide');
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "39", toEmail: toEmail, msg: msg, fromEmail: email
+                            },
+                            success: function(response) {
+                                console.log(response);
+                                if(response[0]["status"] == "sent") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Your Message has been sent. Thank You.</p>").fadeIn();
+
+                                    // remove the contents of the message box here.
+                                    $('#txtSendStatusMessage').val("");
+                                }
+                                else if(response[0]["status"] == "queued" || response[0]["status"] == "scheduled") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Your Message has been Queued. Sit back and relax while we send your message in sometime.</p>").fadeIn();
+                                }
+                                else if(response[0]["status"] == "rejected" || response[0]["status"] == "invalid") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! Your Message could not ben sent. Please try again.</p>").fadeIn();
+                                }
+                            },
+                            error: function() {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();                                             
+                            },
+                            complete: function() {
+                                hideLoading();
+                            }
+                        });    
+                    }   // end of else.
+                    return false;
+                });
+
+
+                return false;
+            });   // end of status link on LHS.
 
         });    // end of ready function.
 
@@ -1254,6 +1370,7 @@
                 </ul>
                 <ul class="nav nav-sidebar">
                     <li><a href="#" class="feedback">Give Feedback</a></li>
+                    <li><a href="#" class="status">Mentee Status</a></li>
                 </ul>
             </div>
         </div>
@@ -1261,6 +1378,15 @@
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <!-- for showing the statuses of the mentees under the mentor -->
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div status-div">
+            <h1 class="page-header">
+                Mentee Status
+            </h1>
+
+            <!-- data will come from ajax here -->
+        </div>
 
         <!-- for giving the feedback to the mentee assignments -->
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div feedback-div">
@@ -1590,32 +1716,34 @@
 		</div><!-- /.modal-dialog -->
 	</div><!-- /.modal -->
 
-
-   <!--   <footer class="footer">
-	        <div class="container">
-	            <div class="row">
-	                <div class="col-md-4">
-	                    <span class="copyright">Copyright &copy; Mentored-Research 2015</span>
-	                </div>
-	                <div class="col-md-4">
-	                    <ul class="list-inline social-buttons">
-	                        <li><a href="https://www.facebook.com/pages/Mentored-Researchs-Equity-Research-Initiative/313860081992430?ref=br_tf" target="_blank"><i class="fa fa-facebook"></i></a>
-	                        </li>
-	                        <li><a href="https://www.linkedin.com/company/2217419?trk=tyah&trkInfo=tarId%3A1401993298521%2Ctas%3Amentored%2Cidx%3A1-3-3" target="_blank"><i class="fa fa-linkedin"></i></a>
-	                        </li>
-	                    </ul>
-	                </div>
-	                <div class="col-md-4">  
-	                    <ul class="list-inline social-buttons">
-	                        <li><a href="https://www.facebook.com/pages/Mentored-Researchs-Equity-Research-Initiative/313860081992430?ref=br_tf" target="_blank"><i class="fa fa-facebook"></i></a>
-	                        </li>
-	                        <li><a href="https://www.linkedin.com/company/2217419?trk=tyah&trkInfo=tarId%3A1401993298521%2Ctas%3Amentored%2Cidx%3A1-3-3" target="_blank"><i class="fa fa-linkedin"></i></a>
-	                        </li>
-	                    </ul>
-	                </div>
-	            </div>
-	        </div>
-	    </footer> -->
+    <!-- this is for sending the email to the mentor using the modal -->
+    <div class="modal fade" id="sendStatusMessageModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Send Message</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <tr>
+                            <td>
+                                <input type="email" id="txtSendStatusMessageEmail" placeholder="Email Address" required class="form-control" disabled="disabled" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <textarea id="txtSendStatusMessage" placeholder="Type in your message" required class="form-control" rows="10"></textarea>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnSendStatusMessage">Send Message</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
 
     <!-- Bootstrap Core JavaScript -->
     <script src="js/bootstrap.min.js"></script>

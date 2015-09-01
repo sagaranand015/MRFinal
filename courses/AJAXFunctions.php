@@ -117,6 +117,73 @@ else if(isset($_GET["no"]) && $_GET["no"] == "36") {  // to get the quiz questio
 else if(isset($_GET["no"]) && $_GET["no"] == "37") {  // to evaluate the basic quiz
 	SubmitAndEvaluateBasicQuiz($_GET["ans"], $_GET["quizId"], $_GET["assId"], $_GET["menteeId"], $_GET["menteeEmail"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "38") {  // to get the mentee submission and feedback status, along with message sending to the mentee.
+	GetMenteeStatusForMentor($_GET["mentorId"], $_GET["mentorEmail"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "39") {  // for sending a multipurpose message from the mentor to any of the mentees.(or any other message)
+	SendMultipurposeMessage($_GET["toEmail"], $_GET["msg"], $_GET["fromEmail"]);	
+}
+
+// for sending a multipurpose message from the mentor to any of the mentees.(or any other message)
+function SendMultipurposeMessage($toEmail, $message, $fromEmail) {
+	$resp = "-1";
+	try {
+		$subject = "Message Received - Mentored-Research";
+		$msg = "Dear " . $toEmail . ", <br /><br />";
+		$msg .= "You have received the following message from " . $fromEmail . "<br /><br />";
+		$msg .= "<b>" . $message . "</b>";
+
+		$msg .= "Team Mentored-Research<br />";
+		$msg .= "info@mentored-research.com<br /><br />";
+		$msg .= "Please do not reply to this automated mail.<br /><br />";
+
+		$res = SendMessage($toEmail, $toEmail, "info@mentored-research.com", "Mentored-Research", $subject, $msg);
+		if($res == "-1") {
+			echo $res;
+		}
+		else {
+			header('Content-Type: application/json');
+			echo json_encode($res);
+		}
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// to get the mentee submission and feedback status, along with message sending to the mentee.
+function GetMenteeStatusForMentor($mentorId, $mentorEmail) {
+	$resp = "-1";
+	$submission = "";
+	$feedback = "";
+	$mentee = array();
+	try {
+		$query = "select * from Mentee where MenteeMentor='$mentorId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "";
+			if(mysql_num_rows($rs) > 0) {
+				while ($res = mysql_fetch_array($rs)) {
+					$mentee = GetMenteeDetails($res["MenteeID"]);
+					$resp .= "<h3>" . $mentee["MenteeName"] . "(" . $mentee["MenteeEmail"] . ")</h3>";
+					$resp .= GetMenteeSubmissionFeedbackInTableFormat($res["MenteeID"]);
+				}
+			}
+			else {
+				$resp = "0";  // no record exists.
+			}
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // to evaluate the basic quiz. Returns the score on evaluation.
 function SubmitAndEvaluateBasicQuiz($givenAns, $quizId, $assId, $menteeId, $menteeEmail) {

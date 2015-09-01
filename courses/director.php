@@ -909,7 +909,12 @@
     </div>
 
     <div id="popup" class="alert alert-danger" role="alert">
-          <button type="button" class="close" id="btnExitPopup" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button type="button" class="close" id="btnExitPopup" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <div class="progress" style="display: none;">
+            <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">
+                <span class="sr-only"></span>
+            </div>
+        </div>
     </div>
 
     <!-- Navigation -->

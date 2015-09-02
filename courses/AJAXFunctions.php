@@ -123,6 +123,42 @@ else if(isset($_GET["no"]) && $_GET["no"] == "38") {  // to get the mentee submi
 else if(isset($_GET["no"]) && $_GET["no"] == "39") {  // for sending a multipurpose message from the mentor to any of the mentees.(or any other message)
 	SendMultipurposeMessage($_GET["toEmail"], $_GET["msg"], $_GET["fromEmail"]);	
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "40") {  // to get the mentee submission and feedback status for the admin and director pages.
+	GetMenteeStatusForAdminAndDirector($_GET["assId"]);
+}
+
+// to get the mentee submission and feedback status for the admin and director pages.
+function GetMenteeStatusForAdminAndDirector($assId) {
+	$resp = "-1";
+	$submission = "";
+	$feedback = "";
+	$mentee = array();
+	try {
+		$query = "select * from SubmissionFeedback where AssID='$assId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "";
+			if(mysql_num_rows($rs) > 0) {
+				while ($res = mysql_fetch_array($rs)) {
+					$mentee = GetMenteeDetails($res["MenteeID"]);
+					$resp .= "<h3>" . $mentee["MenteeName"] . " (" . $mentee["MenteeEmail"] . ")</h3>";
+					$resp .= GetMenteeSubmissionFeedbackInTableFormatForAdminAndDirector($res["MenteeID"]);
+				}
+			}
+			else {
+				$resp = "0";  // no record exists.
+			}
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // for sending a multipurpose message from the mentor to any of the mentees.(or any other message)
 function SendMultipurposeMessage($toEmail, $message, $fromEmail) {
@@ -131,7 +167,7 @@ function SendMultipurposeMessage($toEmail, $message, $fromEmail) {
 		$subject = "Message Received - Mentored-Research";
 		$msg = "Dear " . $toEmail . ", <br /><br />";
 		$msg .= "You have received the following message from " . $fromEmail . "<br /><br />";
-		$msg .= "<b>" . $message . "</b>";
+		$msg .= "<b>" . $message . "</b><br /><br />";
 
 		$msg .= "Team Mentored-Research<br />";
 		$msg .= "info@mentored-research.com<br /><br />";
@@ -169,7 +205,7 @@ function GetMenteeStatusForMentor($mentorId, $mentorEmail) {
 			if(mysql_num_rows($rs) > 0) {
 				while ($res = mysql_fetch_array($rs)) {
 					$mentee = GetMenteeDetails($res["MenteeID"]);
-					$resp .= "<h3>" . $mentee["MenteeName"] . "(" . $mentee["MenteeEmail"] . ")</h3>";
+					$resp .= "<h3>" . $mentee["MenteeName"] . " (" . $mentee["MenteeEmail"] . ")</h3>";
 					$resp .= GetMenteeSubmissionFeedbackInTableFormat($res["MenteeID"]);
 				}
 			}

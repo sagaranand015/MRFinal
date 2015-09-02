@@ -2033,107 +2033,106 @@
                 return false;
             });   // end of user link on LHS.
 
+
             // for the change password link on the LHS
             $('.password').on('click', function() {
                 showDiv($('.password-div'));
                 changeActiveState($(this).parent('li'));
-
-                $('#formChangePassword').submit(function() {
-                    // first, check for both the new passwords:
-                    var oldPassword = $('#txtOldPassword').val().trim();
-                    var newPassword = $('#txtNewPassword').val().trim();
-                    var newPasswordConfirm = $('#txtNewPasswordConfirm').val().trim();
-                    var email = $.cookie("email");
-
-                    if(newPassword != newPasswordConfirm) {
-                        popup.children('p').remove();
-                        popup.append("<p>Your Passwords do not match. Please recheck and try again.</p>").fadeIn();
-                    }
-                    else if(email == "" || email == "undefined" || email == undefined) {
-                        popup.children('p').remove();
-                        popup.append("<p>You have not logged in properly. Please log out and login again.</p>").fadeIn();   
-                    }
-                    else {   // ajax request for password change
-                        showLoading();
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "17", email: email, oldPassword: oldPassword, newPassword: newPassword, newPasswordConfirm: newPasswordConfirm, table: "Admin"
-                            },
-                            success: function(response) {
-                                if(response == "1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Password Successfully Changed.</p>").fadeIn();
-                                }
-                                else {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Error encountered while changing your password. Please try again.</p>").fadeIn();   
-                                }
-                            },
-                            error: function() {
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
-                            },
-                            complete: function() {
-                                hideLoading();
-                            }
-                        });   // end of AJAX Request.
-                    }
-                    return false;
-                });   // end of formChangePassword submit()
                 return false;
             });   // end of .password on LHS.
+            $('#formChangePassword').submit(function() {
+                // first, check for both the new passwords:
+                var oldPassword = $('#txtOldPassword').val().trim();
+                var newPassword = $('#txtNewPassword').val().trim();
+                var newPasswordConfirm = $('#txtNewPasswordConfirm').val().trim();
+                var email = $.cookie("email");
+
+                if(newPassword != newPasswordConfirm) {
+                    popup.children('p').remove();
+                    popup.append("<p>Your Passwords do not match. Please recheck and try again.</p>").fadeIn();
+                }
+                else if(email == "" || email == "undefined" || email == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>You have not logged in properly. Please log out and login again.</p>").fadeIn();   
+                }
+                else {   // ajax request for password change
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "17", email: email, oldPassword: oldPassword, newPassword: newPassword, newPasswordConfirm: newPasswordConfirm, table: "Admin"
+                        },
+                        success: function(response) {
+                            if(response == "1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Password Successfully Changed.</p>").fadeIn();
+                            }
+                            else {
+                                popup.children('p').remove();
+                                popup.append("<p>Error encountered while changing your password. Please try again.</p>").fadeIn();   
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });   // end of AJAX Request.
+                }
+                return false;
+            });   // end of formChangePassword submit()
 
 			// for the change password link on the LHS
             $('.invite').on('click', function() {
                 showDiv($('.invite-div'));
                 changeActiveState($(this).parent('li'));
-
-                // for sending the invites to the email
-                $('#formSendInvite').submit(function() {
-                	var msg = $('#txtSendInviteMsg').val().trim();
-                	var emailList = $('#txtSendInvite').val().trim();
-            		var list1 = new Array();
-            		list1 = emailList.split(',');
-            		var list = new Array();
-            		for(var i=0;i<list1.length;i++) {
-            			item = list1[i].trim();
-        				if(item == "") {
-        				}
-        				else {
-        					list.push(item);
-        				}
-            		}
-            		showLoading();
-                	$.ajax({
-                		type: "GET",
-                		url: "AJAXFunctions.php",
-                		data: {
-                			no: "23", list: list, msg: msg
-                		},
-                		success: function(response) {
-                			if(response == "-1") {
-                				popup.children('p').remove();
-                            	popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  	
-                			}
-                			else {
-                				popup.children('p').remove();
-                            	popup.append("<p>" + "<b>" + response + "</b>" + " mails have been sent. Thank You.</p>").fadeIn();  	
-                			}
-                		},
-                		error: function() {
-                			popup.children('p').remove();
-                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
-                		},
-                		complete: function() {
-                			hideLoading();
-                		}
-                	});
-                	return false;
-                });
                 return false;
             });   // end of .invite on LHS.
+            // for sending the invites to the email
+            $('#formSendInvite').submit(function() {
+                var msg = $('#txtSendInviteMsg').val().trim();
+                var emailList = $('#txtSendInvite').val().trim();
+                var list1 = new Array();
+                list1 = emailList.split(',');
+                var list = new Array();
+                for(var i=0;i<list1.length;i++) {
+                    item = list1[i].trim();
+                    if(item == "") {
+                    }
+                    else {
+                        list.push(item);
+                    }
+                }
+                showLoading();
+                $.ajax({
+                    type: "GET",
+                    url: "AJAXFunctions.php",
+                    data: {
+                        no: "23", list: list, msg: msg
+                    },
+                    success: function(response) {
+                        if(response == "-1") {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();     
+                        }
+                        else {
+                            popup.children('p').remove();
+                            popup.append("<p>" + "<b>" + response + "</b>" + " mails have been sent. Thank You.</p>").fadeIn();     
+                        }
+                    },
+                    error: function() {
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+                return false;
+            });   // end of form submit function()
 
             // for the assign-mentees div on the LHS
             $('.assign-mentee').on('click', function() {
@@ -2201,209 +2200,210 @@
                         hideLoading();
                     }
                 });   // end of getting all the courses on the admin page.
-
-                var assignOrgan = "-1";
-                var assignCourse = "-1";
-
-                // for the change event of the organization in ddl
-                $('.assign-mentee-div').delegate('#ddl-organisation', 'change', function() {
-                    assignOrgan = $(this).val();
-                    assignCourse = $('.assign-mentee-course').children('select').val();
-                    if(assignCourse == "-1" || assignOrgan == "-1") {
-                    }
-                    else if(assignCourse != "-1" && assignOrgan != "-1") {
-                        // for getting the mentors of the given organisation and course.
-                        $('.assign-mentee-mentor').children('select').remove();  // to remove the previous one.
-                        showLoading();
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "29", organ: assignOrgan, course: assignCourse
-                            },
-                            success: function(response) {
-                                if(response == "-1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-                                }
-                                else if(response == "0") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>No Mentors found in the database. Please try again.</p>").fadeIn();   
-                                }
-                                else {
-                                    $('.assign-mentee-mentor').append(response);
-                                }
-                            },
-                            error: function() {
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-                            },
-                            complete: function() {
-                            }
-                        });
-                        // for getting the mentees of the given organisation and course.
-                        $('.assign-mentee-mentee').children('input, label').remove();
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "30", organ: assignOrgan, course: assignCourse
-                            },
-                            success: function(response) {
-                                if(response == "-1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
-                                }
-                                else if(response == "0" || response == "") {
-                                    popup.append("<p>No mentees could be found in the database.</p>").fadeIn();
-                                }
-                                else {
-                                    $('.assign-mentee-mentee').append(response);
-                                }
-                            },
-                            error: function() {
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-                            },
-                            complete: function() {
-                                hideLoading();
-                            }
-                        });  // end of the second ajax call.
-
-                    }   // end of else if.
-                    return false;
-                });    // end of delegate event for Organisation ddl.
-
-                // for the change event of the course in ddl
-                $('.assign-mentee-div').delegate('#ddl-course', 'change', function() {
-                    assignCourse = $(this).val();
-                    assignOrgan = $('.assign-mentee-organ').children('select').val();
-                    if(assignCourse == "-1" || assignOrgan == "-1") {
-                    }
-                    else if(assignCourse != "-1" && assignOrgan != "-1") {
-                        // for getting the mentors of the given organisation and course.
-                        $('.assign-mentee-mentor').children('select').remove();  // to remove the previous one.
-                        showLoading();
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "29", organ: assignOrgan, course: assignCourse
-                            },
-                            success: function(response) {
-                                if(response == "-1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-                                }
-                                else if(response == "0") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>No Mentors found in the database. Please try again.</p>").fadeIn();   
-                                }
-                                else {
-                                    $('.assign-mentee-mentor').append(response);
-                                }
-                            },
-                            error: function() {
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-                            },
-                            complete: function() {
-                            }
-                        });
-                        // for getting the mentees of the given organisation and course.
-                        $('.assign-mentee-mentee').children('input, label').remove();
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "30", organ: assignOrgan, course: assignCourse
-                            },
-                            success: function(response) {
-                                if(response == "-1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
-                                }
-                                else if(response == "0" || response == "") {
-                                    popup.append("<p>No mentees could be found in the database.</p>").fadeIn();
-                                }
-                                else {
-                                    $('.assign-mentee-mentee').append(response);
-                                }
-                            },
-                            error: function() {
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-                            },
-                            complete: function() {
-                                hideLoading();
-                            }
-                        });  // end of second ajax request.
-
-                    }   // end of else if for checking assignOrgan and assignCourse
-                    return false;
-                });   // end of delegate event for Course ddl.
-
-                // for the button click for assignment of mentors to the mentees.
-                $('#formAssignMentee').submit(function() {
-                    // get the selected mentees first.
-                    var selected = [];
-                    $('.assign-checkbox').each(function() {
-                        var item = $(this);
-                        if(item.is(':checked')) {
-                            selected.push(item.attr('name'));
-                        }
-                    });
-
-                    // now, the mentor selected.
-                    var mentor = $('.assign-mentee-mentor').children('select').val();
-                    var mentees = JSON.stringify(selected);
-
-                    if(mentor == "-1" || mentor == "") {
-                        popup.children('p').remove();
-                        popup.append("<p>Please select a mentor before assigning. Thank You.</p>").fadeIn();
-                    }
-                    else if(selected.length == 0) {
-                        popup.children('p').remove();
-                        popup.append("<p>Please select at least one mentee to be assigned to. Thank You.</p>").fadeIn();
-                    }
-                    else {
-                        //now, the ajax request to assign the mentors to the selected mentees.
-                        showLoading();
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "31", mentorId: mentor, mentees: mentees
-                            },
-                            success: function(response) {
-                                if(response == "-1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
-                                }
-                                else {
-                                    popup.children('p').remove();
-                                    popup.append("<p>" + response + ". Please wait while we reload the page for you.</p>").fadeIn();
-
-                                    // reload the page for no problems afterwards.
-                                    setTimeout(function() {
-                                        location.reload();
-                                    }, 5000);
-                                }
-                            },
-                            error: function() {
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-                            },
-                            complete: function() {
-                                hideLoading();
-                            }
-                        });
-                    }
-
-                    return false;
-                });
                 return false;
             });   // end of the assign-mentees div on LHS.
+            var assignOrgan = "-1";
+            var assignCourse = "-1";
+            // for the change event of the organization in ddl
+            $('.assign-mentee-div').delegate('#ddl-organisation', 'change', function() {
+                assignOrgan = $(this).val();
+                assignCourse = $('.assign-mentee-course').children('select').val();
+                if(assignCourse == "-1" || assignOrgan == "-1") {
+                }
+                else if(assignCourse != "-1" && assignOrgan != "-1") {
+                    // for getting the mentors of the given organisation and course.
+                    $('.assign-mentee-mentor').children('select').remove();  // to remove the previous one.
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "29", organ: assignOrgan, course: assignCourse
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                            }
+                            else if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No Mentors found in the database. Please try again.</p>").fadeIn();   
+                            }
+                            else {
+                                $('.assign-mentee-mentor').append(response);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                        }
+                    });
+                    // for getting the mentees of the given organisation and course.
+                    $('.assign-mentee-mentee').children('input, label').remove();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "30", organ: assignOrgan, course: assignCourse
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
+                            }
+                            else if(response == "0" || response == "") {
+                                popup.append("<p>No mentees could be found in the database.</p>").fadeIn();
+                            }
+                            else {
+                                $('.assign-mentee-mentee').append(response);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });  // end of the second ajax call.
+
+                }   // end of else if.
+                return false;
+            });    // end of delegate event for Organisation ddl.
+
+            // for the change event of the course in ddl
+            $('.assign-mentee-div').delegate('#ddl-course', 'change', function() {
+                assignCourse = $(this).val();
+                assignOrgan = $('.assign-mentee-organ').children('select').val();
+                if(assignCourse == "-1" || assignOrgan == "-1") {
+                }
+                else if(assignCourse != "-1" && assignOrgan != "-1") {
+                    // for getting the mentors of the given organisation and course.
+                    $('.assign-mentee-mentor').children('select').remove();  // to remove the previous one.
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "29", organ: assignOrgan, course: assignCourse
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                            }
+                            else if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No Mentors found in the database. Please try again.</p>").fadeIn();   
+                            }
+                            else {
+                                $('.assign-mentee-mentor').append(response);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                        }
+                    });
+                    // for getting the mentees of the given organisation and course.
+                    $('.assign-mentee-mentee').children('input, label').remove();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "30", organ: assignOrgan, course: assignCourse
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
+                            }
+                            else if(response == "0" || response == "") {
+                                popup.append("<p>No mentees could be found in the database.</p>").fadeIn();
+                            }
+                            else {
+                                $('.assign-mentee-mentee').append(response);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });  // end of second ajax request.
+
+                }   // end of else if for checking assignOrgan and assignCourse
+                return false;
+            });   // end of delegate event for Course ddl.
+
+            // for the button click for assignment of mentors to the mentees.
+            $('#formAssignMentee').submit(function() {
+                // get the selected mentees first.
+                var selected = [];
+                $('.assign-checkbox').each(function() {
+                    var item = $(this);
+                    if(item.is(':checked')) {
+                        selected.push(item.attr('name'));
+                    }
+                });
+
+                // now, the mentor selected.
+                var mentor = $('.assign-mentee-mentor').children('select').val();
+                var mentees = JSON.stringify(selected);
+
+                if(mentor == "-1" || mentor == "") {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select a mentor before assigning. Thank You.</p>").fadeIn();
+                }
+                else if(selected.length == 0) {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select at least one mentee to be assigned to. Thank You.</p>").fadeIn();
+                }
+                else {
+                    //now, the ajax request to assign the mentors to the selected mentees.
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "31", mentorId: mentor, mentees: mentees
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
+                            }
+                            else {
+                                popup.children('p').remove();
+                                popup.append("<p>" + response + ". Please wait while we reload the page for you.</p>").fadeIn();
+
+                                // reload the page for no problems afterwards.
+                                setTimeout(function() {
+                                    location.reload();
+                                }, 5000);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }
+                return false;
+            });   // end of the submit() function.
+                
+            
+
+            // --------------- Central Resources Page ------------------
 
             // for the Central Resources page on LHS
             $('.CRP').on('click', function() {
@@ -2842,9 +2842,129 @@
                     }
                     return false;
                 });  //end of submit function.
-
                 return false;
             });   // end of Quiz link on the LHS.
+
+
+
+
+            //------------------ mentee-status ------------------
+
+            // for the mentee status link on the LHS.
+            $('.status').on('click', function() {
+                showDiv($('.status-div'));
+                changeActiveState($(this).parent('li'));
+                // firstly, get the courses and assignments for the admin page.
+                // to get all the courses as a drop down list
+                showLoading();
+                $.ajax({
+                    type: "GET",
+                    url: "AJAXFunctions.php",
+                    data: {
+                        no: "6"
+                    },
+                    success: function(response) {
+                        // to show the courses drop down at appropriate place.
+                        if(response == "-1") {
+                            popup.children('p').remove();
+                            popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                        }
+                        else {
+                            $('.mentee-status-course').children('select').remove();
+                            $('.mentee-status-course').append(response);
+                        }
+                    }, 
+                    error: function() {
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });   // end of courses dll
+                
+                return false;
+            });  // end of on-click event of status on LHS.
+            // for the delegate function of course in mentee status tab.
+            $('.status-div').delegate('#ddl-course', 'change', function() {
+                if($(this).val() == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not selected the course. Please do so before uploading the calender.</p>").fadeIn();
+                }
+                else {
+                    // to get all the assignments as a drop down list
+                    var courseId = $(this).val();
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "10", courseAssPDF: courseId
+                        },
+                        success: function(response) {
+                            // to show the assignments drop down at appropriate place.
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>We could not retrieve the assignments from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                            }
+                            else {
+                                $('.mentee-status-assignment').children('select').remove();
+                                $('.mentee-status-assignment').append(response);
+                            }
+                        }, 
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }   // end of else.
+                return false;
+            });    // end of delegate event for getting the assignments from course.
+            // for the change event of the assignment drop down list.
+            $('.status-div').delegate('#ddl-assignment', 'change', function() {
+                var assId = $(this).val();
+                $('.mentee-status-div').children('table, h3').remove();
+                if(assId == "-1" || assId == "undefined" || assId == undefined || assId == "") {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select an Assignment before continuing.</p>").fadeIn();
+                }
+                else {
+                    // to get the mentee statuses of all the mentees, filtered by course and assignment.
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "40", assId: assId
+                        },
+                        success: function(response) {
+                            if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No Submission/Feedback Records found.</p>").fadeIn();
+                            }
+                            else if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();      
+                            }
+                            else {
+                                $('.mentee-status-div').append(response);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });   // end of ajax request.
+                }  // end of else.
+                return false;
+            });   // end of the delegate change event of assignment ddl.
+
 
             // hide all the divs on page load. Except for first div.
             $('.main-div').hide();
@@ -2933,6 +3053,7 @@
                 <ul class="nav nav-sidebar">
                     <li><a href="#" class="CRP">Central Resources</a></li>
                 	<li><a href="#" class="dashboard">Admin Dashboard</a></li>
+                    <li><a href="#" class="status">Mentee Status</a></li>
                     <li><a href="#" class="profile">Profile</a></li>
                     <li><a href="#" class="password">Change Password</a></li>
 					<li><a href="#" class="invite">Send Invites</a></li>                    
@@ -2960,6 +3081,36 @@
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <!-- for showing the statuses of the mentees under the mentor -->
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div status-div">
+            <h1 class="page-header">
+                Mentee Status
+            </h1>
+
+            <table class="table">
+                <tr>
+                    <td>
+                        <label>Select Course: </label>
+                    </td>
+                    <td class="mentee-status-course">
+                        <!-- data will come from ajax here -->            
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Select Assignment: </label>
+                    </td>
+                    <td class="mentee-status-assignment">
+                        <!-- data will come from ajax here -->            
+                    </td>
+                </tr>
+            </table>
+
+            <div class="mentee-status-div">
+                <!-- data will come from ajax here -->
+            </div>   <!-- end of mentee-status-div -->
+        </div>   <!-- end of status-div -->
 
         <!-- for adding the quiz --> 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div quiz-div">

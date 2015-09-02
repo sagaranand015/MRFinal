@@ -878,6 +878,127 @@
                 return false;
             });   // end of .password on LHS.
 
+
+            //------------------ mentee-status ------------------
+
+            // for the mentee status link on the LHS.
+            $('.status').on('click', function() {
+                showDiv($('.status-div'));
+                changeActiveState($(this).parent('li'));
+                // firstly, get the courses and assignments for the admin page.
+                // to get all the courses as a drop down list
+                showLoading();
+                $.ajax({
+                    type: "GET",
+                    url: "AJAXFunctions.php",
+                    data: {
+                        no: "6"
+                    },
+                    success: function(response) {
+                        // to show the courses drop down at appropriate place.
+                        if(response == "-1") {
+                            popup.children('p').remove();
+                            popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                        }
+                        else {
+                            $('.mentee-status-course').children('select').remove();
+                            $('.mentee-status-course').append(response);
+                        }
+                    }, 
+                    error: function() {
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });   // end of courses dll
+                
+                return false;
+            });  // end of on-click event of status on LHS.
+            // for the delegate function of course in mentee status tab.
+            $('.status-div').delegate('#ddl-course', 'change', function() {
+                if($(this).val() == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not selected the course. Please do so before uploading the calender.</p>").fadeIn();
+                }
+                else {
+                    // to get all the assignments as a drop down list
+                    var courseId = $(this).val();
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "10", courseAssPDF: courseId
+                        },
+                        success: function(response) {
+                            // to show the assignments drop down at appropriate place.
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>We could not retrieve the assignments from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                            }
+                            else {
+                                $('.mentee-status-assignment').children('select').remove();
+                                $('.mentee-status-assignment').append(response);
+                            }
+                        }, 
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }   // end of else.
+                return false;
+            });    // end of delegate event for getting the assignments from course.
+            // for the change event of the assignment drop down list.
+            $('.status-div').delegate('#ddl-assignment', 'change', function() {
+                var assId = $(this).val();
+                $('.mentee-status-div').children('table, h3').remove();
+                if(assId == "-1" || assId == "undefined" || assId == undefined || assId == "") {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select an Assignment before continuing.</p>").fadeIn();
+                }
+                else {
+                    // to get the mentee statuses of all the mentees, filtered by course and assignment.
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "40", assId: assId
+                        },
+                        success: function(response) {
+                            if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No Submission/Feedback Records found.</p>").fadeIn();
+                            }
+                            else if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();      
+                            }
+                            else {
+                                $('.mentee-status-div').append(response);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });   // end of ajax request.
+                }  // end of else.
+                return false;
+            });   // end of the delegate change event of assignment ddl.
+
+
+
+
         });    // end of ready function.
 
 	</script>
@@ -956,6 +1077,7 @@
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="CRP">Central Resources</a></li>
                     <li><a href="#" class="calender">Program Calender</a></li>
+                    <li><a href="#" class="status">Mentee Status</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="profile">Profile</a></li>
@@ -967,6 +1089,36 @@
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <!-- for showing the statuses of the mentees under the mentor -->
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div status-div">
+            <h1 class="page-header">
+                Mentee Status
+            </h1>
+
+            <table class="table">
+                <tr>
+                    <td>
+                        <label>Select Course: </label>
+                    </td>
+                    <td class="mentee-status-course">
+                        <!-- data will come from ajax here -->            
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Select Assignment: </label>
+                    </td>
+                    <td class="mentee-status-assignment">
+                        <!-- data will come from ajax here -->            
+                    </td>
+                </tr>
+            </table>
+
+            <div class="mentee-status-div">
+                <!-- data will come from ajax here -->
+            </div>   <!-- end of mentee-status-div -->
+        </div>   <!-- end of status-div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div password-div">
             <h1 class="page-header">

@@ -9,6 +9,61 @@ include 'headers/databaseConn.php';
 require_once 'mandrill/Mandrill.php'; 
 
 // to get the assignment submission link for the mentee only.
+function GetMenteeSubmissionFeedbackInTableFormatForAdminAndDirector($menteeId) {
+	$resp = "-1";
+	$submission = "#";
+	$feedback = "#";
+	$assignmentName = "";
+	$menteeArr = array();
+	try {
+		$query = "select * from SubmissionFeedback where MenteeID='$menteeId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "<table class='table mentee-status-table'>";
+			if(mysql_num_rows($rs) > 0) {
+				while ($res = mysql_fetch_array($rs)) {
+					$assignmentName = GetAssignmentName($res["AssID"]);
+					$menteeArr = GetMenteeDetails($menteeId);
+
+					if($res["Submission"] != "" && $res["Feedback"] != "") {
+						$submission = $res["Submission"];
+						$feedback = $res["Feedback"];
+						$resp .= "<tr><td>" . $assignmentName . "</td><td>" . "<a href='http://www.mentored-research.com/courses/" . $submission . "' target='_blank'>Submission</a></td><td>" . "<a href='http://www.mentored-research.com/courses/" . $feedback . "' target='_blank'>Feedback link</a></td></tr>";
+					}
+					else if($res["Submission"] == "" && $res["Feedback"] != "") {
+						$submission = "#";
+						$feedback = $res["Feedback"];
+						$resp .= "<tr><td>" . $assignmentName . "</td><td>" . "<a href='#'>No Submission</a></td><td>" . "<a href='http://www.mentored-research.com/courses/" . $feedback . "' target='_blank'>Feedback link</a></td></tr>";
+					}
+					else if($res["Feedback"] == "" && $res["Submission"] != "") {
+						$feedback = "#";
+						$submission = $res["Submission"];
+						$resp .= "<tr><td>" . $assignmentName . "</td><td>" . "<a href='http://www.mentored-research.com/courses/" . $submission . "' target='_blank'>Submission</a></td><td>" . "<a href='#'> No Feedback</a></td></tr>";
+					}
+					else if($res["Feedback"] == "" && $res["Submission"] == "") {
+						$submission = "#";
+						$feedback = "#";
+						$resp .= "<tr><td>" . $assignmentName . "</td><td>" . "<a href='#'>No Submission</a></td><td>" . "<a href='#'>No Feedback</a></td></tr>";
+					}
+				}
+				$resp .= "</table>";
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// to get the assignment submission link for the mentee only.
 function GetMenteeSubmissionFeedbackInTableFormat($menteeId) {
 	$resp = "-1";
 	$submission = "#";

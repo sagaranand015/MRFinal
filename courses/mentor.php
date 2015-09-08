@@ -1009,6 +1009,10 @@
             $('.feedback-div').delegate('#ddl-mentee', 'change', function() {
                 var menteeId = $(this).val();
                 $.cookie("menteeId", menteeId);
+
+                var id = $.cookie("id");
+                var email = $.cookie("email");
+                
                 if(menteeId == "-1") {
                     popup.children('p').remove();
                     popup.append("<p>Please select a mentee to get the submitted assignments</p>").fadeIn();

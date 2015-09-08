@@ -548,7 +548,7 @@
 	            	});	  // end of ajax.
             	}   // end of else.
             	return false;
-            });
+            });    // end of CRP link on LHS.
 			// for the delegate event of the assignments in CRP.
 			$('.CRP-div').delegate('#ddl-assignment', 'change', function() {
 				var assID = $(this).val();
@@ -777,7 +777,7 @@
 	            	});
             	}  // end of else.
             	return false;
-            });
+            });   // end of calender link on LHS
 
             // for the Profile page on LHS
             $('.profile').on('click', function() {
@@ -843,7 +843,7 @@
 	            	});   // end of ajax request
             	}  // end of else.
             	return false;
-            });   // end of mentor link on LHS.
+            });   // end of director link on LHS.
 			// for sending message button 
 			$('#btnSendMessageToDirectorModal').on('click', function() {
 				var email = $('.director-email').html();   // to get the email for the mail to be send.
@@ -912,53 +912,52 @@
             $('.password').on('click', function() {
                 showDiv($('.password-div'));
                 changeActiveState($(this).parent('li'));
-
-                $('#formChangePassword').submit(function() {
-                    // first, check for both the new passwords:
-                    var oldPassword = $('#txtOldPassword').val().trim();
-                    var newPassword = $('#txtNewPassword').val().trim();
-                    var newPasswordConfirm = $('#txtNewPasswordConfirm').val().trim();
-                    var email = $.cookie("email");
-
-                    if(newPassword != newPasswordConfirm) {
-                        popup.children('p').remove();
-                        popup.append("<p>Your Passwords do not match. Please recheck and try again.</p>").fadeIn();
-                    }
-                    else if(email == "" || email == "undefined" || email == undefined) {
-                        popup.children('p').remove();
-                        popup.append("<p>You have not logged in properly. Please log out and login again.</p>").fadeIn();   
-                    }
-                    else {   // ajax request for password change
-                        showLoading();
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "17", email: email, oldPassword: oldPassword, newPassword: newPassword, newPasswordConfirm: newPasswordConfirm, table: "Mentor"
-                            },
-                            success: function(response) {
-                                if(response == "1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Password Successfully Changed.</p>").fadeIn();
-                                }
-                                else {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Error encountered while changing your password. Please try again.</p>").fadeIn();   
-                                }
-                            },
-                            error: function() {
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
-                            },
-                            complete: function() {
-                                hideLoading();
-                            }
-                        });   // end of AJAX Request.
-                    }
-                    return false;
-                });   // end of formChangePassword submit()
                 return false;
             });   // end of .password on LHS.
+            $('#formChangePassword').submit(function() {
+                // first, check for both the new passwords:
+                var oldPassword = $('#txtOldPassword').val().trim();
+                var newPassword = $('#txtNewPassword').val().trim();
+                var newPasswordConfirm = $('#txtNewPasswordConfirm').val().trim();
+                var email = $.cookie("email");
+
+                if(newPassword != newPasswordConfirm) {
+                    popup.children('p').remove();
+                    popup.append("<p>Your Passwords do not match. Please recheck and try again.</p>").fadeIn();
+                }
+                else if(email == "" || email == "undefined" || email == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>You have not logged in properly. Please log out and login again.</p>").fadeIn();   
+                }
+                else {   // ajax request for password change
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "17", email: email, oldPassword: oldPassword, newPassword: newPassword, newPasswordConfirm: newPasswordConfirm, table: "Mentor"
+                        },
+                        success: function(response) {
+                            if(response == "1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Password Successfully Changed.</p>").fadeIn();
+                            }
+                            else {
+                                popup.children('p').remove();
+                                popup.append("<p>Error encountered while changing your password. Please try again.</p>").fadeIn();   
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });   // end of AJAX Request.
+                }
+                return false;
+            });   // end of formChangePassword submit()
 
             // for download the assignment and uploading the feedback for an assignment.
             $('.feedback').on('click', function() {
@@ -1003,169 +1002,169 @@
                         }
                     });
                 }   // end of the else if logging in.
-
-                // now, for the showing of the assignment ddl when a mentee is selected.
-                $('.feedback-div').delegate('#ddl-mentee', 'change', function() {
-                    var menteeId = $(this).val();
-                    $.cookie("menteeId", menteeId);
-                    if(menteeId == "-1") {
-                        popup.children('p').remove();
-                        popup.append("<p>Please select a mentee to get the submitted assignments</p>").fadeIn();
-                    }
-                    else {
-                        showLoading();
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "27", email: email, id: id, menteeId: menteeId
-                            },
-                            success: function(response) {
-                                if(response == "0") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>No Matching Assignments found.</p>").fadeIn();
-                                }
-                                else if(response == "-1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
-                                }
-                                else {
-                                    $('.feedback-assignment').html(response);
-                                }
-                            },
-                            error: function() {
+                return false;
+            });    // end of the feedback link on LHS.
+            
+            // now, for the showing of the assignment ddl when a mentee is selected.
+            $('.feedback-div').delegate('#ddl-mentee', 'change', function() {
+                var menteeId = $(this).val();
+                $.cookie("menteeId", menteeId);
+                if(menteeId == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select a mentee to get the submitted assignments</p>").fadeIn();
+                }
+                else {
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "27", email: email, id: id, menteeId: menteeId
+                        },
+                        success: function(response) {
+                            if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No Matching Assignments found.</p>").fadeIn();
+                            }
+                            else if(response == "-1") {
                                 popup.children('p').remove();
                                 popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
-                            },
-                            complete: function() {
-                                hideLoading();
                             }
-                        });
-                    }   // end of else.
-                    return false;
-                });    // end of feedback-div delegate change event.
+                            else {
+                                $('.feedback-assignment').html(response);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }   // end of else.
+                return false;
+            });    // end of feedback-div delegate change event.
 
-                $('.feedback-div').delegate('#ddl-assignment', 'change', function() {
-                    var assId = $(this).val();
-                    $.cookie("assId", assId);
-                    var submission = $(this).find('option:selected').attr('data-submission');
-                    var feedback = $(this).find('option:selected').attr('data-feedback');
-                    if(assId == "-1") {
-                        popup.children('p').remove();
-                        popup.append("<p>Please select the Assignment to show the Submission and Feedback Details.</p>").fadeIn();
+            $('.feedback-div').delegate('#ddl-assignment', 'change', function() {
+                var assId = $(this).val();
+                $.cookie("assId", assId);
+                var submission = $(this).find('option:selected').attr('data-submission');
+                var feedback = $(this).find('option:selected').attr('data-feedback');
+                if(assId == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select the Assignment to show the Submission and Feedback Details.</p>").fadeIn();
+                }
+                else {
+                    $('.feedback-submission').html("<a href='" + submission + "' target='_blank'>Download Submission here</a>");
+
+                    if(feedback == "") {
+                        $('.feedback-feedback').html("<a href='#'>No Feedback uploaded yet.</a>");                            
                     }
                     else {
-                        $('.feedback-submission').html("<a href='" + submission + "' target='_blank'>Download Submission here</a>");
-
-                        if(feedback == "") {
-                            $('.feedback-feedback').html("<a href='#'>No Feedback uploaded yet.</a>");                            
-                        }
-                        else {
-                            $('.feedback-feedback').html("<a href='" + feedback + "' target='_blank'>Download Feedback here</a>");                            
-                        }
+                        $('.feedback-feedback').html("<a href='" + feedback + "' target='_blank'>Download Feedback here</a>");                            
                     }
-                    return false;
-                });
+                }
+                return false;
+            });
 
-                // for the helper functions for the file upload things.
-                //function to check file size before uploading.
-                function beforeSubmitAssignmentFeedback() {
-                    alertMsg.children('p').remove();
-                    alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
-                    //check whether browser fully supports all File API
-                    if (window.File && window.FileReader && window.FileList && window.Blob) {
-                        if( !$('#fileUploadFeedback').val()) {   //check empty input filed 
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
-                            return false;
-                        }
-                        var fsize = $('#fileUploadFeedback')[0].files[0].size; //get file size
-                        var ftype = $('#fileUploadFeedback')[0].files[0].type; // get file type
-                        //allow file types 
-                        switch(ftype) {
-                            case 'image/png': 
-                            case 'image/gif': 
-                            case 'image/jpeg': 
-                            case 'image/pjpeg':
-                            case 'text/plain':
-                            case 'text/html':
-                            case 'application/x-zip-compressed':
-                            case 'application/pdf':
-                            case 'application/msword':
-                            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                            case 'application/vnd.ms-excel':
-                            case 'video/mp4':
-                                break;
-                            default:
-                                alertMsg.children('p').remove();
-                                alertMsg.fadeOut();
-                                popup.children('p').remove();
-                                popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
-                                return false;
-                        }
-                        //Allowed file size is less than 5 MB (1048576)
-                        if(fsize>5242880)   {
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
-                            return false;
-                        }
-                    }
-                    else  {
+            // for the helper functions for the file upload things.
+            //function to check file size before uploading.
+            function beforeSubmitAssignmentFeedback() {
+                alertMsg.children('p').remove();
+                alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+                //check whether browser fully supports all File API
+                if (window.File && window.FileReader && window.FileList && window.Blob) {
+                    if( !$('#fileUploadFeedback').val()) {   //check empty input filed 
                         alertMsg.children('p').remove();
                         alertMsg.fadeOut();
                         popup.children('p').remove();
-                        popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
+                        popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
                         return false;
                     }
+                    var fsize = $('#fileUploadFeedback')[0].files[0].size; //get file size
+                    var ftype = $('#fileUploadFeedback')[0].files[0].type; // get file type
+                    //allow file types 
+                    switch(ftype) {
+                        case 'image/png': 
+                        case 'image/gif': 
+                        case 'image/jpeg': 
+                        case 'image/pjpeg':
+                        case 'text/plain':
+                        case 'text/html':
+                        case 'application/x-zip-compressed':
+                        case 'application/pdf':
+                        case 'application/msword':
+                        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                        case 'application/vnd.ms-excel':
+                        case 'video/mp4':
+                            break;
+                        default:
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
+                            return false;
+                    }
+                    //Allowed file size is less than 5 MB (1048576)
+                    if(fsize>5242880)   {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
+                        return false;
+                    }
+                }
+                else  {
                     alertMsg.children('p').remove();
                     alertMsg.fadeOut();
-                }   // end of beforeSubmitAssignmentSolution function.
-
-                function afterSuccessAssignmentFeedback() {
-                    // to hide the loading overlay after the uploading is done.
-                    hideLoading();
                     popup.children('p').remove();
-                    popup.fadeOut();
-                    $('.progress').fadeOut();
-                    alertMsg.fadeIn();
-                    // finally, trigger the solution button for reloading.
-                    $('.feedback').trigger('click');
-                    // to fadeOut the alertMsg after 10 seconds.
-                    setTimeout(function() {
-                        alertMsg.fadeOut();
-                    }, 10000);
-                }     // end of afterSuccessAssignmentSolution function
-
-                // code for assignmentSolution File upload
-                var optionsAssignmentFeedback = { 
-                    target:   '#alertMsg',   // target element(s) to be updated with server response 
-                    beforeSubmit:  beforeSubmitAssignmentFeedback,  // pre-submit callback 
-                    success:       afterSuccessAssignmentFeedback,  // post-submit callback 
-                    uploadProgress: OnProgress, //upload progress callback 
-                    resetForm: true        // reset the form after successful submit 
-                };
-
-                // for uploading the feedback as file from the mentor.
-                $('#formUploadFeedback').submit(function() {
-                    if($.cookie("assId") == "undefined" || $.cookie("assId") == undefined || $.cookie("assId") == "" || $.cookie("assId") == "-1") {
-                        popup.children('p').remove();
-                        popup.append("<p>The Assignment has not been selected. Please do so first.</p>").fadeIn();
-                    }
-                    else if($.cookie("menteeId") == "undefined" || $.cookie("menteeId") == undefined || $.cookie("menteeId") == "" || $.cookie("menteeId") == "-1") {
-                        popup.children('p').remove();
-                        popup.append("<p>The Mentee has not been selected. Please do so first.</p>").fadeIn();
-                    }
-                    else {
-                        $(this).ajaxSubmit(optionsAssignmentFeedback);     
-                    }
+                    popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
                     return false;
-                });   // end of formUploadFeedback
+                }
+                alertMsg.children('p').remove();
+                alertMsg.fadeOut();
+            }   // end of beforeSubmitAssignmentSolution function.
+
+            function afterSuccessAssignmentFeedback() {
+                // to hide the loading overlay after the uploading is done.
+                hideLoading();
+                popup.children('p').remove();
+                popup.fadeOut();
+                $('.progress').fadeOut();
+                alertMsg.fadeIn();
+                // finally, trigger the solution button for reloading.
+                $('.feedback').trigger('click');
+                // to fadeOut the alertMsg after 10 seconds.
+                setTimeout(function() {
+                    alertMsg.fadeOut();
+                }, 10000);
+            }     // end of afterSuccessAssignmentSolution function
+
+            // code for assignmentSolution File upload
+            var optionsAssignmentFeedback = { 
+                target:   '#alertMsg',   // target element(s) to be updated with server response 
+                beforeSubmit:  beforeSubmitAssignmentFeedback,  // pre-submit callback 
+                success:       afterSuccessAssignmentFeedback,  // post-submit callback 
+                uploadProgress: OnProgress, //upload progress callback 
+                resetForm: true        // reset the form after successful submit 
+            };
+
+            // for uploading the feedback as file from the mentor.
+            $('#formUploadFeedback').submit(function() {
+                if($.cookie("assId") == "undefined" || $.cookie("assId") == undefined || $.cookie("assId") == "" || $.cookie("assId") == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>The Assignment has not been selected. Please do so first.</p>").fadeIn();
+                }
+                else if($.cookie("menteeId") == "undefined" || $.cookie("menteeId") == undefined || $.cookie("menteeId") == "" || $.cookie("menteeId") == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>The Mentee has not been selected. Please do so first.</p>").fadeIn();
+                }
+                else {
+                    $(this).ajaxSubmit(optionsAssignmentFeedback);     
+                }
                 return false;
-            });    // end of the feedback div
+            });   // end of formUploadFeedback
 
             // for the mentee status div
             $('.status').on('click', function() {
@@ -1176,7 +1175,7 @@
                 var id = $.cookie("id");
 
                 // remove the previous tables and headings.
-                $('.status-div').children('table, h3').remove();
+                $('.status-div').children('table, h4').remove();
 
                 if(id == "undefined" || id == "" || id == undefined || email == "" || email == "undefined" || email == undefined) {
                     popup.children('p').remove();
@@ -1213,76 +1212,72 @@
                         }
                     });  // end of ajax request
                 }  // end of else.
-
-                // for the click event of the send message.
-                $('.status-div').delegate('.mentee-status-message', 'click', function() {
-                    var sendEmail = $(this).attr('data-email');
-                    var sendId = $(this).attr('data-id');
-
-                    if(sendEmail == "" || sendEmail == "No Data Available") {
-                        $('#txtSendStatusMessageEmail').val("Email Address not Available");
-                    }
-                    else {
-                        $('#txtSendStatusMessageEmail').val(sendEmail);  // show it to the user, but disabled.
-                    }
-                    // show the modal now.
-                    $('#sendStatusMessageModal').modal('show');
-
-                    return false;
-                });
-
-                // for sending the message from the mentee status page.
-                $('#btnSendStatusMessage').on('click', function() {
-                    var toEmail = $('#txtSendStatusMessageEmail').val().trim();
-                    var msg = $('#txtSendStatusMessage').val();
-                    var email = $.cookie("email");
-
-                    if(email == "" || email == "undefined" || email == undefined) {
-                        popup.children('p').remove();
-                        popup.append("<p>You have not logged in properly. Please <a href='http://mentored-research.com/login' style='color: black;'>LOGIN AGAIN</a> to continue.</p>").fadeIn();
-                    }
-                    else {
-                        showLoading();
-                        $('#sendStatusMessageModal').modal('hide');
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "39", toEmail: toEmail, msg: msg, fromEmail: email
-                            },
-                            success: function(response) {
-                                console.log(response);
-                                if(response[0]["status"] == "sent") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Your Message has been sent. Thank You.</p>").fadeIn();
-
-                                    // remove the contents of the message box here.
-                                    $('#txtSendStatusMessage').val("");
-                                }
-                                else if(response[0]["status"] == "queued" || response[0]["status"] == "scheduled") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Your Message has been Queued. Sit back and relax while we send your message in sometime.</p>").fadeIn();
-                                }
-                                else if(response[0]["status"] == "rejected" || response[0]["status"] == "invalid") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Oops! Your Message could not ben sent. Please try again.</p>").fadeIn();
-                                }
-                            },
-                            error: function() {
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();                                             
-                            },
-                            complete: function() {
-                                hideLoading();
-                            }
-                        });    
-                    }   // end of else.
-                    return false;
-                });
-
-
                 return false;
             });   // end of status link on LHS.
+            // for the click event of the send message.
+            $('.status-div').delegate('.mentee-status-message', 'click', function() {
+                var sendEmail = $(this).attr('data-email');
+                var sendId = $(this).attr('data-id');
+
+                if(sendEmail == "" || sendEmail == "No Data Available") {
+                    $('#txtSendStatusMessageEmail').val("Email Address not Available");
+                }
+                else {
+                    $('#txtSendStatusMessageEmail').val(sendEmail);  // show it to the user, but disabled.
+                }
+                // show the modal now.
+                $('#sendStatusMessageModal').modal('show');
+
+                return false;
+            });
+            // for sending the message from the mentee status page.
+            $('#btnSendStatusMessage').on('click', function() {
+                var toEmail = $('#txtSendStatusMessageEmail').val().trim();
+                var msg = $('#txtSendStatusMessage').val();
+                var email = $.cookie("email");
+
+                if(email == "" || email == "undefined" || email == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>You have not logged in properly. Please <a href='http://mentored-research.com/login' style='color: black;'>LOGIN AGAIN</a> to continue.</p>").fadeIn();
+                }
+                else {
+                    showLoading();
+                    $('#sendStatusMessageModal').modal('hide');
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "39", toEmail: toEmail, msg: msg, fromEmail: email
+                        },
+                        success: function(response) {
+                            console.log(response);
+                            if(response[0]["status"] == "sent") {
+                                popup.children('p').remove();
+                                popup.append("<p>Your Message has been sent. Thank You.</p>").fadeIn();
+
+                                // remove the contents of the message box here.
+                                $('#txtSendStatusMessage').val("");
+                            }
+                            else if(response[0]["status"] == "queued" || response[0]["status"] == "scheduled") {
+                                popup.children('p').remove();
+                                popup.append("<p>Your Message has been Queued. Sit back and relax while we send your message in sometime.</p>").fadeIn();
+                            }
+                            else if(response[0]["status"] == "rejected" || response[0]["status"] == "invalid") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! Your Message could not ben sent. Please try again.</p>").fadeIn();
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();                                             
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });    
+                }   // end of else.
+                return false;
+            });
 
         });    // end of ready function.
 

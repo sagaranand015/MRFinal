@@ -689,124 +689,121 @@
 				        hideLoading();
 				    }
 				});
+            	return false;
+            });    // end of dashboard click link on LHS.
+            // for the delegate event of the change of the organisation drop down on dashboard.
+            // show all the directors and mentors and mentees here on this page.
+            $('.dashboard-div').delegate('#ddl-organisation', 'change', function() {
+                var organ = $(this).val();
 
-                // for the delegate event of the change of the organisation drop down on dashboard.
-                // show all the directors and mentors and mentees here on this page.
-                $('.dashboard-div').delegate('#ddl-organisation', 'change', function() {
-                    var organ = $(this).val();
+                // this is to get the directors, mentors and mentees on the admin dashboard.
+                showLoading();
+                $.ajax({
+                    type: "GET",
+                    url: "AJAXFunctions.php",
+                    data: {
+                        no: "32", organ: organ
+                    },
+                    success: function(response) {
+                        if(response == "-1") {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
+                        }
+                        else {
+                            var res = $.parseJSON(response);
+                            console.log(res);
 
-                    // this is to get the directors, mentors and mentees on the admin dashboard.
+                            // firstly, get the directors(index: 0)
+                            var temp = "<h3>Directors: </h3>";
+                            for(var i = 0;i<res[0].length;i++) {
+                                temp += "<tr><td>" + res[0][i].DirectorName + "</td><td>" + res[0][i].DirectorEmail + "</td><td><a href='#' data-email='" + res[0][i].DirectorEmail + "' class='btnDashboardSendMessage'>Send Messsage</a></td></tr>";
+                            }
+                            $('.dashboard-director').html(temp);
+
+                            // for the mentor display
+                            temp = "<h3>Mentors: </h3>";
+                            for(var i = 0;i<res[1].length;i++) {
+                                temp += "<tr><td>" + res[1][i].MentorName + "</td><td>" + res[1][i].MentorEmail + "</td><td><a href='#' data-email='" + res[1][i].MentorEmail + "' class='btnDashboardSendMessage'>Send Messsage</a></td></tr>";
+                            }
+                            $('.dashboard-mentor').html(temp);
+
+                            // for the mentee display
+                            temp = "<h3>Mentees: </h3>";
+                            for(var i = 0;i<res[2].length;i++) {
+                                temp += "<tr><td>" + res[2][i].MenteeName + "</td><td>" + res[2][i].MenteeEmail + "</td><td><a href='#' data-email='" + res[2][i].MenteeEmail + "' class='btnDashboardSendMessage'>Send Messsage</a></td></tr>";
+                            }
+                            $('.dashboard-mentee').html(temp);
+                        }
+                    },
+                    error: function() {
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+
+            });   // end of delegate event.
+
+            // for the send Message button that shows the modal for sending message.
+            $('.dashboard-div').delegate('.btnDashboardSendMessage', 'click', function() {
+                var email = $(this).attr('data-email');
+                $('#txtSendMessageEmail').val(email);
+                $('#sendMessageModal').modal('show');
+                return false;
+            });
+
+            // for sending the message from the modal box.
+            $('#btnSendMessage').on('click', function() {
+                var msg = $('#txtSendMessage').val();
+
+                var email = $('#txtSendMessageEmail').val();
+
+                if(msg == "") {
+                    popup.children('p').remove();
+                    popup.append("<p>Please Enter a message to be sent</p>").fadeIn();
+                }
+                else if(email == "" || email == "undefined" || email == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Unexpected Error Occured. Please login again.</p>").fadeIn();   
+                }
+                else {   // ajax request to send the message to the email
+                    $('#sendMessageModal').modal('hide');
                     showLoading();
                     $.ajax({
                         type: "GET",
                         url: "AJAXFunctions.php",
                         data: {
-                            no: "32", organ: organ
+                            no: "33", email: email, msg: msg
                         },
                         success: function(response) {
-                            if(response == "-1") {
+                            if(response[0]["status"] == "sent") {
                                 popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
+                                popup.append("<p>Your Message has been sent. Thank You.</p>").fadeIn();
+                                // remove the contents of the message box here.
+                                $('#txtSendMessage').val("");
                             }
-                            else {
-                                var res = $.parseJSON(response);
-                                console.log(res);
-
-                                // firstly, get the directors(index: 0)
-                                var temp = "<h3>Directors: </h3>";
-                                for(var i = 0;i<res[0].length;i++) {
-                                    temp += "<tr><td>" + res[0][i].DirectorName + "</td><td>" + res[0][i].DirectorEmail + "</td><td><a href='#' data-email='" + res[0][i].DirectorEmail + "' class='btnDashboardSendMessage'>Send Messsage</a></td></tr>";
-                                }
-                                $('.dashboard-director').html(temp);
-
-                                // for the mentor display
-                                temp = "<h3>Mentors: </h3>";
-                                for(var i = 0;i<res[1].length;i++) {
-                                    temp += "<tr><td>" + res[1][i].MentorName + "</td><td>" + res[1][i].MentorEmail + "</td><td><a href='#' data-email='" + res[1][i].MentorEmail + "' class='btnDashboardSendMessage'>Send Messsage</a></td></tr>";
-                                }
-                                $('.dashboard-mentor').html(temp);
-
-                                // for the mentee display
-                                temp = "<h3>Mentees: </h3>";
-                                for(var i = 0;i<res[2].length;i++) {
-                                    temp += "<tr><td>" + res[2][i].MenteeName + "</td><td>" + res[2][i].MenteeEmail + "</td><td><a href='#' data-email='" + res[2][i].MenteeEmail + "' class='btnDashboardSendMessage'>Send Messsage</a></td></tr>";
-                                }
-                                $('.dashboard-mentee').html(temp);
+                            else if(response[0]["status"] == "queued" || response[0]["status"] == "scheduled") {
+                                popup.children('p').remove();
+                                popup.append("<p>Your Message has been Queued. Sit back and relax while we send your message in sometime.</p>").fadeIn();
+                            }
+                            else if(response[0]["status"] == "rejected" || response[0]["status"] == "invalid") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! Your Message could not ben sent. Please try again.</p>").fadeIn();
                             }
                         },
                         error: function() {
                             popup.children('p').remove();
-                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
                         },
                         complete: function() {
                             hideLoading();
                         }
-                    });
-
-                });   // end of delegate event.
-
-                // for the send Message button that shows the modal for sending message.
-                $('.dashboard-div').delegate('.btnDashboardSendMessage', 'click', function() {
-                    var email = $(this).attr('data-email');
-                    $('#txtSendMessageEmail').val(email);
-                    $('#sendMessageModal').modal('show');
-                    return false;
-                });
-
-                // for sending the message from the modal box.
-                $('#btnSendMessage').on('click', function() {
-                    var msg = $('#txtSendMessage').val();
-
-                    var email = $('#txtSendMessageEmail').val();
-
-                    if(msg == "") {
-                        popup.children('p').remove();
-                        popup.append("<p>Please Enter a message to be sent</p>").fadeIn();
-                    }
-                    else if(email == "" || email == "undefined" || email == undefined) {
-                        popup.children('p').remove();
-                        popup.append("<p>Unexpected Error Occured. Please login again.</p>").fadeIn();   
-                    }
-                    else {   // ajax request to send the message to the email
-                        $('#sendMessageModal').modal('hide');
-                        showLoading();
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "33", email: email, msg: msg
-                            },
-                            success: function(response) {
-                                console.log(response);
-                                if(response[0]["status"] == "sent") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Your Message has been sent. Thank You.</p>").fadeIn();
-                                    // remove the contents of the message box here.
-                                    $('#txtSendMessage').val("");
-                                }
-                                else if(response[0]["status"] == "queued" || response[0]["status"] == "scheduled") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Your Message has been Queued. Sit back and relax while we send your message in sometime.</p>").fadeIn();
-                                }
-                                else if(response[0]["status"] == "rejected" || response[0]["status"] == "invalid") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Oops! Your Message could not ben sent. Please try again.</p>").fadeIn();
-                                }
-                            },
-                            error: function() {
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
-                            },
-                            complete: function() {
-                                hideLoading();
-                            }
-                        });   // end of ajax Request
-                    }  // end of else.
-                    return false;
-                });  // end of #btnSendMessage click.
-
-            	return false;
-            });    // end of dashboard click link on LHS.
+                    });   // end of ajax Request
+                }  // end of else.
+                return false;
+            });  // end of #btnSendMessage click.
 
 			// for the assignment link on LHS
 			$('.assignment').on('click', function() {
@@ -1462,7 +1459,7 @@
             		}
             	});
             	return false;
-            });
+            });   // end of calender link on LHS.
 			// for the delegate event of the change of the course drop down on calender upload.
             $('.calender-div').delegate('#ddl-course', 'change', function() {
                 if($(this).val() == "-1") {
@@ -1523,7 +1520,7 @@
             		}
             	});
             	return false;
-            });
+            });   // end of guide link on LHS.
 			// for the onfocusout event of the guide name
 			$('#txtGuideName').on('focusout', function() {
 				$.cookie("guideName", $(this).val());
@@ -1712,326 +1709,324 @@
 				    complete: function() {
 				        hideLoading();
 				    }
-				});
-
-				// for the form submitting while adding the users to the database.
-				$('#form-add-director').on('submit', function() {
-					var organ = $('.add-director-organ').children('select').val();
-					var directorEmail = $('#txtAddDirector').val().trim();
-					if(organ == "-1") {
-						popup.children('p').remove();
-						popup.append("<p>Please select the organization correctly.</p>").fadeIn();
-					}
-					else {
-						showLoading();
-						$.ajax({
-							type: "GET",
-							url: "AJAXFunctions.php",
-							data: {
-								no: "16", organ: organ, course: "", email: directorEmail, level: "B"
-							},
-							success: function(response) {
-								if(response == "1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Director Successfully Added. Thank You.</p>").fadeIn();
-                                }
-                                else {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Oops! We encountered an error while adding the Director. Please try again.</p>").fadeIn();
-                                }
-							},
-							error: function() {
-								alertMsg.children('p').remove();
-						        alertMsg.fadeOut();
-						        popup.children('p').remove();
-						        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-							},
-							complete: function() {
-								hideLoading();
-							}
-						});
-					}
-					return false;
-				});
-
-				// for the form submitting while adding the users(mentors) to the database.
-				$('#form-add-mentor').on('submit', function() {
-					var organ = $('.add-mentor-organ').children('select').val();
-					var course = $('.add-mentor-course').children('select').val();
-					var mentorEmail = $('#txtAddMentor').val().trim();
-					if(organ == "-1" || course == "-1") {
-						popup.children('p').remove();
-						popup.append("<p>Please select the organization or course correctly.</p>").fadeIn();
-					}
-					else {
-						showLoading();
-						$.ajax({
-							type: "GET",
-							url: "AJAXFunctions.php",
-							data: {
-								no: "16", organ: organ, course: course, email: mentorEmail, level: "C"
-							},
-							success: function(response) {
-								if(response == "1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Mentor Successfully Added. Thank You.</p>").fadeIn();
-                                }
-                                else {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Oops! We encountered an error while adding the Mentor. Please try again.</p>").fadeIn();
-                                }
-							},
-							error: function() {
-								alertMsg.children('p').remove();
-						        alertMsg.fadeOut();
-						        popup.children('p').remove();
-						        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-							},
-							complete: function() {
-								hideLoading();
-							}
-						});
-					}
-					return false;
-				});
-
-				// for the form submitting while adding the users(mentors) to the database.
-				$('#form-add-mentee').on('submit', function() {
-					var organ = $('.add-mentee-organ').children('select').val();
-					var course = $('.add-mentee-course').children('select').val();
-					var mentorEmail = $('#txtAddMentee').val().trim();
-					if(organ == "-1" || course == "-1") {
-						popup.children('p').remove();
-						popup.append("<p>Please select the organization or course correctly.</p>").fadeIn();
-					}
-					else {
-						showLoading();
-						$.ajax({
-							type: "GET",
-							url: "AJAXFunctions.php",
-							data: {
-								no: "16", organ: organ, course: course, email: mentorEmail, level: "D"
-							},
-							success: function(response) {
-								if(response == "1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Mentee Successfully Added. Thank You.</p>").fadeIn();
-                                }
-                                else {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Oops! We encountered an error while adding the Mentee. Please try again.</p>").fadeIn();
-                                }
-							},
-							error: function() {
-								alertMsg.children('p').remove();
-						        alertMsg.fadeOut();
-						        popup.children('p').remove();
-						        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-							},
-							complete: function() {
-								hideLoading();
-							}
-						});
-					}
-					return false;
-				});   // end of submit() of form-add-mentee
-                
-                //function to check file size before uploading for the update Solution
-                function beforeSubmitMenteeExcel() {
-                    alertMsg.children('p').remove();
-                    alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
-                    //check whether browser fully supports all File API
-                    if (window.File && window.FileReader && window.FileList && window.Blob) {
-                        if( !$('#fileAddMentee').val()) {   //check empty input filed 
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
-                            return false;
-                        }
-                        var fsize = $('#fileAddMentee')[0].files[0].size; //get file size
-                        var ftype = $('#fileAddMentee')[0].files[0].type; // get file type
-                        //allow file types 
-                        switch(ftype) {
-                            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                            case 'application/vnd.ms-excel':
-                            case 'application/msexcel':
-                            case 'application/x-msexcel':
-                            case 'application/x-ms-excel':
-                            case 'application/x-excel':
-                            case 'application/x-dos_ms_excel':
-                            case 'application/xls':
-                            case 'application/x-xls':
-                                break;
-                            default:
-                                alertMsg.children('p').remove();
-                                alertMsg.fadeOut();
-                                popup.children('p').remove();
-                                popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the Excel format only.</p>").fadeIn();
-                                return false;
-                        }
-                        //Allowed file size is less than 5 MB (1048576)
-                        if(fsize>5242880)   {
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
-                            return false;
-                        }
-                    }
-                    else  {
-                        alertMsg.children('p').remove();
-                        alertMsg.fadeOut();
-                        popup.children('p').remove();
-                        popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
-                        return false;
-                    }
-                    alertMsg.children('p').remove();
-                    alertMsg.fadeOut();
-                }   // end of beforeSubmitMenteeExcel function.
-
-                function afterSuccessMenteeExcel() {
-                    // to hide the loading overlay after the uploading is done.
-                    hideLoading();
-                    popup.children('p').remove();
-                    popup.fadeOut();
-                    $('.progress').fadeOut();
-                    alertMsg.fadeIn();
-                    // finally, remove the courseID cookie here.
-                    $('.user').trigger('click');
-                    // to fadeOut the alertMsg and reload the page after 3 seconds.
-                    setTimeout(function() {
-                        alertMsg.fadeOut();
-                        location.reload();
-                    }, 3000);
-                }     // end of afterSuccessAssignmentSolution function
-
-                // code for updateSolution File upload
-                var optionsMenteeExcel = { 
-                    target:   '#alertMsg',   // target element(s) to be updated with server response 
-                    beforeSubmit:  beforeSubmitMenteeExcel,  // pre-submit callback 
-                    success:       afterSuccessMenteeExcel,  // post-submit callback 
-                    uploadProgress: OnProgress, //upload progress callback 
-                    resetForm: true        // reset the form after successful submit 
-                };
-
-                // for adding the mentees through the excel sheets.
-                $('#form-add-mentee-excel').submit(function() {
-                    var organ1 = $('.add-mentee-organ').children('select').val();
-                    var course1 = $('.add-mentee-course').children('select').val();
-                    $.cookie("addMenteeOrgan", organ1);
-                    $.cookie("addMenteeCourse", course1);
-
-                    var email = $.cookie("email");
-                    var id = $.cookie("id");
-
-                    //alert($.cookie("addMenteeCourse") + " --> " + $.cookie("addMenteeOrgan"));
-                    if(organ1 == "-1" || course1 == "-1") {
-                        popup.children('p').remove();
-                        popup.append("<p>Please select the organisation and course before uploading files. Thank You.</p>").fadeIn();
-                    }
-                    else if(email == "-1" || id == "-1" || email == undefined || email == "undefined" || id == "undefined" || id == undefined) {
-                        popup.children('p').remove();
-                        popup.append("<p>Looks like you have not logged in properly. Please login again and try again.</p>").fadeIn();
-                    }
-                    else {
-                        $(this).ajaxSubmit(optionsMenteeExcel);
-                    }
-                    return false;
-                });   // end of submit() of form-add-mentee-excel
-
-                //function to check file size before uploading for the update Solution
-                function beforeSubmitMentorExcel() {
-                    alertMsg.children('p').remove();
-                    alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
-                    //check whether browser fully supports all File API
-                    if (window.File && window.FileReader && window.FileList && window.Blob) {
-                        if( !$('#fileAddMentor').val()) {   //check empty input filed 
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
-                            return false;
-                        }
-                        var fsize = $('#fileAddMentor')[0].files[0].size; //get file size
-                        var ftype = $('#fileAddMentor')[0].files[0].type; // get file type
-                        //allow file types 
-                        switch(ftype) {
-                            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                            case 'application/vnd.ms-excel':
-                            case 'application/msexcel':
-                            case 'application/x-msexcel':
-                            case 'application/x-ms-excel':
-                            case 'application/x-excel':
-                            case 'application/x-dos_ms_excel':
-                            case 'application/xls':
-                            case 'application/x-xls':
-                                break;
-                            default:
-                                alertMsg.children('p').remove();
-                                alertMsg.fadeOut();
-                                popup.children('p').remove();
-                                popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the Excel format only.</p>").fadeIn();
-                                return false;
-                        }
-                        //Allowed file size is less than 5 MB (1048576)
-                        if(fsize>5242880)   {
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
-                            return false;
-                        }
-                    }
-                    else  {
-                        alertMsg.children('p').remove();
-                        alertMsg.fadeOut();
-                        popup.children('p').remove();
-                        popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
-                        return false;
-                    }
-                    alertMsg.children('p').remove();
-                    alertMsg.fadeOut();
-                }   // end of beforeSubmitMentorExcel function.
-
-
-                // code for updateSolution File upload
-                var optionsMentorExcel = { 
-                    target:   '#alertMsg',   // target element(s) to be updated with server response 
-                    beforeSubmit:  beforeSubmitMentorExcel,  // pre-submit callback 
-                    success:       afterSuccessMenteeExcel,  // post-submit callback 
-                    uploadProgress: OnProgress, //upload progress callback 
-                    resetForm: true        // reset the form after successful submit 
-                };
-
-                // for adding the mentees through the excel sheets.
-                $('#form-add-mentor-excel').submit(function() {
-                    var organ1 = $('.add-mentor-organ').children('select').val();
-                    var course1 = $('.add-mentor-course').children('select').val();
-                    $.cookie("addMentorOrgan", organ1);
-                    $.cookie("addMentorCourse", course1);
-
-                    var email = $.cookie("email");
-                    var id = $.cookie("id");
-
-                    if(organ1 == "-1" || course1 == "-1") {
-                        popup.children('p').remove();
-                        popup.append("<p>Please select the organisation and course before uploading files. Thank You.</p>").fadeIn();
-                    }
-                    else if(email == "-1" || id == "-1" || email == undefined || email == "undefined" || id == "undefined" || id == undefined) {
-                        popup.children('p').remove();
-                        popup.append("<p>Looks like you have not logged in properly. Please login again and try again.</p>").fadeIn();
-                    }
-                    else {
-                        $(this).ajaxSubmit(optionsMentorExcel);
-                    }
-                    return false;
-                });   // end of submit() of form-add-mentor-excel
-
+				});   // end of second ajax request
                 return false;
             });   // end of user link on LHS.
+            // for the form submitting while adding the users to the database.
+            $('#form-add-director').on('submit', function() {
+                var organ = $('.add-director-organ').children('select').val();
+                var directorEmail = $('#txtAddDirector').val().trim();
+                if(organ == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select the organization correctly.</p>").fadeIn();
+                }
+                else {
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "16", organ: organ, course: "", email: directorEmail, level: "B"
+                        },
+                        success: function(response) {
+                            if(response == "1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Director Successfully Added. Thank You.</p>").fadeIn();
+                            }
+                            else {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while adding the Director. Please try again.</p>").fadeIn();
+                            }
+                        },
+                        error: function() {
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }
+                return false;
+            });
+
+            // for the form submitting while adding the users(mentors) to the database.
+            $('#form-add-mentor').on('submit', function() {
+                var organ = $('.add-mentor-organ').children('select').val();
+                var course = $('.add-mentor-course').children('select').val();
+                var mentorEmail = $('#txtAddMentor').val().trim();
+                if(organ == "-1" || course == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select the organization or course correctly.</p>").fadeIn();
+                }
+                else {
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "16", organ: organ, course: course, email: mentorEmail, level: "C"
+                        },
+                        success: function(response) {
+                            if(response == "1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Mentor Successfully Added. Thank You.</p>").fadeIn();
+                            }
+                            else {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while adding the Mentor. Please try again.</p>").fadeIn();
+                            }
+                        },
+                        error: function() {
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }
+                return false;
+            });
+
+            // for the form submitting while adding the users(mentors) to the database.
+            $('#form-add-mentee').on('submit', function() {
+                var organ = $('.add-mentee-organ').children('select').val();
+                var course = $('.add-mentee-course').children('select').val();
+                var mentorEmail = $('#txtAddMentee').val().trim();
+                if(organ == "-1" || course == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select the organization or course correctly.</p>").fadeIn();
+                }
+                else {
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "16", organ: organ, course: course, email: mentorEmail, level: "D"
+                        },
+                        success: function(response) {
+                            if(response == "1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Mentee Successfully Added. Thank You.</p>").fadeIn();
+                            }
+                            else {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while adding the Mentee. Please try again.</p>").fadeIn();
+                            }
+                        },
+                        error: function() {
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }
+                return false;
+            });   // end of submit() of form-add-mentee
+            
+            //function to check file size before uploading for the update Solution
+            function beforeSubmitMenteeExcel() {
+                alertMsg.children('p').remove();
+                alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+                //check whether browser fully supports all File API
+                if (window.File && window.FileReader && window.FileList && window.Blob) {
+                    if( !$('#fileAddMentee').val()) {   //check empty input filed 
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
+                        return false;
+                    }
+                    var fsize = $('#fileAddMentee')[0].files[0].size; //get file size
+                    var ftype = $('#fileAddMentee')[0].files[0].type; // get file type
+                    //allow file types 
+                    switch(ftype) {
+                        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                        case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                        case 'application/vnd.ms-excel':
+                        case 'application/msexcel':
+                        case 'application/x-msexcel':
+                        case 'application/x-ms-excel':
+                        case 'application/x-excel':
+                        case 'application/x-dos_ms_excel':
+                        case 'application/xls':
+                        case 'application/x-xls':
+                            break;
+                        default:
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the Excel format only.</p>").fadeIn();
+                            return false;
+                    }
+                    //Allowed file size is less than 5 MB (1048576)
+                    if(fsize>5242880)   {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
+                        return false;
+                    }
+                }
+                else  {
+                    alertMsg.children('p').remove();
+                    alertMsg.fadeOut();
+                    popup.children('p').remove();
+                    popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
+                    return false;
+                }
+                alertMsg.children('p').remove();
+                alertMsg.fadeOut();
+            }   // end of beforeSubmitMenteeExcel function.
+
+            function afterSuccessMenteeExcel() {
+                // to hide the loading overlay after the uploading is done.
+                hideLoading();
+                popup.children('p').remove();
+                popup.fadeOut();
+                $('.progress').fadeOut();
+                alertMsg.fadeIn();
+                // finally, remove the courseID cookie here.
+                $('.user').trigger('click');
+                // to fadeOut the alertMsg and reload the page after 3 seconds.
+                setTimeout(function() {
+                    alertMsg.fadeOut();
+                    location.reload();
+                }, 3000);
+            }     // end of afterSuccessAssignmentSolution function
+
+            // code for updateSolution File upload
+            var optionsMenteeExcel = { 
+                target:   '#alertMsg',   // target element(s) to be updated with server response 
+                beforeSubmit:  beforeSubmitMenteeExcel,  // pre-submit callback 
+                success:       afterSuccessMenteeExcel,  // post-submit callback 
+                uploadProgress: OnProgress, //upload progress callback 
+                resetForm: true        // reset the form after successful submit 
+            };
+
+            // for adding the mentees through the excel sheets.
+            $('#form-add-mentee-excel').submit(function() {
+                var organ1 = $('.add-mentee-organ').children('select').val();
+                var course1 = $('.add-mentee-course').children('select').val();
+                $.cookie("addMenteeOrgan", organ1);
+                $.cookie("addMenteeCourse", course1);
+
+                var email = $.cookie("email");
+                var id = $.cookie("id");
+
+                //alert($.cookie("addMenteeCourse") + " --> " + $.cookie("addMenteeOrgan"));
+                if(organ1 == "-1" || course1 == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select the organisation and course before uploading files. Thank You.</p>").fadeIn();
+                }
+                else if(email == "-1" || id == "-1" || email == undefined || email == "undefined" || id == "undefined" || id == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not logged in properly. Please login again and try again.</p>").fadeIn();
+                }
+                else {
+                    $(this).ajaxSubmit(optionsMenteeExcel);
+                }
+                return false;
+            });   // end of submit() of form-add-mentee-excel
+
+            //function to check file size before uploading for the update Solution
+            function beforeSubmitMentorExcel() {
+                alertMsg.children('p').remove();
+                alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+                //check whether browser fully supports all File API
+                if (window.File && window.FileReader && window.FileList && window.Blob) {
+                    if( !$('#fileAddMentor').val()) {   //check empty input filed 
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
+                        return false;
+                    }
+                    var fsize = $('#fileAddMentor')[0].files[0].size; //get file size
+                    var ftype = $('#fileAddMentor')[0].files[0].type; // get file type
+                    //allow file types 
+                    switch(ftype) {
+                        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                        case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                        case 'application/vnd.ms-excel':
+                        case 'application/msexcel':
+                        case 'application/x-msexcel':
+                        case 'application/x-ms-excel':
+                        case 'application/x-excel':
+                        case 'application/x-dos_ms_excel':
+                        case 'application/xls':
+                        case 'application/x-xls':
+                            break;
+                        default:
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the Excel format only.</p>").fadeIn();
+                            return false;
+                    }
+                    //Allowed file size is less than 5 MB (1048576)
+                    if(fsize>5242880)   {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
+                        return false;
+                    }
+                }
+                else  {
+                    alertMsg.children('p').remove();
+                    alertMsg.fadeOut();
+                    popup.children('p').remove();
+                    popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
+                    return false;
+                }
+                alertMsg.children('p').remove();
+                alertMsg.fadeOut();
+            }   // end of beforeSubmitMentorExcel function.
+
+
+            // code for updateSolution File upload
+            var optionsMentorExcel = { 
+                target:   '#alertMsg',   // target element(s) to be updated with server response 
+                beforeSubmit:  beforeSubmitMentorExcel,  // pre-submit callback 
+                success:       afterSuccessMenteeExcel,  // post-submit callback 
+                uploadProgress: OnProgress, //upload progress callback 
+                resetForm: true        // reset the form after successful submit 
+            };
+
+            // for adding the mentees through the excel sheets.
+            $('#form-add-mentor-excel').submit(function() {
+                var organ1 = $('.add-mentor-organ').children('select').val();
+                var course1 = $('.add-mentor-course').children('select').val();
+                $.cookie("addMentorOrgan", organ1);
+                $.cookie("addMentorCourse", course1);
+
+                var email = $.cookie("email");
+                var id = $.cookie("id");
+
+                if(organ1 == "-1" || course1 == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select the organisation and course before uploading files. Thank You.</p>").fadeIn();
+                }
+                else if(email == "-1" || id == "-1" || email == undefined || email == "undefined" || id == "undefined" || id == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not logged in properly. Please login again and try again.</p>").fadeIn();
+                }
+                else {
+                    $(this).ajaxSubmit(optionsMentorExcel);
+                }
+                return false;
+            });   // end of submit() of form-add-mentor-excel
 
 
             // for the change password link on the LHS
@@ -2715,137 +2710,135 @@
                         hideLoading();
                     }
                 });
-                // to get the assignments on the Quiz Page on change of the course.
-                $('.quiz-div').delegate('#ddl-course', 'change', function() {
-                    var courseId = $(this).val();
-                    if(courseId == "" || courseId == "undefined" || courseId == undefined) {
-                        popup.children('p').remove();
-                        popup.append("<p>Please select the course properly or try again.</p>").fadeIn();
-                    }
-                    else {
-                        showLoading();
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "10", courseAssPDF: courseId
-                            },
-                            success: function(response) {
-                                // to show the assignments drop down at appropriate place.
-                                if(response == "-1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>We could not retrieve your assignments from the database. Please check your internet connection and try again.</p>").fadeIn();                             
-                                }
-                                else if(response == "-2") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>You have not been assigned any courses. Please try again or contact your mentor.</p>").fadeIn();                               
-                                }
-                                else {
-                                    $('.quiz-assignment').children('select').remove();
-                                    $('.quiz-assignment').append(response);
-                                }
-                            }, 
-                            error: function() {
-                                alertMsg.children('p').remove();
-                                alertMsg.fadeOut();
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
-                            },
-                            complete: function() {
-                                hideLoading();
-                            }
-                        });   // end of ajax.
-                    }  // end of else.
-                    return false;    
-                });  // end of the course delegate function.
-
-                // for the submit event of the basic course form.
-                $('#form-add-basic-quiz').submit(function() {
-                    var email = $.cookie("email");
-                    var id = $.cookie("id");
-
-                    var courseId = $('.quiz-course').children('select').val();
-                    var assId = $('.quiz-assignment').children('select').val();
-
-                    var quizName = $('#txtQuizName').val();
-                    var deadline = $('#txtQuizDeadline').val();
-
-                    // to get all the questions.
-                    var question = [$('#txtQ1').val(), $('#txtQ2').val(), $('#txtQ3').val(), $('#txtQ4').val(), $('#txtQ5').val()];
-                    var jsonQues = JSON.stringify(question);
-
-                    // to get all the options.
-                    var options = [];
-                    $.each($('.ans-op'), function() {
-                        options.push($(this).val());
-                    });
-                    var jsonOp = JSON.stringify(options);
-
-                    // to get all the answers selected.
-                    var ans = [];
-                    $.each($('.ans-radio'), function() {
-                        var item = $(this).is(':checked');
-                        if(item == true) {   // for all the checked radio buttons.
-                            ans.push($(this).attr('for'));
-                        }
-                    });
-                    var j = "";
-                    var answers = [];
-                    for(var i=0;i<ans.length;i++) {
-                        j = "";
-                        j += "#" + ans[i];
-                        answers.push($(j).val());
-                    }
-                    jsonAns = JSON.stringify(answers);
-
-                    if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
-                        popup.children('p').remove();
-                        popup.append("<p>Looks like you have not logged in properly. Please login and try again.</p>").fadeIn();
-                    }
-                    else if(quizName == "" || deadline == "") {
-                        popup.children('p').remove();
-                        popup.append("<p>Looks like you missed either the Quiz Name or Quiz Deadline. Please recheck and try again.</p>");
-                    }
-                    else {
-                        // make the ajax request to save the quiz details nd questions
-                        showLoading();
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "34", courseId: courseId, assId: assId, quizName: quizName, deadline: deadline, questions: jsonQues, answers: jsonAns, options: jsonOp
-                            },
-                            success: function(response) {
-                                console.log(response);
-                                var r = response.split(" ~ ");
-                                if(r[0] == "1" && r[1] == "1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Quiz Added Successfully. Thank You.</p>").fadeIn();
-                                }
-                                else if(r[0] == "-1" || r[1] == "-1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Oops! We encountered an error adding the Quiz. Please try again.</p>").fadeIn();
-                                }
-                                else {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Oops! We encountered an error adding the Quiz. Please try again.</p>").fadeIn();   
-                                }
-                            },
-                            error: function() {
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
-                            },
-                            complete: function() {
-                                hideLoading();
-                            }
-                        });
-                    }
-                    return false;
-                });  //end of submit function.
                 return false;
             });   // end of Quiz link on the LHS.
+            // to get the assignments on the Quiz Page on change of the course.
+            $('.quiz-div').delegate('#ddl-course', 'change', function() {
+                var courseId = $(this).val();
+                if(courseId == "" || courseId == "undefined" || courseId == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select the course properly or try again.</p>").fadeIn();
+                }
+                else {
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "10", courseAssPDF: courseId
+                        },
+                        success: function(response) {
+                            // to show the assignments drop down at appropriate place.
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>We could not retrieve your assignments from the database. Please check your internet connection and try again.</p>").fadeIn();                             
+                            }
+                            else if(response == "-2") {
+                                popup.children('p').remove();
+                                popup.append("<p>You have not been assigned any courses. Please try again or contact your mentor.</p>").fadeIn();                               
+                            }
+                            else {
+                                $('.quiz-assignment').children('select').remove();
+                                $('.quiz-assignment').append(response);
+                            }
+                        }, 
+                        error: function() {
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });   // end of ajax.
+                }  // end of else.
+                return false;    
+            });  // end of the course delegate function.
 
+            // for the submit event of the basic course form.
+            $('#form-add-basic-quiz').submit(function() {
+                var email = $.cookie("email");
+                var id = $.cookie("id");
 
+                var courseId = $('.quiz-course').children('select').val();
+                var assId = $('.quiz-assignment').children('select').val();
+
+                var quizName = $('#txtQuizName').val();
+                var deadline = $('#txtQuizDeadline').val();
+
+                // to get all the questions.
+                var question = [$('#txtQ1').val(), $('#txtQ2').val(), $('#txtQ3').val(), $('#txtQ4').val(), $('#txtQ5').val()];
+                var jsonQues = JSON.stringify(question);
+
+                // to get all the options.
+                var options = [];
+                $.each($('.ans-op'), function() {
+                    options.push($(this).val());
+                });
+                var jsonOp = JSON.stringify(options);
+
+                // to get all the answers selected.
+                var ans = [];
+                $.each($('.ans-radio'), function() {
+                    var item = $(this).is(':checked');
+                    if(item == true) {   // for all the checked radio buttons.
+                        ans.push($(this).attr('for'));
+                    }
+                });
+                var j = "";
+                var answers = [];
+                for(var i=0;i<ans.length;i++) {
+                    j = "";
+                    j += "#" + ans[i];
+                    answers.push($(j).val());
+                }
+                jsonAns = JSON.stringify(answers);
+
+                if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not logged in properly. Please login and try again.</p>").fadeIn();
+                }
+                else if(quizName == "" || deadline == "") {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you missed either the Quiz Name or Quiz Deadline. Please recheck and try again.</p>");
+                }
+                else {
+                    // make the ajax request to save the quiz details nd questions
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "34", courseId: courseId, assId: assId, quizName: quizName, deadline: deadline, questions: jsonQues, answers: jsonAns, options: jsonOp
+                        },
+                        success: function(response) {
+                            console.log(response);
+                            var r = response.split(" ~ ");
+                            if(r[0] == "1" && r[1] == "1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Quiz Added Successfully. Thank You.</p>").fadeIn();
+                            }
+                            else if(r[0] == "-1" || r[1] == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error adding the Quiz. Please try again.</p>").fadeIn();
+                            }
+                            else {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error adding the Quiz. Please try again.</p>").fadeIn();   
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }
+                return false;
+            });  //end of submit function.
 
 
             //------------------ mentee-status ------------------
@@ -2926,7 +2919,7 @@
             // for the change event of the assignment drop down list.
             $('.status-div').delegate('#ddl-assignment', 'change', function() {
                 var assId = $(this).val();
-                $('.mentee-status-div').children('table, h3').remove();
+                $('.mentee-status-div').children('table, h4').remove();
                 if(assId == "-1" || assId == "undefined" || assId == undefined || assId == "") {
                     popup.children('p').remove();
                     popup.append("<p>Please select an Assignment before continuing.</p>").fadeIn();
@@ -2964,7 +2957,6 @@
                 }  // end of else.
                 return false;
             });   // end of the delegate change event of assignment ddl.
-
 
             // hide all the divs on page load. Except for first div.
             $('.main-div').hide();

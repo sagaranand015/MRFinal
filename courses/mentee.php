@@ -283,6 +283,10 @@
 		.assignment-video, .assignment-report, .assignment-offtopic, .assignment-extra, .latest-assignment-name {
 			cursor: pointer;
 		}
+
+        input.query-type {
+            margin-left: 2%;
+        }
 		 
     </style>
 
@@ -926,53 +930,52 @@
             $('.password').on('click', function() {
                 showDiv($('.password-div'));
                 changeActiveState($(this).parent('li'));
-
-                $('#formChangePassword').submit(function() {
-                    // first, check for both the new passwords:
-                    var oldPassword = $('#txtOldPassword').val().trim();
-                    var newPassword = $('#txtNewPassword').val().trim();
-                    var newPasswordConfirm = $('#txtNewPasswordConfirm').val().trim();
-                    var email = $.cookie("email");
-
-                    if(newPassword != newPasswordConfirm) {
-                        popup.children('p').remove();
-                        popup.append("<p>Your Passwords do not match. Please recheck and try again.</p>").fadeIn();
-                    }
-                    else if(email == "" || email == "undefined" || email == undefined) {
-                        popup.children('p').remove();
-                        popup.append("<p>You have not logged in properly. Please log out and login again.</p>").fadeIn();   
-                    }
-                    else {   // ajax request for password change
-                        showLoading();
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "17", email: email, oldPassword: oldPassword, newPassword: newPassword, newPasswordConfirm: newPasswordConfirm, table: "Mentee"
-                            },
-                            success: function(response) {
-                                if(response == "1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Password Successfully Changed.</p>").fadeIn();
-                                }
-                                else {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Error encountered while changing your password. Please try again.</p>").fadeIn();   
-                                }
-                            },
-                            error: function() {
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
-                            },
-                            complete: function() {
-                                hideLoading();
-                            }
-                        });   // end of AJAX Request.
-                    }
-                    return false;
-                });   // end of formChangePassword submit()
                 return false;
             });   // end of .password on LHS.
+            $('#formChangePassword').submit(function() {
+                // first, check for both the new passwords:
+                var oldPassword = $('#txtOldPassword').val().trim();
+                var newPassword = $('#txtNewPassword').val().trim();
+                var newPasswordConfirm = $('#txtNewPasswordConfirm').val().trim();
+                var email = $.cookie("email");
+
+                if(newPassword != newPasswordConfirm) {
+                    popup.children('p').remove();
+                    popup.append("<p>Your Passwords do not match. Please recheck and try again.</p>").fadeIn();
+                }
+                else if(email == "" || email == "undefined" || email == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>You have not logged in properly. Please log out and login again.</p>").fadeIn();   
+                }
+                else {   // ajax request for password change
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "17", email: email, oldPassword: oldPassword, newPassword: newPassword, newPasswordConfirm: newPasswordConfirm, table: "Mentee"
+                        },
+                        success: function(response) {
+                            if(response == "1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Password Successfully Changed.</p>").fadeIn();
+                            }
+                            else {
+                                popup.children('p').remove();
+                                popup.append("<p>Error encountered while changing your password. Please try again.</p>").fadeIn();   
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });   // end of AJAX Request.
+                }
+                return false;
+            });   // end of formChangePassword submit()
 
             $('.submitSolution').on('click', function() {
                 showDiv($('.submitSolution-div'));
@@ -1103,210 +1106,208 @@
                             hideLoading();
                         }
                     });
-
                 }  // end of else that validates the logged in credentials
-
-                // for the helper functions for the file upload things.
-                //progress bar function
-                function OnProgress(event, position, total, percentComplete) {
-                    // show the loading overlay here, when the process of uploading starts.
-                    showLoading();
-                    popup.children('p').remove();
-                    popup.fadeIn();
-                    $('.progress').fadeIn();
-                    $('.progress-bar').width(percentComplete + '%') //update progressbar percent complete
-                    $('.progress-bar').html(percentComplete + '%'); //update status text
-                }
-                //function to format bites bit.ly/19yoIPO
-                function bytesToSize(bytes) {
-                   var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-                   if (bytes == 0) return '0 Bytes';
-                   var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-                   return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
-                }
-
-                //function to check file size before uploading.
-                function beforeSubmitAssignmentSolution() {
-                    alertMsg.children('p').remove();
-                    alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
-                    //check whether browser fully supports all File API
-                    if (window.File && window.FileReader && window.FileList && window.Blob) {
-                        if( !$('#fileAssignmentSolution').val()) {   //check empty input filed 
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
-                            return false;
-                        }
-                        var fsize = $('#fileAssignmentSolution')[0].files[0].size; //get file size
-                        var ftype = $('#fileAssignmentSolution')[0].files[0].type; // get file type
-                        //allow file types 
-                        switch(ftype) {
-                            case 'image/png': 
-                            case 'image/gif': 
-                            case 'image/jpeg': 
-                            case 'image/pjpeg':
-                            case 'text/plain':
-                            case 'text/html':
-                            case 'application/x-zip-compressed':
-                            case 'application/pdf':
-                            case 'application/msword':
-                            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                            case 'application/vnd.ms-excel':
-                            case 'video/mp4':
-                                break;
-                            default:
-                                alertMsg.children('p').remove();
-                                alertMsg.fadeOut();
-                                popup.children('p').remove();
-                                popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
-                                return false;
-                        }
-                        //Allowed file size is less than 5 MB (1048576)
-                        if(fsize>5242880)   {
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
-                            return false;
-                        }
-                    }
-                    else  {
-                        alertMsg.children('p').remove();
-                        alertMsg.fadeOut();
-                        popup.children('p').remove();
-                        popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
-                        return false;
-                    }
-                    alertMsg.children('p').remove();
-                    alertMsg.fadeOut();
-                }   // end of beforeSubmitAssignmentSolution function.
-
-                function afterSuccessAssignmentSolution() {
-                    // to hide the loading overlay after the uploading is done.
-                    hideLoading();
-                    popup.children('p').remove();
-                    popup.fadeOut();
-                    $('.progress').fadeOut();
-                    alertMsg.fadeIn();
-                    // finally, trigger the solution button for reloading.
-                    $('.submitSolution').trigger('click');
-                    // to fadeOut the alertMsg after 10 seconds.
-                    setTimeout(function() {
-                        alertMsg.fadeOut();
-                    }, 10000);
-                }     // end of afterSuccessAssignmentSolution function
-
-
-                // code for assignmentSolution File upload
-                var optionsAssignmentSolution = { 
-                    target:   '#alertMsg',   // target element(s) to be updated with server response 
-                    beforeSubmit:  beforeSubmitAssignmentSolution,  // pre-submit callback 
-                    success:       afterSuccessAssignmentSolution,  // post-submit callback 
-                    uploadProgress: OnProgress, //upload progress callback 
-                    resetForm: true        // reset the form after successful submit 
-                };
-
-                // for the submission of the assignment solution, through form submission model.
-                $('#formSubmitSolution').submit(function() {
-                    if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
-                        popup.children('p').remove();
-                        popup.append("Oops! Looks like you have not logged in properly. Please logout and try again.").fadeIn();
-                    }
-                    else {
-                        $(this).ajaxSubmit(optionsAssignmentSolution);    
-                    }
-                    return false;
-                });
-
-                //for the delegate event of the change of the drop down list that contains the submitted assignments.
-                $('.submitSolution-div').delegate('#ddl-assignment', 'change', function() {
-                    var assID = $(this).val();
-                    $.cookie("assIdUpdate", assID);
-                    return false;
-                });
-
-                //function to check file size before uploading for the update Solution
-                function beforeSubmitUpdateSolution() {
-                    alertMsg.children('p').remove();
-                    alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
-                    //check whether browser fully supports all File API
-                    if (window.File && window.FileReader && window.FileList && window.Blob) {
-                        if( !$('#fileUpdateSolution').val()) {   //check empty input filed 
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
-                            return false;
-                        }
-                        var fsize = $('#fileUpdateSolution')[0].files[0].size; //get file size
-                        var ftype = $('#fileUpdateSolution')[0].files[0].type; // get file type
-                        //allow file types 
-                        switch(ftype) {
-                            case 'image/png': 
-                            case 'image/gif': 
-                            case 'image/jpeg': 
-                            case 'image/pjpeg':
-                            case 'text/plain':
-                            case 'text/html':
-                            case 'application/x-zip-compressed':
-                            case 'application/pdf':
-                            case 'application/msword':
-                            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                            case 'application/vnd.ms-excel':
-                            case 'video/mp4':
-                                break;
-                            default:
-                                alertMsg.children('p').remove();
-                                alertMsg.fadeOut();
-                                popup.children('p').remove();
-                                popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
-                                return false;
-                        }
-                        //Allowed file size is less than 5 MB (1048576)
-                        if(fsize>5242880)   {
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
-                            return false;
-                        }
-                    }
-                    else  {
-                        alertMsg.children('p').remove();
-                        alertMsg.fadeOut();
-                        popup.children('p').remove();
-                        popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
-                        return false;
-                    }
-                    alertMsg.children('p').remove();
-                    alertMsg.fadeOut();
-                }   // end of beforeSubmitUpdateSolution function.
-
-                // code for updateSolution File upload
-                var optionsUpdateSolution = { 
-                    target:   '#alertMsg',   // target element(s) to be updated with server response 
-                    beforeSubmit:  beforeSubmitUpdateSolution,  // pre-submit callback 
-                    success:       afterSuccessAssignmentSolution,  // post-submit callback 
-                    uploadProgress: OnProgress, //upload progress callback 
-                    resetForm: true        // reset the form after successful submit 
-                };
-
-                // now, for the uploading of the file that contains the updated assignment solution
-                $('#formUpdateSolution').submit(function() {
-                    var assID = $('.update-solution-assignment').children('select').val();
-                    if(assID == "-1") {
-                        popup.children('p').remove();
-                        popup.append("<p>Please select the assignment before updating the submitted solution. Thank You.</p>").fadeIn();
-                    }
-                    else {   // upload the updated solution here
-                        $(this).ajaxSubmit(optionsUpdateSolution);
-                    }
-                    return false;
-                });
-
                 return false;
             });   // end of Submitsolution-div
+
+            // for the helper functions for the file upload things.
+            //progress bar function
+            function OnProgress(event, position, total, percentComplete) {
+                // show the loading overlay here, when the process of uploading starts.
+                showLoading();
+                popup.children('p').remove();
+                popup.fadeIn();
+                $('.progress').fadeIn();
+                $('.progress-bar').width(percentComplete + '%') //update progressbar percent complete
+                $('.progress-bar').html(percentComplete + '%'); //update status text
+            }
+            //function to format bites bit.ly/19yoIPO
+            function bytesToSize(bytes) {
+               var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+               if (bytes == 0) return '0 Bytes';
+               var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+               return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+            }
+
+            //function to check file size before uploading.
+            function beforeSubmitAssignmentSolution() {
+                alertMsg.children('p').remove();
+                alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+                //check whether browser fully supports all File API
+                if (window.File && window.FileReader && window.FileList && window.Blob) {
+                    if( !$('#fileAssignmentSolution').val()) {   //check empty input filed 
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
+                        return false;
+                    }
+                    var fsize = $('#fileAssignmentSolution')[0].files[0].size; //get file size
+                    var ftype = $('#fileAssignmentSolution')[0].files[0].type; // get file type
+                    //allow file types 
+                    switch(ftype) {
+                        case 'image/png': 
+                        case 'image/gif': 
+                        case 'image/jpeg': 
+                        case 'image/pjpeg':
+                        case 'text/plain':
+                        case 'text/html':
+                        case 'application/x-zip-compressed':
+                        case 'application/pdf':
+                        case 'application/msword':
+                        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                        case 'application/vnd.ms-excel':
+                        case 'video/mp4':
+                            break;
+                        default:
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
+                            return false;
+                    }
+                    //Allowed file size is less than 5 MB (1048576)
+                    if(fsize>5242880)   {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
+                        return false;
+                    }
+                }
+                else  {
+                    alertMsg.children('p').remove();
+                    alertMsg.fadeOut();
+                    popup.children('p').remove();
+                    popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
+                    return false;
+                }
+                alertMsg.children('p').remove();
+                alertMsg.fadeOut();
+            }   // end of beforeSubmitAssignmentSolution function.
+
+            function afterSuccessAssignmentSolution() {
+                // to hide the loading overlay after the uploading is done.
+                hideLoading();
+                popup.children('p').remove();
+                popup.fadeOut();
+                $('.progress').fadeOut();
+                alertMsg.fadeIn();
+                // finally, trigger the solution button for reloading.
+                $('.submitSolution').trigger('click');
+                // to fadeOut the alertMsg after 10 seconds.
+                setTimeout(function() {
+                    alertMsg.fadeOut();
+                }, 10000);
+            }     // end of afterSuccessAssignmentSolution function
+
+
+            // code for assignmentSolution File upload
+            var optionsAssignmentSolution = { 
+                target:   '#alertMsg',   // target element(s) to be updated with server response 
+                beforeSubmit:  beforeSubmitAssignmentSolution,  // pre-submit callback 
+                success:       afterSuccessAssignmentSolution,  // post-submit callback 
+                uploadProgress: OnProgress, //upload progress callback 
+                resetForm: true        // reset the form after successful submit 
+            };
+
+            // for the submission of the assignment solution, through form submission model.
+            $('#formSubmitSolution').submit(function() {
+                if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                    popup.children('p').remove();
+                    popup.append("Oops! Looks like you have not logged in properly. Please logout and try again.").fadeIn();
+                }
+                else {
+                    $(this).ajaxSubmit(optionsAssignmentSolution);    
+                }
+                return false;
+            });
+
+            //for the delegate event of the change of the drop down list that contains the submitted assignments.
+            $('.submitSolution-div').delegate('#ddl-assignment', 'change', function() {
+                var assID = $(this).val();
+                $.cookie("assIdUpdate", assID);
+                return false;
+            });
+
+            //function to check file size before uploading for the update Solution
+            function beforeSubmitUpdateSolution() {
+                alertMsg.children('p').remove();
+                alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+                //check whether browser fully supports all File API
+                if (window.File && window.FileReader && window.FileList && window.Blob) {
+                    if( !$('#fileUpdateSolution').val()) {   //check empty input filed 
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
+                        return false;
+                    }
+                    var fsize = $('#fileUpdateSolution')[0].files[0].size; //get file size
+                    var ftype = $('#fileUpdateSolution')[0].files[0].type; // get file type
+                    //allow file types 
+                    switch(ftype) {
+                        case 'image/png': 
+                        case 'image/gif': 
+                        case 'image/jpeg': 
+                        case 'image/pjpeg':
+                        case 'text/plain':
+                        case 'text/html':
+                        case 'application/x-zip-compressed':
+                        case 'application/pdf':
+                        case 'application/msword':
+                        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                        case 'application/vnd.ms-excel':
+                        case 'video/mp4':
+                            break;
+                        default:
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
+                            return false;
+                    }
+                    //Allowed file size is less than 5 MB (1048576)
+                    if(fsize>5242880)   {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
+                        return false;
+                    }
+                }
+                else  {
+                    alertMsg.children('p').remove();
+                    alertMsg.fadeOut();
+                    popup.children('p').remove();
+                    popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
+                    return false;
+                }
+                alertMsg.children('p').remove();
+                alertMsg.fadeOut();
+            }   // end of beforeSubmitUpdateSolution function.
+
+            // code for updateSolution File upload
+            var optionsUpdateSolution = { 
+                target:   '#alertMsg',   // target element(s) to be updated with server response 
+                beforeSubmit:  beforeSubmitUpdateSolution,  // pre-submit callback 
+                success:       afterSuccessAssignmentSolution,  // post-submit callback 
+                uploadProgress: OnProgress, //upload progress callback 
+                resetForm: true        // reset the form after successful submit 
+            };
+
+            // now, for the uploading of the file that contains the updated assignment solution
+            $('#formUpdateSolution').submit(function() {
+                var assID = $('.update-solution-assignment').children('select').val();
+                if(assID == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select the assignment before updating the submitted solution. Thank You.</p>").fadeIn();
+                }
+                else {   // upload the updated solution here
+                    $(this).ajaxSubmit(optionsUpdateSolution);
+                }
+                return false;
+            });
 
             // for the showing feedback button on the LHS
             $('.feedback').on('click', function() {
@@ -1350,30 +1351,29 @@
                         }
                     });  // end of ajax request.
                 }   // end of else.
-
-                // for showing the submission and feedback on the change of drop down list.
-                $('.feedback-div').delegate('#ddl-assignment', 'change', function() {
-                    var assId = $(this).val();
-                    var submission = $(this).find('option:selected').attr('data-submission');
-                    var feedback = $(this).find('option:selected').attr('data-feedback');
-
-                    // for showing the feedbacks of the assignment.
-                    if(feedback == "") {
-                        $('.feedback-feedback').html("<a href='#' class='btn btn-lg btn-primary btn-block' >No Feedback Yet.</a>");    
-                    } else {
-                        $('.feedback-feedback').html("<a href='" + feedback + "' class='btn btn-lg btn-primary btn-block' target='_blank' >Download Feedback</a>");
-                    }
-
-                    // for showing the submissions of the assignments.
-                    if(submission == "") {
-                        $('.feedback-submission').html("<a href='#' class='btn btn-lg btn-primary btn-block' >No Submission Yet.</a>");    
-                    } else {
-                        $('.feedback-submission').html("<a href='" + submission + "' class='btn btn-lg btn-primary btn-block' target='_blank' >Download Latest Submission</a>");
-                    }
-                    return false;
-                });
                 return false;
             });   // end of feedback-div on LHS
+             // for showing the submission and feedback on the change of drop down list.
+            $('.feedback-div').delegate('#ddl-assignment', 'change', function() {
+                var assId = $(this).val();
+                var submission = $(this).find('option:selected').attr('data-submission');
+                var feedback = $(this).find('option:selected').attr('data-feedback');
+
+                // for showing the feedbacks of the assignment.
+                if(feedback == "") {
+                    $('.feedback-feedback').html("<a href='#' class='btn btn-lg btn-primary btn-block' >No Feedback Yet.</a>");    
+                } else {
+                    $('.feedback-feedback').html("<a href='" + feedback + "' class='btn btn-lg btn-primary btn-block' target='_blank' >Download Feedback</a>");
+                }
+
+                // for showing the submissions of the assignments.
+                if(submission == "") {
+                    $('.feedback-submission').html("<a href='#' class='btn btn-lg btn-primary btn-block' >No Submission Yet.</a>");    
+                } else {
+                    $('.feedback-submission').html("<a href='" + submission + "' class='btn btn-lg btn-primary btn-block' target='_blank' >Download Latest Submission</a>");
+                }
+                return false;
+            });
 
             // for the quiz link on LHS
             $('.quiz').on('click', function() {
@@ -1425,205 +1425,279 @@
                         }
                     });   // end of ajax.
                 }    // end of else.
-
-                // for the delegate event of the change of assignment.
-                $('.quiz-div').delegate('#ddl-assignment', 'change', function() {
-                    var assId = $(this).val();
-                    var id = $.cookie("id");
-                    var email = $.cookie("email");
-                    // now, get the quizzes in the table form.
-                    if(assId == "" || assId == "undefined" || assId == undefined) {
-                        popup.children('p').remove();
-                        popup.append("<p>Please select the Assignment first and then try again.</p>").fadeIn();
-                    }
-                    else if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
-                        popup.children('p').remove();
-                        popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
-                    }
-                    else {
-                        showLoading();
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "35", assId: assId, menteeId: id, menteeEmail: email
-                            },
-                            success: function(response) {
-                                if(response == "-1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
-                                }
-                                else if(response == "0") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>No Quizzes has yet been uploaded for this assignment.</p>").fadeIn();
-                                }
-                                else {
-                                    $('.quiz-table').html(response);
-                                }
-                            },
-                            error: function() {
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
-                            },
-                            complete: function() {
-                                hideLoading();
-                            }
-                        });  // end of ajax
-                    }     // end of else
-                    return false;
-                });   // end of delegate event of the change of assignment ddl.
-
-                // for the click event of the attempt button.
-                $('.quiz-table').delegate('.btnAttemptQuiz', 'click', function() {
-                    var quizId = $(this).attr('data-id');
-                    var quizName = $(this).attr('data-name');
-
-                    if(quizId == "-1" || quizId == "undefined" || quizId == undefined || quizId == "") {
-                        popup.children('p').remove();
-                        popup.append("<p>Oops! We encountered an error. Please refresh and select the assignment again.</p>").fadeIn();
-                    }
-                    else {
-                        $('.basic-quiz-modal-title').html("<h3>Attempt " + quizName + "</h3>");
-                        // to get all the questions and options from the database.
-                        showLoading();
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "36", quizId: quizId
-                            },
-                            success: function(response) {
-                                if(response == "-1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();     
-                                }
-                                else if(response == "0") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>No quiz questions found in this course. Please try again.</p>").fadeIn();
-                                }
-                                else {
-                                    var res = response.split(" ~ ");
-                                    var ques = $.parseJSON(res[0]);
-                                    var op = $.parseJSON(res[1]);
-
-                                    // for all the questions to be shown
-                                    $('.q1').html("Q1: " + ques[0]);
-                                    $('.q2').html("Q2: " + ques[1]);
-                                    $('.q3').html("Q3: " + ques[2]);
-                                    $('.q4').html("Q4: " + ques[3]);
-                                    $('.q5').html("Q5: " + ques[4]);
-
-                                    // for showing all the options.
-                                    var item = "";
-                                    var p = 0;
-                                    for(var i=1;i<=5;i++) {
-                                        for(var j=1;j<=4;j++) {
-                                            item = "#ans" + i.toString() + j.toString();
-                                            $(item).html(op[p]);   // showing the options to the radio buttons.
-                                            p++;
-                                        }
-                                    }
-
-                                    // show the modal with the response embedded here.
-                                    $('#basicQuizModal').modal('show');
-                                }
-                            },
-                            error: function() {
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
-                            },
-                            complete: function() {
-                                hideLoading();
-                            }
-                        });   // end of ajax request
-                    }
-                    return false;
-                });   // end of click delegate event of the attempt quiz button.
-
-                // for the submit event of the form for basic quiz.
-                $('#formSubmitBasicQuiz').submit(function() {
-                    var quizId = $('.btnAttemptQuiz').attr('data-id');
-                    var assId = $('.quiz-assignment').children('select').val();
-                    var id = $.cookie("id");
-                    var email = $.cookie("email");
-                    // to get all the answers selected.
-                    var ans = [];
-                    $.each($('.ans-radio'), function() {
-                        var item = $(this).is(':checked');
-                        if(item == true) {   // for all the checked radio buttons.
-                            ans.push($(this).attr('for'));
-                        }
-                    });
-                    var j = "";
-                    var answers = [];
-                    for(var i=0;i<ans.length;i++) {
-                        j = "";
-                        j += "#" + ans[i];
-                        answers.push($(j).html());
-                    }
-                    jsonAns = JSON.stringify(answers);
-
-                    // now, send the selected answers to the server for evaluation.
-                    var desc = false;
-                    if(ans.length < 5) {
-                        desc = confirm("You have not asnwered all the questions. Are you sure you want to submit?");
-                    }
-                    else {
-                        desc = true;
-                    }
-
-                    if(desc == true) {
-                        // make the ajax request for evaluation.
-                        if(quizId == "-1" || quizId == "undefined" || quizId == undefined || quizId == "") {
-                            popup.children('p').remove();
-                            popup.append("<p>Oops! We encountered an error. Please reload the page and try again.</p>").fadeIn();
-                        }
-                        else {
-                            if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
-                                popup.children('p').remove();
-                                popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
-                            }
-                            else {
-                                $('#basicQuizModal').modal('hide');
-                                showLoading();
-                                $.ajax({
-                                    type: "GET",
-                                    url: "AJAXFunctions.php",
-                                    data: {
-                                        no: "37", ans: jsonAns, quizId: quizId, assId: assId, menteeId: id, menteeId: id, menteeEmail: email
-                                    },
-                                    success: function(response) {
-                                        var res = response.split(" ~ ");
-                                        if(res[0] == "1") {
-                                            popup.children('p').remove();
-                                            popup.append("<p>Your quiz has been submitted and evaluated successfully. <b>Your Score is: " + res[1] + "/5. </b> Please check your mail for more details</p>").fadeIn();
-
-                                            // now, remove all the html content in the attempt quiz page. and make the link trigger click.
-                                            $('.quiz-table').html("");
-                                            $('.quiz').trigger('click');
-                                        }
-                                        else {
-                                            popup.children('p').remove();
-                                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();     
-                                        }
-                                    },
-                                    error: function() {
-                                        popup.children('p').remove();
-                                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
-                                    },
-                                    complete: function() {
-                                        hideLoading();
-                                    }
-                                });   // end of ajax.
-                            }   // end of else.
-                        }   // end of else.
-                    }   // end of if.
-                    return false;
-                });   // end of the form submit function.
-
                 return false;
             });   // end of LHS link of Quiz
+            // for the delegate event of the change of assignment.
+            $('.quiz-div').delegate('#ddl-assignment', 'change', function() {
+                var assId = $(this).val();
+                var id = $.cookie("id");
+                var email = $.cookie("email");
+                // now, get the quizzes in the table form.
+                if(assId == "" || assId == "undefined" || assId == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select the Assignment first and then try again.</p>").fadeIn();
+                }
+                else if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
+                }
+                else {
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "35", assId: assId, menteeId: id, menteeEmail: email
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                            }
+                            else if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No Quizzes has yet been uploaded for this assignment.</p>").fadeIn();
+                            }
+                            else {
+                                $('.quiz-table').html(response);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });  // end of ajax
+                }     // end of else
+                return false;
+            });   // end of delegate event of the change of assignment ddl.
 
+            // for the click event of the attempt button.
+            $('.quiz-table').delegate('.btnAttemptQuiz', 'click', function() {
+                var quizId = $(this).attr('data-id');
+                var quizName = $(this).attr('data-name');
+
+                if(quizId == "-1" || quizId == "undefined" || quizId == undefined || quizId == "") {
+                    popup.children('p').remove();
+                    popup.append("<p>Oops! We encountered an error. Please refresh and select the assignment again.</p>").fadeIn();
+                }
+                else {
+                    $('.basic-quiz-modal-title').html("<h3>Attempt " + quizName + "</h3>");
+                    // to get all the questions and options from the database.
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "36", quizId: quizId
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();     
+                            }
+                            else if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No quiz questions found in this course. Please try again.</p>").fadeIn();
+                            }
+                            else {
+                                var res = response.split(" ~ ");
+                                var ques = $.parseJSON(res[0]);
+                                var op = $.parseJSON(res[1]);
+
+                                // for all the questions to be shown
+                                $('.q1').html("Q1: " + ques[0]);
+                                $('.q2').html("Q2: " + ques[1]);
+                                $('.q3').html("Q3: " + ques[2]);
+                                $('.q4').html("Q4: " + ques[3]);
+                                $('.q5').html("Q5: " + ques[4]);
+
+                                // for showing all the options.
+                                var item = "";
+                                var p = 0;
+                                for(var i=1;i<=5;i++) {
+                                    for(var j=1;j<=4;j++) {
+                                        item = "#ans" + i.toString() + j.toString();
+                                        $(item).html(op[p]);   // showing the options to the radio buttons.
+                                        p++;
+                                    }
+                                }
+
+                                // show the modal with the response embedded here.
+                                $('#basicQuizModal').modal('show');
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });   // end of ajax request
+                }
+                return false;
+            });   // end of click delegate event of the attempt quiz button.
+
+            // for the submit event of the form for basic quiz.
+            $('#formSubmitBasicQuiz').submit(function() {
+                var quizId = $('.btnAttemptQuiz').attr('data-id');
+                var assId = $('.quiz-assignment').children('select').val();
+                var id = $.cookie("id");
+                var email = $.cookie("email");
+                // to get all the answers selected.
+                var ans = [];
+                $.each($('.ans-radio'), function() {
+                    var item = $(this).is(':checked');
+                    if(item == true) {   // for all the checked radio buttons.
+                        ans.push($(this).attr('for'));
+                    }
+                });
+                var j = "";
+                var answers = [];
+                for(var i=0;i<ans.length;i++) {
+                    j = "";
+                    j += "#" + ans[i];
+                    answers.push($(j).html());
+                }
+                jsonAns = JSON.stringify(answers);
+
+                // now, send the selected answers to the server for evaluation.
+                var desc = false;
+                if(ans.length < 5) {
+                    desc = confirm("You have not asnwered all the questions. Are you sure you want to submit?");
+                }
+                else {
+                    desc = true;
+                }
+
+                if(desc == true) {
+                    // make the ajax request for evaluation.
+                    if(quizId == "-1" || quizId == "undefined" || quizId == undefined || quizId == "") {
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error. Please reload the page and try again.</p>").fadeIn();
+                    }
+                    else {
+                        if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                            popup.children('p').remove();
+                            popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
+                        }
+                        else {
+                            $('#basicQuizModal').modal('hide');
+                            showLoading();
+                            $.ajax({
+                                type: "GET",
+                                url: "AJAXFunctions.php",
+                                data: {
+                                    no: "37", ans: jsonAns, quizId: quizId, assId: assId, menteeId: id, menteeId: id, menteeEmail: email
+                                },
+                                success: function(response) {
+                                    var res = response.split(" ~ ");
+                                    if(res[0] == "1") {
+                                        popup.children('p').remove();
+                                        popup.append("<p>Your quiz has been submitted and evaluated successfully. <b>Your Score is: " + res[1] + "/5. </b> Please check your mail for more details</p>").fadeIn();
+
+                                        // now, remove all the html content in the attempt quiz page. and make the link trigger click.
+                                        $('.quiz-table').html("");
+                                        $('.quiz').trigger('click');
+                                    }
+                                    else {
+                                        popup.children('p').remove();
+                                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();     
+                                    }
+                                },
+                                error: function() {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                                },
+                                complete: function() {
+                                    hideLoading();
+                                }
+                            });   // end of ajax.
+                        }   // end of else.
+                    }   // end of else.
+                }   // end of if.
+                return false;
+            });   // end of the form submit function.
+
+            // for the email support button on LHS.
+            $('.support').on('click', function() { 
+                showDiv($('.support-div'));
+                changeActiveState($(this).parent('li'));
+                return false;
+            });
+            // for submitting the Query form
+            $('#form-query').submit(function() {
+
+                var val = "";
+                $.each($('.query-type'), function() {
+                    var item = $(this);
+                    if(item.is(':checked')) {
+                        val = item.attr('data-val');
+                    }
+                });
+
+                var no = "";
+                if(val == "assignment") {
+                    no = "41";
+                }
+                else if(val == "tech") {
+                    no = "42";
+                }
+                else if(val == "deadline") {
+                    no = "43";
+                }
+                else if(val == "other") {
+                    no = "43";
+                }
+                else {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select the query type before submitting your query</p>").fadeIn();
+                }
+
+                var name = $('#txtQueryName').val();
+                var contact = $('#txtQueryContact').val();
+                var msg = $('#txtQueryMessage').val();
+                var email = $.cookie("email");
+                var id = $.cookie("id");
+
+                if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not logged in properly. Please login and try again.</p>").fadeIn();
+                }
+                else {   // make the ajax request here.
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: no, email: email, id: id, name: name, contact: contact, msg: msg
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your request. Please try again.</p>").fadeIn();
+                            }
+                            else {
+                                popup.children('p').remove();
+                                popup.append("<p>Your message has been sent. Mentored-Research's team will get back to your inbox soon.</p>").fadeIn();   
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+
+                }  // end of else.
+
+                return false;
+            });
 
         });    // end of ready function.
 
@@ -1715,6 +1789,7 @@
                 </ul>
                 <ul class="nav nav-sidebar">
                     <li><a href="#" class="quiz">Attempt Quiz</a></li>
+                    <li><a href="#" class="support">Email Support</a></li>
                 </ul>
             </div>
         </div>
@@ -1722,6 +1797,64 @@
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <!-- for attempting the quizzes -->
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div support-div">
+            <h1 class="page-header">
+                Email Support
+            </h1>
+
+            <div>
+                <h4 class="page-header">Select Query Type:</h4>
+                <input type="radio" name="query" class="query-type" id="ass-query" data-val="assignment" />
+                <label for="ass-query">Assignment Query</label>
+
+                <input type="radio" name="query" class="query-type" id="tech-query" data-val="tech" />
+                <label for="tech-query">Technical Query</label>
+
+                <input type="radio" name="query" class="query-type" id="deadline-query" data-val="deadline" />
+                <label for="deadline-query">Assignment deadline Query</label>
+
+                <input type="radio" name="query" class="query-type" id="other-query" data-val="other" />
+                <label for="other-query">Other(s) Query</label>
+            </div>
+
+            <form id="form-query">
+                <h4 class="page-header">Your Query: </h4>
+                <table class="table query-table">
+                    <tr>
+                        <td>
+                            <label>Your name: </label>
+                        </td>
+                        <td>
+                            <input type="text" placeholder="Your name" id="txtQueryName" class="form-control" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Your Contact Number: </label>
+                        </td>
+                        <td>
+                            <input type="text" placeholder="Your Contact Number" id="txtQueryContact" class="form-control" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Your Query/Message: </label>
+                        </td>
+                        <td>
+                            <textarea placeholder="Your Query/Message" id="txtQueryMessage" class="form-control" required rows="8"></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="submit" class="btn btn-lg btn-primary btn-block" id="btnSendQuery" Value="Submit Query" />
+                        </td>
+                    </tr>
+                </table>
+            </form>
+
+        </div>  <!-- end of support div -->
 
         <!-- for attempting the quizzes -->
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div quiz-div">
@@ -1739,13 +1872,10 @@
                     </td>
                 </tr>
             </table>
-
             <!-- table for showing the quizzes info -->
             <table class="table quiz-table">
-
             </table>
-
-        </div>
+        </div>  <!-- end of quiz div -->
 
         <!-- for showing the assignment feedbacks -->
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div feedback-div">

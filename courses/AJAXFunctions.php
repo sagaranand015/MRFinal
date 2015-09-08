@@ -6,6 +6,9 @@
 include ('headers/databaseConn.php');
 include('helpers.php');
 
+// for mandrill mail sending API.
+require_once 'mandrill/Mandrill.php'; 
+
 if(isset($_GET["no"]) && $_GET["no"] == "1") {  // for updating the profile data
 	UpdateProfile($_GET["email"], $_GET["name"], $_GET["contact"], $_GET["profile"], $_GET["table"]);
 }
@@ -126,6 +129,153 @@ else if(isset($_GET["no"]) && $_GET["no"] == "39") {  // for sending a multipurp
 else if(isset($_GET["no"]) && $_GET["no"] == "40") {  // to get the mentee submission and feedback status for the admin and director pages.
 	GetMenteeStatusForAdminAndDirector($_GET["assId"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "41") {  // for sending the query regarding the assignments
+	SendAssignmentQuery($_GET["no"], $_GET["email"], $_GET["id"], $_GET["name"], $_GET["contact"], $_GET["msg"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "42") {  // for sending the query regarding the assignments
+	SendTechnicalQuery($_GET["no"], $_GET["email"], $_GET["id"], $_GET["name"], $_GET["contact"], $_GET["msg"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "43") {  // for sending the query regarding the assignments
+	SendDeadlineQuery($_GET["no"], $_GET["email"], $_GET["id"], $_GET["name"], $_GET["contact"], $_GET["msg"]);
+}
+
+// for sending the query regarding the assignments
+function SendDeadlineQuery($no, $email, $id, $name, $contact, $msg) {
+	$resp = "-1";
+	try {
+		$subject = "Email Support message received";
+		$mail = "Dear Admin, here is the message received from the Email Support feature of the Mentored-Research's portal. following are the contents: <br /><br />";
+		$mail .= "Name: <b>" . $name . " (" . $email .  ", " . $contact . ")</b><br />";
+		$mail .= "Message: <b>" . $msg . "</b><br /><br />";
+		$mail .= "Please contact the administrator in case of any doubts.<br /><br />";
+		$mail .= "Team Mentored-Research<br />";
+		$mail .= "info@mentored-research.com<br /><br />";
+		$mail .= "Please do not reply to this automated mail.<br /><br />";
+
+		$mandrill = new Mandrill('J99JDcmNNMQLw32QJGDadQ');
+		$message = array(
+	        'html' => $mail,
+	        'subject' => $subject,
+	        'from_email' => 'info@mentored-research.co',
+	        'from_name' => 'Mentored-Research',
+	        'to' => array(
+	            array(
+	                'email' => $email,
+	                'name' => $name,
+	                'type' => 'cc'
+	            ),
+	            array(
+	                'email' => 'guide@mentored-research.com',
+	                'name' => 'Mentored-Research',
+	                'type' => 'cc'
+	            )
+	        ),
+	        'headers' => array('Reply-To' => 'guide@mentored-research.com')
+	    );
+	    $async = false;
+	    $ip_pool = 'Main Pool';
+	    $send_at = null;
+	    $result = $mandrill->messages->send($message, $async, $ip_pool, $send_at);
+	    header('Content-Type: application/json');
+		echo json_encode($result);
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// for sending the query regarding the assignments
+function SendTechnicalQuery($no, $email, $id, $name, $contact, $msg) {
+	$resp = "-1";
+	try {
+		$subject = "Email Support message received";
+		$mail = "Dear Admin, here is the message received from the Email Support feature of the Mentored-Research's portal. following are the contents: <br /><br />";
+		$mail .= "Name: <b>" . $name . " (" . $email .  ", " . $contact . ")</b><br />";
+		$mail .= "Message: <b>" . $msg . "</b><br /><br />";
+		$mail .= "Please contact the administrator in case of any doubts.<br /><br />";
+		$mail .= "Team Mentored-Research<br />";
+		$mail .= "info@mentored-research.com<br /><br />";
+		$mail .= "Please do not reply to this automated mail.<br /><br />";
+
+		$mandrill = new Mandrill('J99JDcmNNMQLw32QJGDadQ');
+		$message = array(
+	        'html' => $mail,
+	        'subject' => $subject,
+	        'from_email' => 'info@mentored-research.co',
+	        'from_name' => 'Mentored-Research',
+	        'to' => array(
+	            array(
+	                'email' => $email,
+	                'name' => $name,
+	                'type' => 'cc'
+	            ),
+	            array(
+	                'email' => 'tech@mentored-research.com',
+	                'name' => 'Mentored-Research',
+	                'type' => 'cc'
+	            )
+	        ),
+	        'headers' => array('Reply-To' => 'tech@mentored-research.com')
+	    );
+	    $async = false;
+	    $ip_pool = 'Main Pool';
+	    $send_at = null;
+	    $result = $mandrill->messages->send($message, $async, $ip_pool, $send_at);
+	    header('Content-Type: application/json');
+		echo json_encode($result);
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// for sending the query regarding the assignments
+function SendAssignmentQuery($no, $email, $id, $name, $contact, $msg) {
+	$resp = "-1";
+	try {
+		$subject = "Email Support message received";
+		$mail = "Dear Admin, here is the message received from the Email Support feature of the Mentored-Research's portal. following are the contents: <br /><br />";
+		$mail .= "Name: <b>" . $name . " (" . $email .  ", " . $contact . ")</b><br />";
+		$mail .= "Message: <b>" . $msg . "</b><br /><br />";
+		$mail .= "Please contact the administrator in case of any doubts.<br /><br />";
+		$mail .= "Team Mentored-Research<br />";
+		$mail .= "info@mentored-research.com<br /><br />";
+		$mail .= "Please do not reply to this automated mail.<br /><br />";
+
+		$mandrill = new Mandrill('J99JDcmNNMQLw32QJGDadQ');
+		$message = array(
+	        'html' => $mail,
+	        'subject' => $subject,
+	        'from_email' => 'info@mentored-research.co',
+	        'from_name' => 'Mentored-Research',
+	        'to' => array(
+	            array(
+	                'email' => $email,
+	                'name' => $name,
+	                'type' => 'cc'
+	            ),
+	            array(
+	                'email' => 'guide@mentored-research.com',
+	                'name' => 'Mentored-Research',
+	                'type' => 'cc'
+	            )
+	        ),
+	        'headers' => array('Reply-To' => 'guide@mentored-research.com')
+	    );
+	    $async = false;
+	    $ip_pool = 'Main Pool';
+	    $send_at = null;
+	    $result = $mandrill->messages->send($message, $async, $ip_pool, $send_at);
+	    header('Content-Type: application/json');
+		echo json_encode($result);
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // to get the mentee submission and feedback status for the admin and director pages.
 function GetMenteeStatusForAdminAndDirector($assId) {
@@ -144,8 +294,8 @@ function GetMenteeStatusForAdminAndDirector($assId) {
 			if(mysql_num_rows($rs) > 0) {
 				while ($res = mysql_fetch_array($rs)) {
 					$mentee = GetMenteeDetails($res["MenteeID"]);
-					$resp .= "<h3>" . $mentee["MenteeName"] . " (" . $mentee["MenteeEmail"] . ")</h3>";
-					$resp .= GetMenteeSubmissionFeedbackInTableFormatForAdminAndDirector($res["MenteeID"]);
+					$resp .= "<h4>" . $mentee["MenteeName"] . " (" . $mentee["MenteeEmail"] . ")</h4>";
+					$resp .= GetMenteeSubmissionFeedbackInTableFormatForAdminAndDirector($res["MenteeID"], $assId);
 				}
 			}
 			else {
@@ -205,7 +355,7 @@ function GetMenteeStatusForMentor($mentorId, $mentorEmail) {
 			if(mysql_num_rows($rs) > 0) {
 				while ($res = mysql_fetch_array($rs)) {
 					$mentee = GetMenteeDetails($res["MenteeID"]);
-					$resp .= "<h3>" . $mentee["MenteeName"] . " (" . $mentee["MenteeEmail"] . ")</h3>";
+					$resp .= "<h4>" . $mentee["MenteeName"] . " (" . $mentee["MenteeEmail"] . ")</h4>";
 					$resp .= GetMenteeSubmissionFeedbackInTableFormat($res["MenteeID"]);
 				}
 			}

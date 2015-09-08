@@ -514,54 +514,51 @@
                         hideLoading();
                     }
                 });    // end of the courseList ajax request
-
-                // now, get the assignments based on the selected course.
-                $('.CRP-div').delegate('#ddl-course', 'change', function() {
-                    var courseId = $(this).val();
-
-                    if(courseId == "-1") {
-                        popup.children('p').remove();
-                        popup.append("<p>Please select a course before proceeding</p>").fadeIn();
-                    }
-                    else {
-                        showLoading();
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "10", courseAssPDF: courseId
-                            },
-                            success: function(response) {
-                                // to show the assignments drop down at appropriate place.
-                                if(response == "-1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>We could not retrieve the assignments from the database. Please check your internet connection and try again.</p>").fadeIn();                              
-                                }
-                                else {
-                                    $('.assignment-crp').children('select').remove();
-                                    $('.assignment-crp').append(response);
-                                }
-                            }, 
-                            error: function() {
-                                alertMsg.children('p').remove();
-                                alertMsg.fadeOut();
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
-                            },
-                            complete: function() {
-                                hideLoading();
-                            }
-                        });   // of of ajax request
-                    }   // end of else.
-                    return false;
-                });   // end of getting Assignments AJAX Request
-
             	return false;
             });
+             // now, get the assignments based on the selected course.
+            $('.CRP-div').delegate('#ddl-course', 'change', function() {
+                var courseId = $(this).val();
+
+                if(courseId == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select a course before proceeding</p>").fadeIn();
+                }
+                else {
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "10", courseAssPDF: courseId
+                        },
+                        success: function(response) {
+                            // to show the assignments drop down at appropriate place.
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>We could not retrieve the assignments from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                            }
+                            else {
+                                $('.assignment-crp').children('select').remove();
+                                $('.assignment-crp').append(response);
+                            }
+                        }, 
+                        error: function() {
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });   // of of ajax request
+                }   // end of else.
+                return false;
+            });   // end of getting Assignments AJAX Request
 			// for the delegate event of the assignments in CRP.
 			$('.CRP-div').delegate('#ddl-assignment', 'change', function() {
 				var assID = $(this).val();
-
 				// ajax request to get the assignment PDF and assignment materials.
 				if(assID == "-1") {
 					popup.children('p').remove();
@@ -774,50 +771,49 @@
                         hideLoading();
                     }
                 });    // end of the courseList ajax request
-
-                // for the change event of the course, which will show the calender.
-                $('.calender-div').delegate('#ddl-course', 'change', function() {
-                    var courseId = $(this).val();
-                    if(courseId == "-1") {
-                        popup.children('p').remove();
-                        popup.append("<p>Please select a course for the Calender to be visible.</p>").fadeIn();
-                    }
-                    else {
-                        showLoading();
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "22", courseId: courseId
-                            },
-                            success: function(response) {
-                                if(response == "-1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();                     
-                                }
-                                else if(response == "0") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>No Calender Exists in the database. Please contact your director for the Calender. Thank You.</p>").fadeIn();                     
-                                }
-                                else {
-                                    // show the course calender in the calender-div.
-                                    $('.calender-div').children('img').remove();
-                                    $('.calender-div').append("<img src='" + response + "' />");
-                                }
-                            },
-                            error: function() {
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();           
-                            },
-                            complete: function() {
-                                hideLoading();
-                            }
-                        });   // end of ajax request.
-                    }   // end of else.
-                    return false;
-                });
             	return false;
             });   // end of calender click on LHS,
+            // for the change event of the course, which will show the calender.
+            $('.calender-div').delegate('#ddl-course', 'change', function() {
+                var courseId = $(this).val();
+                if(courseId == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select a course for the Calender to be visible.</p>").fadeIn();
+                }
+                else {
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "22", courseId: courseId
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();                     
+                            }
+                            else if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No Calender Exists in the database. Please contact your director for the Calender. Thank You.</p>").fadeIn();                     
+                            }
+                            else {
+                                // show the course calender in the calender-div.
+                                $('.calender-div').children('img').remove();
+                                $('.calender-div').append("<img src='" + response + "' />");
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();           
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });   // end of ajax request.
+                }   // end of else.
+                return false;
+            });   // end of delegate
 
             // for the Profile page on LHS
             $('.profile').on('click', function() {
@@ -830,53 +826,52 @@
             $('.password').on('click', function() {
                 showDiv($('.password-div'));
                 changeActiveState($(this).parent('li'));
-
-                $('#formChangePassword').submit(function() {
-                    // first, check for both the new passwords:
-                    var oldPassword = $('#txtOldPassword').val().trim();
-                    var newPassword = $('#txtNewPassword').val().trim();
-                    var newPasswordConfirm = $('#txtNewPasswordConfirm').val().trim();
-                    var email = $.cookie("email");
-
-                    if(newPassword != newPasswordConfirm) {
-                        popup.children('p').remove();
-                        popup.append("<p>Your Passwords do not match. Please recheck and try again.</p>").fadeIn();
-                    }
-                    else if(email == "" || email == "undefined" || email == undefined) {
-                        popup.children('p').remove();
-                        popup.append("<p>You have not logged in properly. Please log out and login again.</p>").fadeIn();   
-                    }
-                    else {   // ajax request for password change
-                        showLoading();
-                        $.ajax({
-                            type: "GET",
-                            url: "AJAXFunctions.php",
-                            data: {
-                                no: "17", email: email, oldPassword: oldPassword, newPassword: newPassword, newPasswordConfirm: newPasswordConfirm, table: "Director"
-                            },
-                            success: function(response) {
-                                if(response == "1") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Password Successfully Changed.</p>").fadeIn();
-                                }
-                                else {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Error encountered while changing your password. Please try again.</p>").fadeIn();   
-                                }
-                            },
-                            error: function() {
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
-                            },
-                            complete: function() {
-                                hideLoading();
-                            }
-                        });   // end of AJAX Request.
-                    }
-                    return false;
-                });   // end of formChangePassword submit()
                 return false;
             });   // end of .password on LHS.
+            $('#formChangePassword').submit(function() {
+                // first, check for both the new passwords:
+                var oldPassword = $('#txtOldPassword').val().trim();
+                var newPassword = $('#txtNewPassword').val().trim();
+                var newPasswordConfirm = $('#txtNewPasswordConfirm').val().trim();
+                var email = $.cookie("email");
+
+                if(newPassword != newPasswordConfirm) {
+                    popup.children('p').remove();
+                    popup.append("<p>Your Passwords do not match. Please recheck and try again.</p>").fadeIn();
+                }
+                else if(email == "" || email == "undefined" || email == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>You have not logged in properly. Please log out and login again.</p>").fadeIn();   
+                }
+                else {   // ajax request for password change
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "17", email: email, oldPassword: oldPassword, newPassword: newPassword, newPasswordConfirm: newPasswordConfirm, table: "Director"
+                        },
+                        success: function(response) {
+                            if(response == "1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Password Successfully Changed.</p>").fadeIn();
+                            }
+                            else {
+                                popup.children('p').remove();
+                                popup.append("<p>Error encountered while changing your password. Please try again.</p>").fadeIn();   
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });   // end of AJAX Request.
+                }
+                return false;
+            });   // end of formChangePassword submit()
 
 
             //------------------ mentee-status ------------------
@@ -913,7 +908,6 @@
                         hideLoading();
                     }
                 });   // end of courses dll
-                
                 return false;
             });  // end of on-click event of status on LHS.
             // for the delegate function of course in mentee status tab.
@@ -957,7 +951,7 @@
             // for the change event of the assignment drop down list.
             $('.status-div').delegate('#ddl-assignment', 'change', function() {
                 var assId = $(this).val();
-                $('.mentee-status-div').children('table, h3').remove();
+                $('.mentee-status-div').children('table, h4').remove();
                 if(assId == "-1" || assId == "undefined" || assId == undefined || assId == "") {
                     popup.children('p').remove();
                     popup.append("<p>Please select an Assignment before continuing.</p>").fadeIn();
@@ -995,9 +989,6 @@
                 }  // end of else.
                 return false;
             });   // end of the delegate change event of assignment ddl.
-
-
-
 
         });    // end of ready function.
 

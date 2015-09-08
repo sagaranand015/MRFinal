@@ -1,5 +1,7 @@
 <?php 
 
+session_start();
+
 // this is the file for all the helper functions in the contact us page.
 
 //these are for the PHP Helper files
@@ -408,6 +410,11 @@ function LoginUtility($email, $pwd, $table, $emailCol, $pwdCol) {
 	            // check for password equality
 	            if ($encrypted_password == $hash) {
 	                $resp = "1";
+	                // set the global cookie here in PHP.
+	                // setcookie("globalEmail", $res[$table . "Email"], time() + (86400 * 30), "/");
+	                // setcookie("globalID", $res[$table . "ID"], time() + (86400 * 30), "/");
+	                $_SESSION["globalEmail"] = $res[$table . "Email"];
+	                $_SESSION["globalId"] = $res[$table . "ID"];
 	            }
 	            else {
 	            	$resp = "0";

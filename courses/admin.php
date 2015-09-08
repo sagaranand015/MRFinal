@@ -2249,7 +2249,7 @@
                                 popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
                             }
                             else if(response == "0" || response == "") {
-                                popup.append("<p>No mentees could be found in the database.</p>").fadeIn();
+                                popup.append("<p>No mentees left to be assigned.</p>").fadeIn();
                             }
                             else {
                                 $('.assign-mentee-mentee').append(response);

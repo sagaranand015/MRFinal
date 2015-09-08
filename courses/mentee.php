@@ -1,3 +1,9 @@
+<?php
+    
+    session_start();
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -291,10 +297,15 @@
     </style>
 
 	<script type="text/javascript">
-        
+
 		$(window).load(function() {
 
-			var alertMsg = $('#alertMsg').fadeOut();
+            var globalEmail = "<?php echo $_SESSION['globalEmail'] ?>";
+            console.log(globalEmail);
+            var globalId = "<?php echo $_SESSION['globalId'] ?>";
+            console.log(globalId);
+
+            var alertMsg = $('#alertMsg').fadeOut();
             var popup = $('#popup').fadeOut();    
             $('#btnExitPopup').on('click', function() {
                 popup.children('p').remove();
@@ -302,80 +313,93 @@
                 return false;
             });
 
-        	var overlay = $('#overlay').addClass('overlay-remove');
+            var overlay = $('#overlay').addClass('overlay-remove');
             function showLoading() {
-            	overlay.removeClass('overlay-remove');
-            	overlay.addClass('overlay-show');
+                overlay.removeClass('overlay-remove');
+                overlay.addClass('overlay-show');
             }
             function hideLoading() {
-            	overlay.removeClass('overlay-show');
-            	overlay.addClass('overlay-remove');	
+                overlay.removeClass('overlay-show');
+                overlay.addClass('overlay-remove'); 
             }
 
             var email = $.cookie("email");
             if($.cookie("email") == "undefined" || $.cookie("email") == undefined) {
-            	popup.children('p').remove();
-            	popup.append("<p>You have not logged in. Please do so before continuing.</p>").fadeIn();
+                popup.children('p').remove();
+                popup.append("<p>You have not logged in. Please do so before continuing.</p>").fadeIn();
+            }
+            else if(email != globalEmail) {
+                popup.children('p').remove();
+                popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                $('#overlay-error').removeClass('overlay-remove');
+                $('#overlay-error').addClass('overlay-show');
             }
             else {
-            	showLoading();
-	    		$.ajax({
-	    			type: "GET",
-	    			url: "AJAXFunctions.php",
-	    			data: {
-	    				no: "2", email: email, table: "Mentee"
-	    			},
-	    			success: function(response) {
-	    				if(response == "-1") {
-	    					popup.children('p').remove();
-	                    	popup.append("<p>Oops! We encountered an error while loading the page. Please try again.</p>").fadeIn();	
-	    				}
-	    				else if(response == "-2") {
-	    					popup.children('p').remove();
-	    					popup.fadeOut();
-	                    	alertMsg.children('p').remove();
-	                    	alertMsg.append("<p>You have not logged in properly. Please <a href='http://mentored-research.com/login' style='color: black;'>LOGIN AGAIN</a> to continue.</p>").fadeIn();
-                    		$('#overlay-error').removeClass('overlay-remove');
-	                    	$('#overlay-error').addClass('overlay-show');
-	    				}	
-	    				else {
-	    					//populate all the fields here.
-	    					var res = response.split(" ~~ ");
-	    					$('#txtProfileName').val(res[1]);
-	    					$('#txtProfileEmail').val(res[0]);
-	    					$('#txtProfileContact').val(res[2]);
-	    					$('#txtProfileOrgan').val(res[3]);
-	    					$('#txtProfileProfile').val(res[4]);
+                showLoading();
+                $.ajax({
+                    type: "GET",
+                    url: "AJAXFunctions.php",
+                    data: {
+                        no: "2", email: email, table: "Mentee"
+                    },
+                    success: function(response) {
+                        indian = response;
+                        if(response == "-1") {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while loading the page. Please try again.</p>").fadeIn();    
+                        }
+                        else if(response == "-2") {
+                            popup.children('p').remove();
+                            popup.fadeOut();
+                            alertMsg.children('p').remove();
+                            alertMsg.append("<p>You have not logged in properly. Please <a href='http://mentored-research.com/login' style='color: black;'>LOGIN AGAIN</a> to continue.</p>").fadeIn();
+                            $('#overlay-error').removeClass('overlay-remove');
+                            $('#overlay-error').addClass('overlay-show');
+                        }   
+                        else {
+                            //populate all the fields here.
+                            var res = response.split(" ~~ ");
 
-	    					// populate the header of the dashboard.
-	    					$('#profile-header').html(res[1] + " Profile");
+                            $('#txtProfileName').val(res[1]);
+                            $('#txtProfileEmail').val(res[0]);
+                            $('#txtProfileContact').val(res[2]);
+                            $('#txtProfileOrgan').val(res[3]);
+                            $('#txtProfileProfile').val(res[4]);
 
-	    					// set the cookie for the menteeID.
-	    					$.cookie("id", res[5], {
-	                            path: '/',
-	                            expires: 365
-	                        });
-	    				}
-	    			},
-	    			error: function() {
-	    				alertMsg.children('p').remove();
-				        alertMsg.fadeOut();
-				        popup.children('p').remove();
-				        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-	    			},
-	    			complete: function() {
-	    				hideLoading();
-	    			}
-	    		});   // end of ajax request.
+                            // populate the header of the dashboard.
+                            $('#profile-header').html(res[1] + " Profile");
+
+                            // set the cookie for the menteeID.
+                            $.cookie("id", res[5], {
+                                path: '/',
+                                expires: 365
+                            });
+                        }
+                    },
+                    error: function() {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });   // end of ajax request.
+
             }   // end of else.
 
             // hide all the divs on page load. Except for first div.
             // this is supposed to be done here and not in ready() function. Or else, it gives an error while loading the divs.
             $('.main-div').hide();
             $('.CRP').trigger('click');
+
 		});   // end of load function.
 
         $(document).ready(function() {
+
+            var globalEmail = "<?php echo $_SESSION['globalEmail'] ?>";
+            var globalId = "<?php echo $_SESSION['globalId'] ?>";
 
         	document.title = "Mentee | " + $.cookie("email");
 
@@ -522,6 +546,12 @@
             		popup.children('p').remove();
             		popup.append("<p>You have not logged in properly. Please logout and login again.</p>").fadeIn();
             	}
+                else if(email != globalEmail) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                    $('#overlay-error').removeClass('overlay-remove');
+                    $('#overlay-error').addClass('overlay-show');
+                }
             	else {
             		showLoading();
 	            	$.ajax({
@@ -576,7 +606,6 @@
 							no: "13", assID: assID
 						},
 						success: function(response) {
-							console.log(response);
 							// now, parse the data and show all the results.
 							if(response.AssName == "" || response.AssName == undefined) { 
 								$('.assignment-name').html("No Assignment Name");	
@@ -760,6 +789,12 @@
             		popup.children('p').remove();
             		popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
             	}
+                else if(menteeEmail != globalEmail) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                    $('#overlay-error').removeClass('overlay-remove');
+                    $('#overlay-error').addClass('overlay-show');
+                }
             	else {
             		showLoading();
 	            	$.ajax({
@@ -815,6 +850,12 @@
             		popup.children('p').remove();
             		popup.append("<p>You have not logged in properly. Please <a href='http://mentored-research.com/login' style='color: black;'>LOGIN AGAIN</a> to continue.</p>").fadeIn();
             	}
+                else if(email != globalEmail) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                    $('#overlay-error').removeClass('overlay-remove');
+                    $('#overlay-error').addClass('overlay-show');
+                }
             	else {
             		showLoading();
 	            	$.ajax({
@@ -886,6 +927,12 @@
                     popup.children('p').remove();
                     popup.append("<p>You have not logged in properly. Please <a href='http://mentored-research.com/login' style='color: black;'>LOGIN AGAIN</a> to continue.</p>").fadeIn();
                 }
+                else if(email != globalEmail) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                    $('#overlay-error').removeClass('overlay-remove');
+                    $('#overlay-error').addClass('overlay-show');
+                }
                 else {
                     showLoading();
                     $('#sendMessageModal').modal('hide');
@@ -947,6 +994,12 @@
                     popup.children('p').remove();
                     popup.append("<p>You have not logged in properly. Please log out and login again.</p>").fadeIn();   
                 }
+                else if(email != globalEmail) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                    $('#overlay-error').removeClass('overlay-remove');
+                    $('#overlay-error').addClass('overlay-show');
+                }
                 else {   // ajax request for password change
                     showLoading();
                     $.ajax({
@@ -988,6 +1041,12 @@
                 if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
                     popup.children('p').remove();
                     popup.append("Oops! Looks like you have not logged in properly. Please logout and try again.").fadeIn();
+                }
+                else if(email != globalEmail) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                    $('#overlay-error').removeClass('overlay-remove');
+                    $('#overlay-error').addClass('overlay-show');
                 }
                 else {
                     showLoading();
@@ -1216,6 +1275,12 @@
                         popup.children('p').remove();
                         popup.append("Oops! Looks like you have not logged in properly. Please logout and try again.").fadeIn();
                     }
+                    else if(email != globalEmail) {
+                        popup.children('p').remove();
+                        popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                        $('#overlay-error').removeClass('overlay-remove');
+                        $('#overlay-error').addClass('overlay-show');
+                    }
                     else {
                         $(this).ajaxSubmit(optionsAssignmentSolution);    
                     }
@@ -1325,6 +1390,12 @@
                     popup.children('p').remove();
                     popup.append("<p>Looks like you have not logged in properly. Please do so before continuing.</p>").fadeIn();
                 }
+                else if(email != globalEmail) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                    $('#overlay-error').removeClass('overlay-remove');
+                    $('#overlay-error').addClass('overlay-show');
+                }
                 else {
                     showLoading();
                     $.ajax({
@@ -1395,6 +1466,12 @@
                     popup.children('p').remove();
                     popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
                 }
+                else if(email != globalEmail) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                    $('#overlay-error').removeClass('overlay-remove');
+                    $('#overlay-error').addClass('overlay-show');
+                }
                 else {
                     showLoading();
                     $.ajax({
@@ -1444,6 +1521,12 @@
                 else if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
                     popup.children('p').remove();
                     popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
+                }
+                else if(email != globalEmail) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                    $('#overlay-error').removeClass('overlay-remove');
+                    $('#overlay-error').addClass('overlay-show');
                 }
                 else {
                     showLoading();
@@ -1699,7 +1782,6 @@
                     });
 
                 }  // end of else.
-
                 return false;
             });
 

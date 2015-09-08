@@ -179,15 +179,15 @@
     		// for the scrolly thing.
     		$('.scrolly').scrolly();
 
-            // for different query strings
-            if(qs["logout"] == "1") {
-                popup.children('p').remove();
-                popup.append("<p>You have successfully logged out. Thank You.</p>").fadeIn();
-            }
-            else if(qs["signup"] == "1") {
-                popup.children('p').remove();
-                popup.append("<p>You have successfully Signed up. Please login with your credentials to continue.</p>").fadeIn();
-            }
+            // // for different query strings
+            // if(qs["logout"] == "1") {
+            //     popup.children('p').remove();
+            //     popup.append("<p>You have successfully logged out. Thank You.</p>").fadeIn();
+            // }
+            // else if(qs["signup"] == "1") {
+            //     popup.children('p').remove();
+            //     popup.append("<p>You have successfully Signed up. Please login with your credentials to continue.</p>").fadeIn();
+            // }
 
     		// for navigation of the sign up button.
     		$('#btnSignup').on('click', function() {

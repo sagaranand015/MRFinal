@@ -3,10 +3,10 @@
 // for the PHP helper functions.
 include('helpers.php');
 
-if(isset($_FILES["fileGuide"]) && $_FILES["fileGuide"]["error"]== UPLOAD_ERR_OK)
+if(isset($_FILES["fileFinanceDoc"]) && $_FILES["fileFinanceDoc"]["error"]== UPLOAD_ERR_OK)
 {
 	############ Edit settings ##############
-	$UploadDirectory	= 'uploads/guide/'; //specify upload directory ends with / (slash)
+	$UploadDirectory	= 'uploads/financeDoc/'; //specify upload directory ends with / (slash)
 	##########################################
 	
 	/*
@@ -16,18 +16,18 @@ if(isset($_FILES["fileGuide"]) && $_FILES["fileGuide"]["error"]== UPLOAD_ERR_OK)
 	*/
 	
 	//check if this is an ajax request
-	if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])){
+	if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
 		die("Apparently, you did not select the course before uploading the file. Please hit the back button and try again.");
 	}
 	
 	
 	//Is file size is less than allowed size.
-	if ($_FILES["fileGuide"]["size"] > 5242880) {
+	if ($_FILES["fileFinanceDoc"]["size"] > 5242880) {
 		die("File size is too big!");
 	}
 	
 	//allowed file type Server side check
-	switch(strtolower($_FILES['fileGuide']['type']))
+	switch(strtolower($_FILES['fileFinanceDoc']['type']))
 		{
 			//allowed file types
             case 'image/gif': 
@@ -57,7 +57,7 @@ if(isset($_FILES["fileGuide"]) && $_FILES["fileGuide"]["error"]== UPLOAD_ERR_OK)
 				die('Unsupported File!'); //output error
 	}
 	
-	$File_Name          = strtolower($_FILES['fileGuide']['name']);
+	$File_Name          = strtolower($_FILES['fileFinanceDoc']['name']);
 	$File_Ext           = substr($File_Name, strrpos($File_Name, '.')); //get file extention
 	$date = date_create();
 	$timestamp = date_timestamp_get($date);
@@ -70,25 +70,25 @@ if(isset($_FILES["fileGuide"]) && $_FILES["fileGuide"]["error"]== UPLOAD_ERR_OK)
 	else {
 		$courseID = "-1";
 	}
-	if(isset($_COOKIE["guideName"])) {
-		$guideName = $_COOKIE["guideName"];
+	if(isset($_COOKIE["financeDocName"])) {
+		$financeDocName = $_COOKIE["financeDocName"];
 	}
 	else {
-		$guideName = "";
+		$financeDocName = "";
 	}
 	
-	if($courseID == "-1" || $guideName == "") {
+	if($courseID == "-1" || $financeDocName == "") {
 		die("Please select the correct course OR provide a name to the Course Guide before uploading the Course Guide.");
 	}
 	else {
-		if(move_uploaded_file($_FILES['fileGuide']['tmp_name'], $UploadDirectory.$NewFileName )) {
-			// put url of the calender file here.
-			$register = RegisterGuideUrl($courseID, $guideName, $UploadDirectory.$NewFileName);
+		if(move_uploaded_file($_FILES['fileFinanceDoc']['tmp_name'], $UploadDirectory.$NewFileName )) {
+			//put url of the calender file here.
+			$register = RegisterFinanceDocUrl($courseID, $financeDocName, $UploadDirectory.$NewFileName);
 			if($register == "1") {
-				die('Your File has been successfully uploaded. Please wait while we reload the page for you.');
+				die('Your File has been successfully uploaded and Registered. Thank You.');
 			}
 			else if($resp == "-1") {
-				die('Oops! We encountered an error while uploading your calender. Please try again.');	
+				die('Oops! We encountered an error while uploading your annual report. Please try again.');	
 			}
 		}
 		else {

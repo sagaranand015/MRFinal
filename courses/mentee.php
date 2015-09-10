@@ -286,7 +286,7 @@
 			left: 45%;
 		}
 
-		.assignment-video, .assignment-report, .assignment-offtopic, .assignment-extra, .latest-assignment-name {
+		.assignment-video, .assignment-report, .assignment-offtopic, .assignment-extra, .latest-assignment-name, .course-guide, .course-ann-report, .course-finance {
 			cursor: pointer;
 		}
 
@@ -301,9 +301,9 @@
 		$(window).load(function() {
 
             var globalEmail = "<?php echo $_SESSION['globalEmail'] ?>";
-            console.log(globalEmail);
+            //console.log(globalEmail);
             var globalId = "<?php echo $_SESSION['globalId'] ?>";
-            console.log(globalId);
+            //console.log(globalId);
 
             var alertMsg = $('#alertMsg').fadeOut();
             var popup = $('#popup').fadeOut();    
@@ -542,6 +542,9 @@
             	// get the assignments drop down list from here.
             	var email = $.cookie("email");
             	var id = $.cookie("id");
+                if(id == undefined || id == "undefined" || id == "") {
+                    id = globalId;
+                }
             	if($.cookie("email") == "undefined" || $.cookie("email") == undefined) {
             		popup.children('p').remove();
             		popup.append("<p>You have not logged in properly. Please logout and login again.</p>").fadeIn();
@@ -562,6 +565,7 @@
 	            		},
 	            		success: function(response) {
 	            			// to show the assignments drop down at appropriate place.
+                            console.log(response);
 	            			if(response == "-1") {
 								popup.children('p').remove();
 					        	popup.append("<p>We could not retrieve your assignments from the database. Please check your internet connection and try again.</p>").fadeIn();	            				
@@ -570,6 +574,10 @@
 								popup.children('p').remove();
 					        	popup.append("<p>You have not been assigned any courses. Please try again or contact your mentor.</p>").fadeIn();	            				
 	            			}
+                            else if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>We could not find any assignments for you. Please contact the administrator or mail us at: <code>tech@mentored-research.com</code></p>").fadeIn();                                  
+                            }
 	            			else {
 	            				$('.assignment-crp').children('select').remove();
 	            				$('.assignment-crp').append(response);
@@ -1490,6 +1498,10 @@
                                 popup.children('p').remove();
                                 popup.append("<p>You have not been assigned any courses. Please try again or contact your mentor.</p>").fadeIn();                               
                             }
+                             else if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>We could not find any assignments for you. Please contact the administrator or mail us at: <code>tech@mentored-research.com</code></p>").fadeIn();                                  
+                            }
                             else {
                                 $('.quiz-assignment').children('select').remove();
                                 $('.quiz-assignment').append(response);
@@ -1671,6 +1683,12 @@
                             popup.children('p').remove();
                             popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
                         }
+                        else if(email != globalEmail) {
+                            popup.children('p').remove();
+                            popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                            $('#overlay-error').removeClass('overlay-remove');
+                            $('#overlay-error').addClass('overlay-show');
+                        }
                         else {
                             $('#basicQuizModal').modal('hide');
                             showLoading();
@@ -1754,6 +1772,12 @@
                     popup.children('p').remove();
                     popup.append("<p>Looks like you have not logged in properly. Please login and try again.</p>").fadeIn();
                 }
+                else if(email != globalEmail) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                    $('#overlay-error').removeClass('overlay-remove');
+                    $('#overlay-error').addClass('overlay-show');
+                }
                 else {   // make the ajax request here.
                     showLoading();
                     $.ajax({
@@ -1784,6 +1808,148 @@
                 }  // end of else.
                 return false;
             });
+
+            // for getting guides/annual reports/finance documents
+            $('.document').on('click', function() {
+                showDiv($('.document-div'));
+                changeActiveState($(this).parent('li'));
+
+                // to get the documents thru ajax request.
+                var email = $.cookie("email");
+                var id = $.cookie("id");
+
+                if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
+                }
+                else if(email != globalEmail) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                    $('#overlay-error').removeClass('overlay-remove');
+                    $('#overlay-error').addClass('overlay-show');
+                }
+                else {
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "44", email: email, id: id
+                        },
+                        success: function(response) {
+                            //console.log(response);
+
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
+                            }
+                            else {
+                                //console.log(response.guide.length + " --> " + response.annualReport.length + " --> " + response.financeDoc.length);
+
+                                // get the guides here.
+                                $('.guides').children('.course-guide').remove();
+                                var guides = response.guide;
+                                var guideDiv = "";
+                                for(var i=0;i<guides.length;i++) {
+                                    guideDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 course-guide'";
+                                    if(guides[i] == undefined || guides[i] == "undefined" || guides[i] == "") {
+                                        guideDiv += "data-url='" + "" +  "'>";
+                                    }
+                                    else {
+                                        guideDiv += "data-url='" + guides[i] +  "'>";
+                                    }
+                                    guideDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
+                                    guideDiv += "<p class='text-muted'>" + "Guide " + (i+1) + "</p>";
+                                    guideDiv += "</div>";
+                                }
+                                $('.guides').append(guideDiv);
+
+                                // for the annual reports here.
+                                $('.ann-reports').children('.course-ann-report').remove();
+                                var annReports = response.annualReport;
+                                var annReportDiv = "";
+                                for(var i=0;i<annReports.length;i++) {
+                                    annReportDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 course-ann-report'";
+                                    if(annReports[i] == undefined || annReports[i] == "undefined" || annReports[i] == "") {
+                                        annReportDiv += "data-url='" + "" +  "'>";
+                                    }
+                                    else {
+                                        annReportDiv += "data-url='" + annReports[i] +  "'>";
+                                    }
+                                    annReportDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
+                                    annReportDiv += "<p class='text-muted'>" + "Annual Report " + (i+1) + "</p>";
+                                    annReportDiv += "</div>";
+                                }
+                                $('.ann-reports').append(annReportDiv);  
+
+                                // for the financial documents here.
+                                $('.finances').children('.course-finance').remove();
+                                var finances = response.financeDoc;
+                                var financeDiv = "";
+                                for(var i=0;i<finances.length;i++) {
+                                    financeDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 course-finance'";
+                                    if(finances[i] == undefined || finances[i] == "undefined" || finances[i] == "") {
+                                        financeDiv += "data-url='" + "" +  "'>";
+                                    }
+                                    else {
+                                        financeDiv += "data-url='" + finances[i] +  "'>";
+                                    }
+                                    financeDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
+                                    financeDiv += "<p class='text-muted'>" + "Financial Document " + (i+1) + "</p>";
+                                    financeDiv += "</div>";
+                                }
+                                $('.finances').append(financeDiv);                                
+
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }   // end of else.
+
+                // for the delegate function of the guide 
+                $('.guides').delegate('.course-guide', 'click', function() {
+                    var url = $(this).attr('data-url');
+                    if(url == "" || url == undefined) {
+                        alert("No defined.");
+                    }
+                    else {
+                        window.open(url, "_blank");
+                    }
+                    return false;
+                });
+
+                // for the delegate function of the annual-report 
+                $('.ann-reports').delegate('.course-ann-report', 'click', function() {
+                    var url = $(this).attr('data-url');
+                    if(url == "" || url == undefined) {
+                        alert("No defined.");
+                    }
+                    else {
+                        window.open(url, "_blank");
+                    }
+                    return false;
+                });
+
+                // for the delegate function of the annual-report 
+                $('.finances').delegate('.course-finance', 'click', function() {
+                    var url = $(this).attr('data-url');
+                    if(url == "" || url == undefined) {
+                        alert("No defined.");
+                    }
+                    else {
+                        window.open(url, "_blank");
+                    }
+                    return false;
+                });
+
+                return false;
+            });   // end of document link on LHS.
 
         });    // end of ready function.
 
@@ -1862,6 +2028,7 @@
 
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="CRP">Central Resources</a></li>
+                    <li><a href="#" class="document">Guides & Documents</a></li>
                     <li><a href="#" class="calender">Program Calender</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
@@ -1883,6 +2050,35 @@
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <!-- for showing the guides and documents -->
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div document-div">
+
+            <!-- for course Guides -->
+            <div class="row text-center guides">
+                <h3 class="page-header">
+                    Course Guide(s)
+                </h3>
+                <!-- data will come from ajax here -->
+            </div>
+
+             <!-- for annual reports -->
+            <div class="row text-center ann-reports">
+                <h3 class="page-header">
+                    Annual Report(s)
+                </h3>
+                <!-- data will come from ajax here -->
+            </div>
+
+            <!-- for Financial documents -->
+            <div class="row text-center finances">
+                <h3 class="page-header">
+                    Finance Document(s)
+                </h3>
+                <!-- data will come from ajax here -->
+            </div>
+
+        </div>
 
         <!-- for attempting the quizzes -->
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div support-div">

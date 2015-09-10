@@ -8,111 +8,6 @@ include 'headers/databaseConn.php';
 // for mandrill mail sending API.
 require_once 'mandrill/Mandrill.php'; 
 
-// // to send the technical Queries to the email hardcoded
-// function SendDeadlineQuery($toEmail, $toId, $toName, $subject, $mail) {
-// 	try {
-// 		$mandrill = new Mandrill('J99JDcmNNMQLw32QJGDadQ');
-// 		$message = array(
-// 	        'html' => $mail,
-// 	        'subject' => $subject,
-// 	        'from_email' => 'info@mentored-research.co',
-// 	        'from_name' => 'Mentored-Research',
-// 	        'to' => array(
-// 	            array(
-// 	                'email' => $toEmail,
-// 	                'name' => $toName,
-// 	                'type' => 'cc'
-// 	            ),
-// 	            array(
-// 	                'email' => 'guide@mentored-research.com',
-// 	                'name' => 'Mentored-Research',
-// 	                'type' => 'cc'
-// 	            )
-// 	        ),
-// 	        'headers' => array('Reply-To' => 'guide@mentored-research.com')
-// 	    );
-// 	    $async = false;
-// 	    $ip_pool = 'Main Pool';
-// 	    $send_at = null;
-// 	    $result = $mandrill->messages->send($message, $async, $ip_pool, $send_at);
-// 		return $result;
-// 	}
-// 	catch(Exception $e) {
-// 		$resp = "-1";
-// 		return $resp;
-// 	}
-// }
-
-// // to send the technical Queries to the email hardcoded
-// function SendTechnicalQuery($toEmail, $toId, $toName, $subject, $mail) {
-// 	try {
-// 		$mandrill = new Mandrill('J99JDcmNNMQLw32QJGDadQ');
-// 		$message = array(
-// 	        'html' => $mail,
-// 	        'subject' => $subject,
-// 	        'from_email' => 'info@mentored-research.co',
-// 	        'from_name' => 'Mentored-Research',
-// 	        'to' => array(
-// 	            array(
-// 	                'email' => $toEmail,
-// 	                'name' => $toName,
-// 	                'type' => 'cc'
-// 	            ),
-// 	            array(
-// 	                'email' => 'tech@mentored-research.com',
-// 	                'name' => 'Mentored-Research',
-// 	                'type' => 'cc'
-// 	            )
-// 	        ),
-// 	        'headers' => array('Reply-To' => 'tech@mentored-research.com')
-// 	    );
-// 	    $async = false;
-// 	    $ip_pool = 'Main Pool';
-// 	    $send_at = null;
-// 	    $result = $mandrill->messages->send($message, $async, $ip_pool, $send_at);
-// 		return $result;
-// 	}
-// 	catch(Exception $e) {
-// 		$resp = "-1";
-// 		return $resp;
-// 	}
-// }
-
-// // to send the assignment Queries to the email hardcoded
-// function SendAssignmentQuery($toEmail, $toId, $toName, $subject, $mail) {
-// 	try {
-// 		$mandrill = new Mandrill('J99JDcmNNMQLw32QJGDadQ');
-// 		$message = array(
-// 	        'html' => $mail,
-// 	        'subject' => $subject,
-// 	        'from_email' => 'info@mentored-research.co',
-// 	        'from_name' => 'Mentored-Research',
-// 	        'to' => array(
-// 	            array(
-// 	                'email' => $toEmail,
-// 	                'name' => $toName,
-// 	                'type' => 'cc'
-// 	            ),
-// 	            array(
-// 	                'email' => 'query@mentored-research.com',
-// 	                'name' => 'Mentored-Research',
-// 	                'type' => 'cc'
-// 	            )
-// 	        ),
-// 	        'headers' => array('Reply-To' => 'query@mentored-research.com')
-// 	    );
-// 	    $async = false;
-// 	    $ip_pool = 'Main Pool';
-// 	    $send_at = null;
-// 	    $result = $mandrill->messages->send($message, $async, $ip_pool, $send_at);
-// 		return $result;
-// 	}
-// 	catch(Exception $e) {
-// 		$resp = "-1";
-// 		return $resp;
-// 	}
-// }
-
 // to get the assignment submission link for the mentee only.
 function GetMenteeSubmissionFeedbackInTableFormatForAdminAndDirector($menteeId, $assId) {
 	$resp = "-1";
@@ -5854,6 +5749,46 @@ function GetMentorIDOfMentee($email, $id) {
 			while ($res = mysql_fetch_array($rs)) {
 				$resp = $res["MenteeMentor"];
 			}
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// this is the function for registering the annual report url to the database table.
+function RegisterFinanceDocUrl($courseID, $financeDocName, $url) {
+	$resp = "-1";
+	try {
+		$query = "insert into FinanceDocument(FinanceDocumentName, FinanceDocument, FinanceDocumentCourse) values('$financeDocName', '$url', '$courseID')";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}	
+
+// this is the function for registering the annual report url to the database table.
+function RegisterAnnualReportUrl($courseID, $annualReportName, $url) {
+	$resp = "-1";
+	try {
+		$query = "insert into AnnualReport(AnnualReportName, AnnualReport, AnnualReportCourse) values('$annualReportName', '$url', '$courseID')";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
 		}
 		return $resp;
 	}

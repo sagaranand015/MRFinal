@@ -138,6 +138,92 @@ else if(isset($_GET["no"]) && $_GET["no"] == "42") {  // for sending the query r
 else if(isset($_GET["no"]) && $_GET["no"] == "43") {  // for sending the query regarding the assignments
 	SendDeadlineQuery($_GET["no"], $_GET["email"], $_GET["id"], $_GET["name"], $_GET["contact"], $_GET["msg"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "44") {  // for getting all the documents for mentor or mentee(based on courseID)
+	GetDocumentsForMentee($_GET["email"], $_GET["id"]);     // includes guides, annual reports and financial documents.
+}
+
+// for getting all the documents for mentor or mentee(based on courseID)
+// includes guides, annual reports and financial documents.
+function GetDocumentsForMentee($email, $id) {
+	$resp = "-1";
+	$documents = array();
+	$guide = array();
+	$annualReport = array();
+	$financeDoc = array();
+	$courseId = GetMenteeCourse($email);
+	//$i = 0;
+	try {
+		// for getting the guides
+		$query1 = "select * from Guide where GuideCourse='$courseId'";
+		$rs1 = mysql_query($query1);
+		if(!$rs1) {
+			$guide[0] = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs1) > 0) {
+				$j = 0;
+				while ($res1 = mysql_fetch_array($rs1)) {
+					$guide[$j] = $res1["Guide"];
+					$j++;
+				}
+			}
+			else {
+				$guide[0] = "0";
+			}
+		}
+		$documents["guide"] = $guide;
+		//$i++;
+
+		// for getting the annual reports.
+		$query2 = "select * from AnnualReport where AnnualReportCourse='$courseId'";
+		$rs2 = mysql_query($query2);
+		if(!$rs2) {
+			$annualReport[0] = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs2) > 0) {
+				$k = 0;
+				while ($res2 = mysql_fetch_array($rs2)) {
+					$annualReport[$k] = $res2["AnnualReport"];
+					$k++;
+				}
+			}
+			else {
+				$annualReport[0] = "0";
+			}
+		}
+		$documents["annualReport"] = $annualReport;
+
+		// for getting the financial documents
+		$query3 = "select * from FinanceDocument where FinanceDocumentCourse='$courseId'";
+		$rs3 = mysql_query($query3);
+		if(!$rs3) {
+			$financeDoc[0] = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs3) > 0) {
+				$l = 0;
+				while ($res3 = mysql_fetch_array($rs3)) {
+					$financeDoc[$l] = $res3["FinanceDocument"];
+					$l++;
+				}
+			}
+			else {
+				$financeDoc[0] = "0";
+			}
+		}
+		$documents["financeDoc"] = $financeDoc;
+
+		header('Content-Type: application/json');
+		$resp = json_encode($documents);
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
 
 // for sending the query regarding the assignments
 function SendDeadlineQuery($no, $email, $id, $name, $contact, $msg) {
@@ -1122,7 +1208,7 @@ function GetAssignmentMaterial($assID) {
 	$assSampleReport = array();
 	$assOffTopic = array();
 	$assExtra = array();
-	$i = 0;   // for the array index.
+	$i = 0;   // for the main(Assignment) array index.
 	try {
 		// firstly, get the assignment details in an array.
 		$detailsQuery = "select * from Assignment where AssID='$assID'";
@@ -1231,17 +1317,26 @@ function GetMenteeAssignment($email, $id) {
 			$resp = "-1";
 		}
 		else {
-			$query = "select * from Assignment where AssCourse='$assCourse'";
+			$lastSubmitted = GetMenteeLastSubmitted($id, $assCourse);
+			$last = intval($lastSubmitted);
+			$last = $last + 1;
+
+			$query = "select * from Assignment where AssCourse='$assCourse' and AssNo<='$last'";
 			$rs = mysql_query($query);
 			if(!$rs) {
 				$resp = "-1";
 			}
 			else {
-				$resp = "<select id='ddl-assignment' class='form-control'><option value='-1'> --Select Assignment-- </option>";
-				while ($res = mysql_fetch_array($rs)) {
-					$resp .= "<option value='" . $res["AssID"] . "' >" . $res["AssName"] . "</option>";
+				if(mysql_num_rows($rs) > 0) {
+					$resp = "<select id='ddl-assignment' class='form-control'><option value='-1'> --Select Assignment-- </option>";
+					while ($res = mysql_fetch_array($rs)) {
+						$resp .= "<option value='" . $res["AssID"] . "' >" . $res["AssName"] . "</option>";
+					}
+					$resp .= "</select>";
 				}
-				$resp .= "</select>";
+				else {
+					$resp = "0";
+				}
 			}
 		}
 		echo $resp;

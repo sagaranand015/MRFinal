@@ -1576,17 +1576,28 @@
 		                    var ftype = $('#fileGuide')[0].files[0].type; // get file type
 		                    //allow file types 
 		                    switch(ftype) {
-		                        case 'image/png': 
-								case 'image/gif': 
-								case 'image/jpeg': 
-								case 'image/pjpeg':
-								case 'text/plain':
-								case 'text/html':
-								case 'application/x-zip-compressed':
-								case 'application/pdf':
-								case 'application/msword':
-								case 'application/vnd.ms-excel':
-								case 'video/mp4':
+		                        case 'image/gif': 
+                                case 'image/jpeg': 
+                                case 'image/pjpeg':
+                                case 'text/plain':
+                                case 'text/html': //html file
+                                case 'application/x-zip-compressed':
+                                case 'application/pdf':
+                                case 'application/msword':
+                                case 'application/vnd.ms-excel':
+                                case 'video/mp4':
+                                case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                                case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                                case 'application/vnd.ms-excel':
+                                case 'application/msexcel':
+                                case 'application/x-msexcel':
+                                case 'application/x-ms-excel':
+                                case 'application/x-excel':
+                                case 'application/x-dos_ms_excel':
+                                case 'application/xls':
+                                case 'application/x-xls':
+                                case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                                case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
 		                            break;
 		                        default:
 		                            alertMsg.children('p').remove();
@@ -1629,8 +1640,8 @@
 		            	// to fadeOut the alertMsg and Reload after 3 seconds.
 		                setTimeout(function() {
 		                    alertMsg.fadeOut();
-		                    //location.reload();
-		                }, 10000);
+		                    location.reload();
+		                }, 5000);
 		            }     // end of afterSuccess function
 
                     // for uploading the calender to the server.
@@ -1657,8 +1668,244 @@
                         // always return false to prevent standard browser submit and page navigation 
                         return false; 
                     });      
+
+                    // ---------------------- for the uploading of Annual Report ----------------------
+
+                    // for the onfocusout event of the guide name
+                    $('#txtAnnualReportName').on('focusout', function() {
+                        $.cookie("annualReportName", $(this).val());
+                        return false;
+                    });
+                    //function to check file size before uploading.
+                    function beforeSubmitAnnualReport() {
+                        alertMsg.children('p').remove();
+                        alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+                        //check whether browser fully supports all File API
+                        if (window.File && window.FileReader && window.FileList && window.Blob) {
+                            if( !$('#fileAnnualReport').val()) {   //check empty input filed 
+                                alertMsg.children('p').remove();
+                                alertMsg.fadeOut();
+                                popup.children('p').remove();
+                                popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
+                                return false;
+                            }
+                            var fsize = $('#fileAnnualReport')[0].files[0].size; //get file size
+                            var ftype = $('#fileAnnualReport')[0].files[0].type; // get file type
+                            //allow file types 
+                            switch(ftype) {
+                                case 'image/gif': 
+                                case 'image/jpeg': 
+                                case 'image/pjpeg':
+                                case 'text/plain':
+                                case 'text/html': //html file
+                                case 'application/x-zip-compressed':
+                                case 'application/pdf':
+                                case 'application/msword':
+                                case 'application/vnd.ms-excel':
+                                case 'video/mp4':
+                                case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                                case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                                case 'application/vnd.ms-excel':
+                                case 'application/msexcel':
+                                case 'application/x-msexcel':
+                                case 'application/x-ms-excel':
+                                case 'application/x-excel':
+                                case 'application/x-dos_ms_excel':
+                                case 'application/xls':
+                                case 'application/x-xls':
+                                case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                                case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+                                    break;
+                                default:
+                                    alertMsg.children('p').remove();
+                                    alertMsg.fadeOut();
+                                    popup.children('p').remove();
+                                    popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
+                                    return false;
+                            }
+                            //Allowed file size is less than 5 MB (1048576)
+                            if(fsize>5242880)   {
+                                alertMsg.children('p').remove();
+                                alertMsg.fadeOut();
+                                popup.children('p').remove();
+                                popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
+                                return false;
+                            }
+                        }
+                        else  {
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
+                            return false;
+                        }
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                    }   // end of beforeSubmit function.
+
+                    //function after succesful file upload (when server response)
+                    function afterSuccessAnnualReport() {
+                        // to hide the loading overlay after the uploading is done.
+                        hideLoading();
+                        popup.children('p').remove();
+                        popup.fadeOut();
+                        $('.progress').fadeOut();
+                        alertMsg.fadeIn();
+                        // finally, remove the courseID cookie here.
+                        $.removeCookie("courseID");
+                        $.removeCookie("annualReportName");
+                        // to fadeOut the alertMsg and Reload after 3 seconds.
+                        setTimeout(function() {
+                            alertMsg.fadeOut();
+                            location.reload();
+                        }, 5000);
+                    }     // end of afterSuccess function
+
+                    // for uploading the calender to the server.
+                    var optionsAnnualReport = { 
+                        target:   '#alertMsg',   // target element(s) to be updated with server response 
+                        beforeSubmit:  beforeSubmitAnnualReport,  // pre-submit callback 
+                        success:       afterSuccessAnnualReport,  // post-submit callback 
+                        uploadProgress: OnProgress, //upload progress callback 
+                        resetForm: true        // reset the form after successful submit 
+                    }; 
+
+                    $('#formAnnualReport').submit(function() { 
+                        if($.cookie("courseID") == "undefined" || $.cookie("courseID") == undefined || $.cookie("annualReportName") == "undefined" || $.cookie("annualReportName") == undefined) {
+                            popup.children('p').remove();
+                            popup.append("<p>Please select the course or add the Annual Report. Something's not right.</p>").fadeIn();
+                        }
+                        else if($.cookie("annualReportName") == "" || $('#txtAnnualReportName').val() == "") {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! Looks like you have not added the Guide Name. Please do so first.</p>").fadeIn();    
+                        }
+                        else {
+                            $(this).ajaxSubmit(optionsAnnualReport);            
+                        }
+                        // always return false to prevent standard browser submit and page navigation 
+                        return false; 
+                    });      
+
+                    // ---------------------- for the uploading of Finance documents ----------------------
+
+                    // for the onfocusout event of the guide name
+                    $('#txtFinanceDocName').on('focusout', function() {
+                        $.cookie("financeDocName", $(this).val());
+                        return false;
+                    });
+                    //function to check file size before uploading.
+                    function beforeSubmitFinanceDoc() {
+                        alertMsg.children('p').remove();
+                        alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
+                        //check whether browser fully supports all File API
+                        if (window.File && window.FileReader && window.FileList && window.Blob) {
+                            if( !$('#fileFinanceDoc').val()) {   //check empty input filed 
+                                alertMsg.children('p').remove();
+                                alertMsg.fadeOut();
+                                popup.children('p').remove();
+                                popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
+                                return false;
+                            }
+                            var fsize = $('#fileFinanceDoc')[0].files[0].size; //get file size
+                            var ftype = $('#fileFinanceDoc')[0].files[0].type; // get file type
+                            //allow file types 
+                            switch(ftype) {
+                                case 'image/gif': 
+                                case 'image/jpeg': 
+                                case 'image/pjpeg':
+                                case 'text/plain':
+                                case 'text/html': //html file
+                                case 'application/x-zip-compressed':
+                                case 'application/pdf':
+                                case 'application/msword':
+                                case 'application/vnd.ms-excel':
+                                case 'video/mp4':
+                                case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                                case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                                case 'application/vnd.ms-excel':
+                                case 'application/msexcel':
+                                case 'application/x-msexcel':
+                                case 'application/x-ms-excel':
+                                case 'application/x-excel':
+                                case 'application/x-dos_ms_excel':
+                                case 'application/xls':
+                                case 'application/x-xls':
+                                case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                                case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+                                    break;
+                                default:
+                                    alertMsg.children('p').remove();
+                                    alertMsg.fadeOut();
+                                    popup.children('p').remove();
+                                    popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
+                                    return false;
+                            }
+                            //Allowed file size is less than 5 MB (1048576)
+                            if(fsize>5242880)   {
+                                alertMsg.children('p').remove();
+                                alertMsg.fadeOut();
+                                popup.children('p').remove();
+                                popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
+                                return false;
+                            }
+                        }
+                        else  {
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
+                            return false;
+                        }
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                    }   // end of beforeSubmit function.
+
+                    //function after succesful file upload (when server response)
+                    function afterSuccessFinanceDoc() {
+                        // to hide the loading overlay after the uploading is done.
+                        hideLoading();
+                        popup.children('p').remove();
+                        popup.fadeOut();
+                        $('.progress').fadeOut();
+                        alertMsg.fadeIn();
+                        // finally, remove the courseID cookie here.
+                        $.removeCookie("courseID");
+                        $.removeCookie("financeDocName");
+                        // to fadeOut the alertMsg and Reload after 3 seconds.
+                        setTimeout(function() {
+                            alertMsg.fadeOut();
+                            location.reload();
+                        }, 5000);
+                    }     // end of afterSuccess function
+
+                    // for uploading the calender to the server.
+                    var optionsFinanceDoc = { 
+                        target:   '#alertMsg',   // target element(s) to be updated with server response 
+                        beforeSubmit:  beforeSubmitFinanceDoc,  // pre-submit callback 
+                        success:       afterSuccessFinanceDoc,  // post-submit callback 
+                        uploadProgress: OnProgress, //upload progress callback 
+                        resetForm: true        // reset the form after successful submit 
+                    }; 
+
+                    $('#formFinanceDoc').submit(function() { 
+                        if($.cookie("courseID") == "undefined" || $.cookie("courseID") == undefined || $.cookie("financeDocName") == "undefined" || $.cookie("financeDocName") == undefined) {
+                            popup.children('p').remove();
+                            popup.append("<p>Please select the course or add the Financial Document. Something's not right.</p>").fadeIn();
+                        }
+                        else if($.cookie("financeDocName") == "" || $('#txtFinanceDocName').val() == "") {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! Looks like you have not added the Financial Document Name. Please do so first.</p>").fadeIn();    
+                        }
+                        else {
+                            $(this).ajaxSubmit(optionsFinanceDoc);            
+                        }
+                        // always return false to prevent standard browser submit and page navigation 
+                        return false; 
+                    });      
+
                 }   // end of else
             });  // end of change (delegate) function in guide-div courses list
+
 
 			 // for the add user link on LHS
             $('.user').on('click', function() {
@@ -2982,6 +3229,15 @@
                 return false;
             });   // end of the delegate change event of assignment ddl.
 
+            // for the annual report link on LHS.
+            $('.annual-report').on('click', function() {
+                showDiv($('.annual-report-div'));
+                changeActiveState($(this).parent('li'));
+
+                return false;
+            })
+
+
             // hide all the divs on page load. Except for first div.
             $('.main-div').hide();
             $('.CRP').trigger('click');
@@ -3078,7 +3334,7 @@
             		<li><a href="#" class="course">Add a Course</a></li>
             		<li><a href="#" class="organisation">Add an organisation</a></li>
             		<li><a href="#" class="calender">Add Course Calender</a></li>
-            		<li><a href="#" class="guide">Add Course Guide</a></li>
+            		<li><a href="#" class="guide">Add Guides/Documents</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="assignment">Add Assignment Details</a></li>
@@ -3086,10 +3342,11 @@
                 </ul>
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="user">Add User</a></li>
+                    <li><a href="#" class="quiz">Add Quiz</a></li>
                     <li><a href="#" class="assign-mentee">Assign Mentees</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
-                    <li><a href="#" class="quiz">Add Quiz</a></li>
+                    
                 </ul>
             </div>
         </div>
@@ -3910,21 +4167,26 @@
         </div>   <!-- end of assignmentPDF-div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div guide-div">
-	        <h1 class="page-header">
-	        	Upload Course Guide
-	        </h1>
 
-	        <!-- Data will come from the AJAX here -->
+            <h4 class="page-header">
+                Select Course:
+            </h4>
+            <table class="table">
+                <tr>
+                    <td>
+                        <label id="lblCourseDdl" for="ddlCourse">Select Course: </label>
+                    </td>
+                    <td class="courseList">
+                        <!-- course list will come from ajax -->
+                    </td>
+                </tr>
+            </table>
+
             <form action="guide-upload.php" method="post" enctype="multipart/form-data" id="formGuide">
+                <h4 class="page-header">
+                    Upload Course Guide
+                </h4>
     		    <table class="table">
-    		    	<tr>
-    		    		<td>
-    		    			<label id="lblCourseDdl" for="ddlCourse">Select Course: </label>
-    		    		</td>
-    		    		<td class="courseList">
-    		    			<!-- course list will come from ajax -->
-    		    		</td>
-    		    	</tr>
     		    	<tr>
     		    		<td>
     		    			<label>Guide Content/Name: </label>
@@ -3948,6 +4210,65 @@
                     </tr>
                 </table>
             </form>
+
+            <form action="annualReport-upload.php" method="post" enctype="multipart/form-data" id="formAnnualReport">
+                <h4 class="page-header">
+                    Upload Annual Report
+                </h4>
+                <table class="table">
+                    <tr>
+                        <td>
+                            <label>Annual Report Content/Name: </label>
+                        </td>
+                        <td>
+                            <input type="text" placeholder="Annual Report Content/Name" id="txtAnnualReportName" class="form-control" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Upload Annual Report: </label>
+                        </td>
+                        <td>
+                            <input name="fileAnnualReport" id="fileAnnualReport" type="file" class="btn btn-lg btn-primary btn-block" />            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="submit"  id="btnSubmitAnnualReport" value="Upload Annual Report" class="btn btn-lg btn-primary btn-block" />                
+                        </td>
+                    </tr>
+                </table>
+            </form> 
+
+            <form action="financeDoc-upload.php" method="post" enctype="multipart/form-data" id="formFinanceDoc">
+                <h4 class="page-header">
+                    Upload Finance Documents
+                </h4>
+                <table class="table">
+                    <tr>
+                        <td>
+                            <label>Finance Document Content/Name: </label>
+                        </td>
+                        <td>
+                            <input type="text" placeholder="Finance Document Content/Name" id="txtFinanceDocName" class="form-control" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Upload Annual Report: </label>
+                        </td>
+                        <td>
+                            <input name="fileFinanceDoc" id="fileFinanceDoc" type="file" class="btn btn-lg btn-primary btn-block" />            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="submit"  id="btnSubmitFinanceDoc" value="Upload Financial Document" class="btn btn-lg btn-primary btn-block" />                
+                        </td>
+                    </tr>
+                </table>
+            </form> 
+
         </div>   <!-- end of guide div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div dashboard-div">

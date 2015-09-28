@@ -1,0 +1,2 @@
+2015-07-12 18:28:59 --> update Admin set AdminName='sagar anand' and AdminContact='ttest' and AdminProfile='test' where AdminEmail='sagar.anand015@gmail.com'
+2015-07-12 18:30:22 --> update Admin set AdminName='sagar anand', AdminContact='ttestsdfsadf', AdminProfile='testsadfas' where AdminEmail='sagar.anand015@gmail.com'

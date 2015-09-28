@@ -11,7 +11,7 @@
 	}
 
 	// (localhost connection settings)
-	// $connection=mysql_connect("localhost","root","");
+	// $connection=mysql_connect("localhost","root","root");
 	// if(!$connection) {
 	//     die("Error Establishing connection");
 	// }

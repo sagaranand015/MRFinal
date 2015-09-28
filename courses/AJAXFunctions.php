@@ -141,6 +141,15 @@ else if(isset($_GET["no"]) && $_GET["no"] == "43") {  // for sending the query r
 else if(isset($_GET["no"]) && $_GET["no"] == "44") {  // for getting all the documents for mentor or mentee(based on courseID)
 	GetDocumentsForMentee($_GET["email"], $_GET["id"]);     // includes guides, annual reports and financial documents.
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "45") {  // to add the advanced quiz's quiestions and answers to the db
+	AddAdvancedQuiz($_GET["courseId"], $_GET["assId"], $_GET["quizName"], $_GET["deadline"], $_GET["questions"], $_GET["answers"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "46") {  //to get the questions and answers from the db and show in the modal
+	GetAdvancedQuizQuestionsAndOptions($_GET["quizId"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "47") {  // to submit the advanced quiz to the server(to be evaluated by the admin)
+	SubmitAdvancedQuiz($_GET["ans"], $_GET["quizId"], $_GET["assId"], $_GET["menteeId"], $_GET["menteeEmail"]);
+}
 
 // for getting all the documents for mentor or mentee(based on courseID)
 // includes guides, annual reports and financial documents.
@@ -457,6 +466,27 @@ function GetMenteeStatusForMentor($mentorId, $mentorEmail) {
 	}
 }
 
+// to submit the advanced quiz to the server(to be evaluated by the admin)
+function SubmitAdvancedQuiz($givenAns, $quizId, $assId, $menteeId, $menteeEmail) {
+	$resp = "-1";
+	$answers = json_decode($givenAns, true);
+	$ans = array();
+	$correct = 0;
+	try {
+		// firstly, get the answers in the array.
+		$ans = GetQuizAnswers($quizId);
+
+		$resp = RegisterQuizResponse($quizId, $assId, $menteeId, $menteeEmail, $givenAns, "-1");
+		// now, send the mail to the mentee.
+		$mail = SendAdvancedQuizResponseMail($quizId, $assId, $menteeId, $menteeEmail, $givenAns, $ans, "-1");
+		echo $resp;
+	}	
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
 // to evaluate the basic quiz. Returns the score on evaluation.
 function SubmitAndEvaluateBasicQuiz($givenAns, $quizId, $assId, $menteeId, $menteeEmail) {
 	$resp = "-1";
@@ -491,6 +521,43 @@ function SubmitAndEvaluateBasicQuiz($givenAns, $quizId, $assId, $menteeId, $ment
 	}
 }
 
+// to get the advanced quiz questions and options to be shown to the mentee.
+function GetAdvancedQuizQuestionsAndOptions($quizId) {
+	$resp = "";
+	$ques = array();
+	try {
+		$query = "select * from QuizQuestion where QuizID='$quizId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				while ($res = mysql_fetch_array($rs)) {
+					array_push($ques, $res["Q1"]);
+					array_push($ques, $res["Q2"]);
+					array_push($ques, $res["Q3"]);
+					array_push($ques, $res["Q4"]);
+					array_push($ques, $res["Q5"]);
+				}
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		if($resp == "-1" || $resp == "0") {
+			echo $resp;
+		}
+		else {
+			$resp = json_encode($ques);
+			echo $resp;
+		}
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // to get the quiz questions and options to be shown to the mentee.
 function GetQuizQuestionsAndOptions($quizId) {
@@ -577,10 +644,20 @@ function GetQuizDetailsByAssignment($assId, $menteeId, $menteeEmail) {
 					}
 					else {
 						if($attempt["IsAttempted"] == "1") {  // quiz has been attempted.
-							$resp .= "<tr><td colspan='2'><h3>" . $res["QuizName"] . "</h3></td></tr>  <tr><td>Quiz Posted On: </td><td>" . $res["QuizPostedOn"] . "</td></tr>  <tr><td>Quiz Deadline: </td><td>" . $res["QuizDeadline"] . "</td></tr>  <tr><td colspan='2'><p>" . $res["QuizName"] . " has already been attempted. Your Score is: " . $attempt["CorrectAns"] . "/5. </p></td></tr>";
+							if($res["QuizType"] == "0") {
+								$resp .= "<tr><td colspan='2'><h3>" . $res["QuizName"] . "</h3></td></tr>  <tr><td>Quiz Posted On: </td><td>" . $res["QuizPostedOn"] . "</td></tr>  <tr><td>Quiz Deadline: </td><td>" . $res["QuizDeadline"] . "</td></tr>  <tr><td colspan='2'><p>" . $res["QuizName"] . " has already been attempted. Your Score is: " . $attempt["CorrectAns"] . "/5. </p></td></tr>";
+							}
+							else if($res["QuizType"] == "1") {
+								$resp .= "<tr><td colspan='2'><h3>" . $res["QuizName"] . "</h3></td></tr>  <tr><td>Quiz Posted On: </td><td>" . $res["QuizPostedOn"] . "</td></tr>  <tr><td>Quiz Deadline: </td><td>" . $res["QuizDeadline"] . "</td></tr>  <tr><td colspan='2'><p>" . $res["QuizName"] . " has already been attempted. You will be notified through mail for Quiz Evaluation and Scores. </p></td></tr>";	
+							}
 						}
 						else {
-							$resp .= "<tr><td colspan='2'><h3>" . $res["QuizName"] . "</h3></td></tr>  <tr><td>Quiz Posted On: </td><td>" . $res["QuizPostedOn"] . "</td></tr>  <tr><td>Quiz Deadline: </td><td>" . $res["QuizDeadline"] . "</td></tr>  <tr><td colspan='2'><input type='button' class='btn btn-lg btn-primary btn-block btnAttemptQuiz' value='Attempt " . $res["QuizName"] . "' data-id='" . $res["QuizID"] . "' data-name='" . $res["QuizName"] . "' /></td></tr>";
+							if($res["QuizType"] == "0") {
+								$resp .= "<tr><td colspan='2'><h3>" . $res["QuizName"] . "</h3></td></tr>  <tr><td>Quiz Posted On: </td><td>" . $res["QuizPostedOn"] . "</td></tr>  <tr><td>Quiz Deadline: </td><td>" . $res["QuizDeadline"] . "</td></tr>  <tr><td colspan='2'><input type='button' class='btn btn-lg btn-primary btn-block btnAttemptQuiz' value='Attempt " . $res["QuizName"] . "' data-id='" . $res["QuizID"] . "' data-name='" . $res["QuizName"] . "' /></td></tr>";
+							}
+							else if($res["QuizType"] == "1") {
+								$resp .= "<tr><td colspan='2'><h3>" . $res["QuizName"] . "</h3></td></tr>  <tr><td>Quiz Posted On: </td><td>" . $res["QuizPostedOn"] . "</td></tr>  <tr><td>Quiz Deadline: </td><td>" . $res["QuizDeadline"] . "</td></tr>  <tr><td colspan='2'><input type='button' class='btn btn-lg btn-primary btn-block btnAttemptAdvQuiz' value='Attempt " . $res["QuizName"] . "' data-id='" . $res["QuizID"] . "' data-name='" . $res["QuizName"] . "' /></td></tr>";
+							}
 						}
 					}
 				}
@@ -597,13 +674,38 @@ function GetQuizDetailsByAssignment($assId, $menteeId, $menteeEmail) {
 	}
 }
 
+// to add the advanced quiz and related Question and Responses to the Database.
+function AddAdvancedQuiz($courseId, $assId, $quizName, $deadline, $questions, $answers) {
+	$resp = "-1";
+	try {
+		$date = date("Y-m-d");
+		$id = "-1";
+		$query = "insert into Quiz(CourseID, AssID, QuizPostedOn, QuizDeadline, QuizName, QuizType) values('$courseId', '$assId', '$date', '$deadline', '$quizName', '1')";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+			$id = mysql_insert_id();  // last inserted id.
+			$res = AddAdvancedQuizQuestions($id, $questions, $answers, $options);
+		}
+		echo $resp . " ~ " . $res;
+	}	
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+
 // to set all the questions, answers and options to the database.
 function AddQuiz($courseId, $assId, $quizName, $deadline, $questions, $answers, $options) {
 	$resp = "-1";
 	try {
 		$date = date("Y-m-d");
 		$id = "-1";
-		$query = "insert into Quiz(CourseID, AssID, QuizPostedOn, QuizDeadline, QuizName, QuizType) values('$courseId', '$assId', '$date', '$deadline', '$quizName', 'A')";
+		$query = "insert into Quiz(CourseID, AssID, QuizPostedOn, QuizDeadline, QuizName, QuizType) values('$courseId', '$assId', '$date', '$deadline', '$quizName', '0')";
 		$rs = mysql_query($query);
 		if(!$rs) {
 			$resp = "-1";

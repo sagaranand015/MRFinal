@@ -3111,8 +3111,70 @@
                 return false;
             });  //end of submit function.
 
+            // ------------------ adding advanced quiz ------------------
+            $('#form-add-advanced-quiz').submit(function() {
+                var email = $.cookie("email");
+                var id = $.cookie("id");
 
-            //------------------ mentee-status ------------------
+                var courseId = $('.quiz-course').children('select').val();
+                var assId = $('.quiz-assignment').children('select').val();
+
+                var quizName = $('#txtQuizName').val();
+                var deadline = $('#txtQuizDeadline').val();
+
+                // to get all the questions.
+                var question = [$('#txtadvQ1').val(), $('#txtadvQ2').val(), $('#txtadvQ3').val(), $('#txtadvQ4').val(), $('#txtadvQ5').val()];
+                var jsonQues = JSON.stringify(question);
+
+                var answer = [$('#txtAdvA1').val(), $('#txtAdvA2').val(), $('#txtAdvA3').val(), $('#txtAdvA4').val(), $('#txtAdvA5').val()];
+                var jsonAns = JSON.stringify(answer);
+
+                if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not logged in properly. Please login and try again.</p>").fadeIn();
+                }
+                else if(quizName == "" || deadline == "") {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you missed either the Quiz Name or Quiz Deadline. Please recheck and try again.</p>");
+                }
+                else {
+                    // make the ajax request for adding the Advanced Quiz here.
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "45", courseId: courseId, assId: assId, quizName: quizName, deadline: deadline, questions: jsonQues, answers: jsonAns
+                        },
+                        success: function(response) {
+                            console.log(response);
+                            var r = response.split(" ~ ");
+                            if(r[0] == "1" && r[1] == "1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Quiz Added Successfully. Thank You.</p>").fadeIn();
+                            }
+                            else if(r[0] == "-1" || r[1] == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error adding the Quiz. Please try again.</p>").fadeIn();
+                            }
+                            else {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error adding the Quiz. Please try again.</p>").fadeIn();   
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }
+                return false;
+            });
+
+            // ------------------ mentee-status ------------------
 
             // for the mentee status link on the LHS.
             $('.status').on('click', function() {

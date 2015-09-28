@@ -242,14 +242,14 @@ function SendDeadlineQuery($no, $email, $id, $name, $contact, $msg) {
 		$message = array(
 	        'html' => $mail,
 	        'subject' => $subject,
-	        'from_email' => 'info@mentored-research.co',
-	        'from_name' => 'Mentored-Research',
+	        'from_email' => $email,
+	        'from_name' => $name,
 	        'to' => array(
-	            array(
-	                'email' => $email,
-	                'name' => $name,
-	                'type' => 'cc'
-	            ),
+	            // array(
+	            //     'email' => $email,
+	            //     'name' => $name,
+	            //     'type' => 'cc'
+	            // ),
 	            array(
 	                'email' => 'guide@mentored-research.com',
 	                'name' => 'Mentored-Research',
@@ -288,14 +288,14 @@ function SendTechnicalQuery($no, $email, $id, $name, $contact, $msg) {
 		$message = array(
 	        'html' => $mail,
 	        'subject' => $subject,
-	        'from_email' => 'info@mentored-research.co',
-	        'from_name' => 'Mentored-Research',
+	        'from_email' => $email,
+	        'from_name' => $name,
 	        'to' => array(
-	            array(
-	                'email' => $email,
-	                'name' => $name,
-	                'type' => 'cc'
-	            ),
+	            // array(
+	            //     'email' => $email,
+	            //     'name' => $name,
+	            //     'type' => 'cc'
+	            // ),
 	            array(
 	                'email' => 'tech@mentored-research.com',
 	                'name' => 'Mentored-Research',
@@ -334,14 +334,14 @@ function SendAssignmentQuery($no, $email, $id, $name, $contact, $msg) {
 		$message = array(
 	        'html' => $mail,
 	        'subject' => $subject,
-	        'from_email' => 'info@mentored-research.co',
-	        'from_name' => 'Mentored-Research',
+	        'from_email' => $email,
+	        'from_name' => $name,
 	        'to' => array(
-	            array(
-	                'email' => $email,
-	                'name' => $name,
-	                'type' => 'cc'
-	            ),
+	            // array(
+	            //     'email' => $email,
+	            //     'name' => $name,
+	            //     'type' => 'cc'
+	            // ),
 	            array(
 	                'email' => 'guide@mentored-research.com',
 	                'name' => 'Mentored-Research',

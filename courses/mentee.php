@@ -328,12 +328,12 @@
                 popup.children('p').remove();
                 popup.append("<p>You have not logged in. Please do so before continuing.</p>").fadeIn();
             }
-            else if(email != globalEmail) {
-                popup.children('p').remove();
-                popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
-                $('#overlay-error').removeClass('overlay-remove');
-                $('#overlay-error').addClass('overlay-show');
-            }
+            // else if(email != globalEmail) {
+            //     popup.children('p').remove();
+            //     popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+            //     $('#overlay-error').removeClass('overlay-remove');
+            //     $('#overlay-error').addClass('overlay-show');
+            // }
             else {
                 showLoading();
                 $.ajax({
@@ -549,12 +549,12 @@
             		popup.children('p').remove();
             		popup.append("<p>You have not logged in properly. Please logout and login again.</p>").fadeIn();
             	}
-                else if(email != globalEmail) {
-                    popup.children('p').remove();
-                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
-                    $('#overlay-error').removeClass('overlay-remove');
-                    $('#overlay-error').addClass('overlay-show');
-                }
+                // else if(email != globalEmail) {
+                //     popup.children('p').remove();
+                //     popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                //     $('#overlay-error').removeClass('overlay-remove');
+                //     $('#overlay-error').addClass('overlay-show');
+                // }
             	else {
             		showLoading();
 	            	$.ajax({
@@ -565,7 +565,6 @@
 	            		},
 	            		success: function(response) {
 	            			// to show the assignments drop down at appropriate place.
-                            console.log(response);
 	            			if(response == "-1") {
 								popup.children('p').remove();
 					        	popup.append("<p>We could not retrieve your assignments from the database. Please check your internet connection and try again.</p>").fadeIn();	            				
@@ -739,7 +738,7 @@
 					alert("No defined.");
 				}
 				else {
-                    $('#lecture-video-modal-body').html("<iframe src='" + url + "'></iframe>");
+                    $('#lecture-video-modal-body').html("<iframe src='" + url + "' width='320' height='180' frameborder='0' scrolling='no' allowfullscreen></iframe>");
 				    $('#lectureVideoModal').modal('show');	
 				}
 
@@ -797,12 +796,12 @@
             		popup.children('p').remove();
             		popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
             	}
-                else if(menteeEmail != globalEmail) {
-                    popup.children('p').remove();
-                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
-                    $('#overlay-error').removeClass('overlay-remove');
-                    $('#overlay-error').addClass('overlay-show');
-                }
+                // else if(menteeEmail != globalEmail) {
+                //     popup.children('p').remove();
+                //     popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                //     $('#overlay-error').removeClass('overlay-remove');
+                //     $('#overlay-error').addClass('overlay-show');
+                // }
             	else {
             		showLoading();
 	            	$.ajax({
@@ -858,12 +857,12 @@
             		popup.children('p').remove();
             		popup.append("<p>You have not logged in properly. Please <a href='http://mentored-research.com/login' style='color: black;'>LOGIN AGAIN</a> to continue.</p>").fadeIn();
             	}
-                else if(email != globalEmail) {
-                    popup.children('p').remove();
-                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
-                    $('#overlay-error').removeClass('overlay-remove');
-                    $('#overlay-error').addClass('overlay-show');
-                }
+                // else if(email != globalEmail) {
+                //     popup.children('p').remove();
+                //     popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                //     $('#overlay-error').removeClass('overlay-remove');
+                //     $('#overlay-error').addClass('overlay-show');
+                // }
             	else {
             		showLoading();
 	            	$.ajax({
@@ -935,12 +934,12 @@
                     popup.children('p').remove();
                     popup.append("<p>You have not logged in properly. Please <a href='http://mentored-research.com/login' style='color: black;'>LOGIN AGAIN</a> to continue.</p>").fadeIn();
                 }
-                else if(email != globalEmail) {
-                    popup.children('p').remove();
-                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
-                    $('#overlay-error').removeClass('overlay-remove');
-                    $('#overlay-error').addClass('overlay-show');
-                }
+                // else if(email != globalEmail) {
+                //     popup.children('p').remove();
+                //     popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                //     $('#overlay-error').removeClass('overlay-remove');
+                //     $('#overlay-error').addClass('overlay-show');
+                // }
                 else {
                     showLoading();
                     $('#sendMessageModal').modal('hide');
@@ -1002,12 +1001,12 @@
                     popup.children('p').remove();
                     popup.append("<p>You have not logged in properly. Please log out and login again.</p>").fadeIn();   
                 }
-                else if(email != globalEmail) {
-                    popup.children('p').remove();
-                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
-                    $('#overlay-error').removeClass('overlay-remove');
-                    $('#overlay-error').addClass('overlay-show');
-                }
+                // else if(email != globalEmail) {
+                //     popup.children('p').remove();
+                //     popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                //     $('#overlay-error').removeClass('overlay-remove');
+                //     $('#overlay-error').addClass('overlay-show');
+                // }
                 else {   // ajax request for password change
                     showLoading();
                     $.ajax({
@@ -1050,12 +1049,12 @@
                     popup.children('p').remove();
                     popup.append("Oops! Looks like you have not logged in properly. Please logout and try again.").fadeIn();
                 }
-                else if(email != globalEmail) {
-                    popup.children('p').remove();
-                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
-                    $('#overlay-error').removeClass('overlay-remove');
-                    $('#overlay-error').addClass('overlay-show');
-                }
+                // else if(email != globalEmail) {
+                //     popup.children('p').remove();
+                //     popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                //     $('#overlay-error').removeClass('overlay-remove');
+                //     $('#overlay-error').addClass('overlay-show');
+                // }
                 else {
                     showLoading();
                     $.ajax({
@@ -1212,24 +1211,34 @@
                         var ftype = $('#fileAssignmentSolution')[0].files[0].type; // get file type
                         //allow file types 
                         switch(ftype) {
-                            case 'image/png': 
                             case 'image/gif': 
                             case 'image/jpeg': 
                             case 'image/pjpeg':
                             case 'text/plain':
-                            case 'text/html':
+                            case 'text/html': //html file
                             case 'application/x-zip-compressed':
                             case 'application/pdf':
                             case 'application/msword':
-                            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
                             case 'application/vnd.ms-excel':
                             case 'video/mp4':
+                            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                            case 'application/vnd.ms-excel':
+                            case 'application/msexcel':
+                            case 'application/x-msexcel':
+                            case 'application/x-ms-excel':
+                            case 'application/x-excel':
+                            case 'application/x-dos_ms_excel':
+                            case 'application/xls':
+                            case 'application/x-xls':
+                            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                            case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
                                 break;
                             default:
                                 alertMsg.children('p').remove();
                                 alertMsg.fadeOut();
                                 popup.children('p').remove();
-                                popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
+                                popup.append("<p>This file format is not supported by the server. Please upload the file in <b>.xlsx</b> format.</p>").fadeIn();
                                 return false;
                         }
                         //Allowed file size is less than 5 MB (1048576)
@@ -1283,12 +1292,12 @@
                         popup.children('p').remove();
                         popup.append("Oops! Looks like you have not logged in properly. Please logout and try again.").fadeIn();
                     }
-                    else if(email != globalEmail) {
-                        popup.children('p').remove();
-                        popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
-                        $('#overlay-error').removeClass('overlay-remove');
-                        $('#overlay-error').addClass('overlay-show');
-                    }
+                    // else if(email != globalEmail) {
+                    //     popup.children('p').remove();
+                    //     popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                    //     $('#overlay-error').removeClass('overlay-remove');
+                    //     $('#overlay-error').addClass('overlay-show');
+                    // }
                     else {
                         $(this).ajaxSubmit(optionsAssignmentSolution);    
                     }
@@ -1321,24 +1330,34 @@
                         var ftype = $('#fileUpdateSolution')[0].files[0].type; // get file type
                         //allow file types 
                         switch(ftype) {
-                            case 'image/png': 
                             case 'image/gif': 
                             case 'image/jpeg': 
                             case 'image/pjpeg':
                             case 'text/plain':
-                            case 'text/html':
+                            case 'text/html': //html file
                             case 'application/x-zip-compressed':
                             case 'application/pdf':
                             case 'application/msword':
-                            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
                             case 'application/vnd.ms-excel':
                             case 'video/mp4':
+                            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                            case 'application/vnd.ms-excel':
+                            case 'application/msexcel':
+                            case 'application/x-msexcel':
+                            case 'application/x-ms-excel':
+                            case 'application/x-excel':
+                            case 'application/x-dos_ms_excel':
+                            case 'application/xls':
+                            case 'application/x-xls':
+                            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                            case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
                                 break;
                             default:
                                 alertMsg.children('p').remove();
                                 alertMsg.fadeOut();
                                 popup.children('p').remove();
-                                popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
+                                popup.append("<p>This file format is not supported by the server. Please upload the file in <b>.xlsx</b> format.</p>").fadeIn();
                                 return false;
                         }
                         //Allowed file size is less than 5 MB (1048576)
@@ -1398,12 +1417,12 @@
                     popup.children('p').remove();
                     popup.append("<p>Looks like you have not logged in properly. Please do so before continuing.</p>").fadeIn();
                 }
-                else if(email != globalEmail) {
-                    popup.children('p').remove();
-                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
-                    $('#overlay-error').removeClass('overlay-remove');
-                    $('#overlay-error').addClass('overlay-show');
-                }
+                // else if(email != globalEmail) {
+                //     popup.children('p').remove();
+                //     popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                //     $('#overlay-error').removeClass('overlay-remove');
+                //     $('#overlay-error').addClass('overlay-show');
+                // }
                 else {
                     showLoading();
                     $.ajax({
@@ -1474,12 +1493,12 @@
                     popup.children('p').remove();
                     popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
                 }
-                else if(email != globalEmail) {
-                    popup.children('p').remove();
-                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
-                    $('#overlay-error').removeClass('overlay-remove');
-                    $('#overlay-error').addClass('overlay-show');
-                }
+                // else if(email != globalEmail) {
+                //     popup.children('p').remove();
+                //     popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                //     $('#overlay-error').removeClass('overlay-remove');
+                //     $('#overlay-error').addClass('overlay-show');
+                // }
                 else {
                     showLoading();
                     $.ajax({
@@ -1534,12 +1553,12 @@
                     popup.children('p').remove();
                     popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
                 }
-                else if(email != globalEmail) {
-                    popup.children('p').remove();
-                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
-                    $('#overlay-error').removeClass('overlay-remove');
-                    $('#overlay-error').addClass('overlay-show');
-                }
+                // else if(email != globalEmail) {
+                //     popup.children('p').remove();
+                //     popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                //     $('#overlay-error').removeClass('overlay-remove');
+                //     $('#overlay-error').addClass('overlay-show');
+                // }
                 else {
                     showLoading();
                     $.ajax({
@@ -1683,12 +1702,12 @@
                             popup.children('p').remove();
                             popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
                         }
-                        else if(email != globalEmail) {
-                            popup.children('p').remove();
-                            popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
-                            $('#overlay-error').removeClass('overlay-remove');
-                            $('#overlay-error').addClass('overlay-show');
-                        }
+                        // else if(email != globalEmail) {
+                        //     popup.children('p').remove();
+                        //     popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                        //     $('#overlay-error').removeClass('overlay-remove');
+                        //     $('#overlay-error').addClass('overlay-show');
+                        // }
                         else {
                             $('#basicQuizModal').modal('hide');
                             showLoading();
@@ -1772,12 +1791,12 @@
                     popup.children('p').remove();
                     popup.append("<p>Looks like you have not logged in properly. Please login and try again.</p>").fadeIn();
                 }
-                else if(email != globalEmail) {
-                    popup.children('p').remove();
-                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
-                    $('#overlay-error').removeClass('overlay-remove');
-                    $('#overlay-error').addClass('overlay-show');
-                }
+                // else if(email != globalEmail) {
+                //     popup.children('p').remove();
+                //     popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                //     $('#overlay-error').removeClass('overlay-remove');
+                //     $('#overlay-error').addClass('overlay-show');
+                // }
                 else {   // make the ajax request here.
                     showLoading();
                     $.ajax({
@@ -1822,12 +1841,12 @@
                     popup.children('p').remove();
                     popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
                 }
-                else if(email != globalEmail) {
-                    popup.children('p').remove();
-                    popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
-                    $('#overlay-error').removeClass('overlay-remove');
-                    $('#overlay-error').addClass('overlay-show');
-                }
+                // else if(email != globalEmail) {
+                //     popup.children('p').remove();
+                //     popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                //     $('#overlay-error').removeClass('overlay-remove');
+                //     $('#overlay-error').addClass('overlay-show');
+                // }
                 else {
                     showLoading();
                     $.ajax({

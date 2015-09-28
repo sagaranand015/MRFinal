@@ -798,7 +798,7 @@ function AddAdvancedQuiz($courseId, $assId, $quizName, $deadline, $questions, $a
 		else {
 			$resp = "1";
 			$id = mysql_insert_id();  // last inserted id.
-			$res = AddAdvancedQuizQuestions($id, $questions, $answers, $options);
+			$res = AddAdvancedQuizQuestions($id, $questions, $answers);
 		}
 		echo $resp . " ~ " . $res;
 	}	

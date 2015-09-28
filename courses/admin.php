@@ -3039,7 +3039,7 @@
                 var deadline = $('#txtQuizDeadline').val();
 
                 // to get all the questions.
-                var question = [$('#txtQ1').val(), $('#txtQ2').val(), $('#txtQ3').val(), $('#txtQ4').val(), $('#txtQ5').val()];
+                var question = [$('#txtQ1').val().replace(/['"]/g, ''), $('#txtQ2').val().replace(/['"]/g, ''), $('#txtQ3').val().replace(/['"]/g, ''), $('#txtQ4').val().replace(/['"]/g, ''), $('#txtQ5').val().replace(/['"]/g, '')];
                 var jsonQues = JSON.stringify(question);
 
                 // to get all the options.
@@ -3062,7 +3062,7 @@
                 for(var i=0;i<ans.length;i++) {
                     j = "";
                     j += "#" + ans[i];
-                    answers.push($(j).val());
+                    answers.push($(j).val().replace(/['"]/g, ''));
                 }
                 jsonAns = JSON.stringify(answers);
 
@@ -3090,9 +3090,13 @@
                                 popup.children('p').remove();
                                 popup.append("<p>Quiz Added Successfully. Thank You.</p>").fadeIn();
                             }
-                            else if(r[0] == "-1" || r[1] == "-1") {
+                            else if(r[0] == '-1') {
                                 popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error adding the Quiz. Please try again.</p>").fadeIn();
+                                popup.append("<p>The Quiz wasn't registered. Please try again.</p>").fadeIn();
+                            }
+                            else if(r[0] == "1" && r[1] == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! The quiz was registered, but we could not upload the questions. Please contact the administrator(s).</p>").fadeIn();
                             }
                             else {
                                 popup.children('p').remove();
@@ -3123,10 +3127,10 @@
                 var deadline = $('#txtQuizDeadline').val();
 
                 // to get all the questions.
-                var question = [$('#txtadvQ1').val(), $('#txtadvQ2').val(), $('#txtadvQ3').val(), $('#txtadvQ4').val(), $('#txtadvQ5').val()];
+                var question = [ $('#txtadvQ1').val().replace(/['"]/g, ''), $('#txtadvQ2').val().replace(/['"]/g, ''), $('#txtadvQ3').val().replace(/['"]/g, ''), $('#txtadvQ4').val().replace(/['"]/g, ''), $('#txtadvQ5').val().replace(/['"]/g, '')];
                 var jsonQues = JSON.stringify(question);
 
-                var answer = [$('#txtAdvA1').val(), $('#txtAdvA2').val(), $('#txtAdvA3').val(), $('#txtAdvA4').val(), $('#txtAdvA5').val()];
+                var answer = [$('#txtAdvA1').val().replace(/['"]/g, ''), $('#txtAdvA2').val().replace(/['"]/g, ''), $('#txtAdvA3').val().replace(/['"]/g, ''), $('#txtAdvA4').val().replace(/['"]/g, ''), $('#txtAdvA5').val().replace(/['"]/g, '')];
                 var jsonAns = JSON.stringify(answer);
 
                 if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
@@ -3147,14 +3151,19 @@
                             no: "45", courseId: courseId, assId: assId, quizName: quizName, deadline: deadline, questions: jsonQues, answers: jsonAns
                         },
                         success: function(response) {
+                            console.log(response);
                             var r = response.split(" ~ ");
                             if(r[0] == "1" && r[1] == "1") {
                                 popup.children('p').remove();
                                 popup.append("<p>Quiz Added Successfully. Thank You.</p>").fadeIn();
                             }
-                            else if(r[0] == "-1" || r[1] == "-1") {
+                            else if(r[0] == '-1') {
                                 popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error adding the Quiz. Please try again.</p>").fadeIn();
+                                popup.append("<p>The Quiz wasn't registered. Please try again.</p>").fadeIn();
+                            }
+                            else if(r[0] == "1" && r[1] == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! The quiz was registered, but we could not upload the questions. Please contact the administrator(s).</p>").fadeIn();
                             }
                             else {
                                 popup.children('p').remove();

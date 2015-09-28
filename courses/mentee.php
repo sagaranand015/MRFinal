@@ -2814,7 +2814,7 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <input type="text" class="form-control" id="advA1" />
+                                    <input type="text" class="form-control" id="advA1" placeholder="Enter Answer 1" />
                                 </td>
                             </tr>
 
@@ -2825,7 +2825,7 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <input type="text" class="form-control" id="advA2" />
+                                    <input type="text" class="form-control" id="advA2" placeholder="Enter Answer 2" />
                                 </td>
                             </tr>
 
@@ -2836,7 +2836,7 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <input type="text" class="form-control" id="advA3" />
+                                    <input type="text" class="form-control" id="advA3" placeholder="Enter Answer 3" />
                                 </td>
                             </tr>
 
@@ -2847,7 +2847,7 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <input type="text" class="form-control" id="advA4" />
+                                    <input type="text" class="form-control" id="advA4" placeholder="Enter Answer 4" />
                                 </td>
                             </tr>
 
@@ -2858,7 +2858,7 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <input type="text" class="form-control" id="advA5" />
+                                    <input type="text" class="form-control" id="advA5" placeholder="Enter Answer 5" />
                                 </td>
                             </tr>
 

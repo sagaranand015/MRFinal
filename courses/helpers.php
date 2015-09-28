@@ -339,16 +339,14 @@ function GetQuizNameById($quizId) {
 }
 
 // for adding the advanced questions to the for advanced quiz.
-function AddAdvancedQuizQuestions($quizId, $questions, $answers, $options) {
+function AddAdvancedQuizQuestions($quizId, $questions, $answers) {
 	$resp = "-1";
 	$ques = json_decode($questions);
 	$ans = json_decode($answers);
-	$op = json_decode($options);
 	try {
 		$query = "insert into QuizQuestion(QuizID, Q1, Q2, Q3, Q4, Q5, ";
 		$query .= "A1, A2, A3, A4, A5) ";
 		$query .= "values('$quizId', '$ques[0]', '$ques[1]', '$ques[2]', '$ques[3]', '$ques[4]', '$ans[0]', '$ans[1]', '$ans[2]', '$ans[3]', '$ans[4]') ";	
-		//return $query;
 		$rs = mysql_query($query);
 		if(!$rs) {
 			$resp = "-1";

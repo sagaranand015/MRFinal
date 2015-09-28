@@ -150,6 +150,112 @@ else if(isset($_GET["no"]) && $_GET["no"] == "46") {  //to get the questions and
 else if(isset($_GET["no"]) && $_GET["no"] == "47") {  // to submit the advanced quiz to the server(to be evaluated by the admin)
 	SubmitAdvancedQuiz($_GET["ans"], $_GET["quizId"], $_GET["assId"], $_GET["menteeId"], $_GET["menteeEmail"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "48") {  // to get the quiz list, filtered by assId and courseId
+	GetQuizDropDown($_GET["assId"], $_GET["courseId"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "49") {  // to get the mentee status and answers from the QuizResponse table.
+	GetMenteeQuizStatus($_GET["assId"], $_GET["courseId"], $_GET["quizId"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "50") {  // to evaluate/update the score of the mentee in the Advanced Quiz response
+	EvaluateAdvancedQuiz($_GET["assId"], $_GET["courseId"], $_GET["menteeId"], $_GET["quizId"], $_GET["score"]);
+}
+
+// to evaluate/update the score of the mentee in the Advanced Quiz response
+function EvaluateAdvancedQuiz($assId, $courseId, $menteeId, $quizId, $score) {
+	$resp = "-1";
+	try {
+		$query = "update QuizResponse set CorrectAns='$score' where QuizID='$quizId' and AssID='$assId' and CourseID='$courseId' and MenteeID='$menteeId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+			// now, send the mail to the mentee notifying the score.
+			SendAdvancedQuizEvaluationMail($assId, $courseId, $menteeId, $quizId, $score);
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// to get the mentee status and answers from the QuizResponse table.
+function GetMenteeQuizStatus($assId, $courseId, $quizId) {
+	$resp = "-1";
+	try {
+		$query = "select * from QuizResponse where QuizID='$quizId' and AssID='$assId' and CourseID='$courseId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				$resp = "<div class='mentee-quiz-status-div' >";
+				while ($res = mysql_fetch_array($rs)) {
+					$mentee = GetMenteeDetails($res["MenteeID"]);
+					$resp .= "<h3 class='page-header'>" . $mentee["MenteeName"] . "(" . $mentee["MenteeEmail"] . ")</h3>";
+					$resp .= "<table class='table'>";
+
+					if($res["CorrectAns"] != "-1") {
+						$resp .= "<tr><td> 1: <b>" . $res["A1"] . "</b></td><td rowspan='3'><input type='text' placeholder='Enter Score(-1 to unmark for evaluation)' class='form-control txtQuizScore' id='" . $res["MenteeID"] . "' value='" . $res["CorrectAns"] . "' /><label style='font-size: 0.9em;'>Already evaluated, Score given: " . $res["CorrectAns"] . "/5. Next Evaluation will update the score. (-1 to unmark for evaluation)</label></td></tr>";						
+					}
+					else {
+						$resp .= "<tr><td> 1: <b>" . $res["A1"] . "</b></td><td rowspan='3'><input type='text' placeholder='Enter Score(-1 to unmark for evaluation)' class='form-control txtQuizScore' id='" . $res["MenteeID"] . "' value='" . $res["CorrectAns"] . "' /></td></tr>";						
+					}
+
+					$resp .= "<tr><td> 2: <b>" . $res["A2"] . "</b></td></tr>";
+					$resp .= "<tr><td> 3: <b>" . $res["A3"] . "</b></td></tr>";
+
+					$resp .= "<tr><td> 4: <b>" . $res["A4"] . "</b></td><td rowspan='2'><input type='button' class='btn btn-lg btn-primary btn-block btnEvaluate' value='Evaluate' data-mentee='" . $res["MenteeID"] . "' data-quiz='" . $res["QuizID"] . "' data-assignment='" . $res["AssID"] . "' data-course='" . $res["CourseID"] . "' /></td></tr>";
+					$resp .= "<tr><td> 5: <b>" . $res["A5"] . "</b></td></tr>";
+
+					$resp .= "</table>";
+				}
+				$resp .= "</div>";
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// to get the quiz list, filtered by assId and courseId
+function GetQuizDropDown($assId, $courseId) {
+	$resp = "-1";
+	try {
+		$query = "select * from Quiz where AssID='$assId' and CourseID='$courseId' and QuizType='1'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				$resp = "<select id='ddl-quiz' class='form-control'><option value='-1'> --Select Quiz-- </option>";
+				while ($res = mysql_fetch_array($rs)) {
+					$resp .= "<option data-type='" . $res["QuizType"] . "' value='" . $res["QuizID"] . "' >" . $res["QuizName"] . "</option>";
+				}
+				$resp .= "</select>";
+			}
+			else {
+				$resp = "0";
+			}	
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // for getting all the documents for mentor or mentee(based on courseID)
 // includes guides, annual reports and financial documents.
@@ -475,7 +581,6 @@ function SubmitAdvancedQuiz($givenAns, $quizId, $assId, $menteeId, $menteeEmail)
 	try {
 		// firstly, get the answers in the array.
 		$ans = GetQuizAnswers($quizId);
-
 		$resp = RegisterQuizResponse($quizId, $assId, $menteeId, $menteeEmail, $givenAns, "-1");
 		// now, send the mail to the mentee.
 		$mail = SendAdvancedQuizResponseMail($quizId, $assId, $menteeId, $menteeEmail, $givenAns, $ans, "-1");
@@ -648,10 +753,15 @@ function GetQuizDetailsByAssignment($assId, $menteeId, $menteeEmail) {
 								$resp .= "<tr><td colspan='2'><h3>" . $res["QuizName"] . "</h3></td></tr>  <tr><td>Quiz Posted On: </td><td>" . $res["QuizPostedOn"] . "</td></tr>  <tr><td>Quiz Deadline: </td><td>" . $res["QuizDeadline"] . "</td></tr>  <tr><td colspan='2'><p>" . $res["QuizName"] . " has already been attempted. Your Score is: " . $attempt["CorrectAns"] . "/5. </p></td></tr>";
 							}
 							else if($res["QuizType"] == "1") {
-								$resp .= "<tr><td colspan='2'><h3>" . $res["QuizName"] . "</h3></td></tr>  <tr><td>Quiz Posted On: </td><td>" . $res["QuizPostedOn"] . "</td></tr>  <tr><td>Quiz Deadline: </td><td>" . $res["QuizDeadline"] . "</td></tr>  <tr><td colspan='2'><p>" . $res["QuizName"] . " has already been attempted. You will be notified through mail for Quiz Evaluation and Scores. </p></td></tr>";	
+								if($attempt["CorrectAns"] == "-1") {   // not yet evaluated
+									$resp .= "<tr><td colspan='2'><h3>" . $res["QuizName"] . "</h3></td></tr>  <tr><td>Quiz Posted On: </td><td>" . $res["QuizPostedOn"] . "</td></tr>  <tr><td>Quiz Deadline: </td><td>" . $res["QuizDeadline"] . "</td></tr>  <tr><td colspan='2'><p>" . $res["QuizName"] . " has already been attempted. You will be notified through mail for Quiz Evaluation and Scores. </p></td></tr>";	
+								}
+								else {
+									$resp .= "<tr><td colspan='2'><h3>" . $res["QuizName"] . "</h3></td></tr>  <tr><td>Quiz Posted On: </td><td>" . $res["QuizPostedOn"] . "</td></tr>  <tr><td>Quiz Deadline: </td><td>" . $res["QuizDeadline"] . "</td></tr>  <tr><td colspan='2'><p>" . $res["QuizName"] . " has already been attempted and Evaluated. Your Score is: " . $attempt["CorrectAns"] .  "</p></td></tr>";		
+								}
 							}
 						}
-						else {
+						else {   // quiz has not been attempted
 							if($res["QuizType"] == "0") {
 								$resp .= "<tr><td colspan='2'><h3>" . $res["QuizName"] . "</h3></td></tr>  <tr><td>Quiz Posted On: </td><td>" . $res["QuizPostedOn"] . "</td></tr>  <tr><td>Quiz Deadline: </td><td>" . $res["QuizDeadline"] . "</td></tr>  <tr><td colspan='2'><input type='button' class='btn btn-lg btn-primary btn-block btnAttemptQuiz' value='Attempt " . $res["QuizName"] . "' data-id='" . $res["QuizID"] . "' data-name='" . $res["QuizName"] . "' /></td></tr>";
 							}

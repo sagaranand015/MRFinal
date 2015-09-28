@@ -154,6 +154,31 @@ function IsQuizAttempted($menteeId, $quizId) {
 }
 
 // for sending the Quiz Response Mail to the mentee.
+function SendAdvancedQuizEvaluationMail($assId, $courseId, $menteeId, $quizId, $score) {
+	$resp = "-1";
+	$mentee = GetMenteeDetails($menteeId);
+	try {
+		$subject = "Quiz Submitted - Mentored-Research";
+		$msg = "Dear " . $mentee["MenteeName"] . ",";
+		$msg .= "You have already submitted your Quiz(" . GetQuizNameById($quizId) . ") in the assignment(" . GetAssignmentName($assId) . "). <br /><br /> ";
+		$msg .= "<b>Your Score, given by the admin is " . $score . ".(on a scale of 5). Please refer to the previous mail for your and correct answers. </b> <br /><br />";
+
+		$msg .= "Please contact your mentor in case of any doubts.<br /><br />";
+		$msg .= "Team Mentored-Research<br />";
+		$msg .= "info@mentored-research.com<br /><br />";
+		$msg .= "Please do not reply to this automated mail.<br /><br />";
+
+		//write the mail sending if else condition here.
+		$res = SendMessage($mentee["MenteeEmail"], $mentee["MenteeName"], "info@mentored-research.com", "Mentored-Research", $subject, $msg);
+		return $res;		
+	}	
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// for sending the Quiz Response Mail to the mentee.
 function SendAdvancedQuizResponseMail($quizId, $assId, $menteeId, $menteeEmail, $givenAns, $ans, $correct) {
 	$resp = "-1";
 	$givenAnswers = json_decode($givenAns, true);

@@ -1592,7 +1592,7 @@
                 return false;
             });   // end of delegate event of the change of assignment ddl.
 
-            // for the click event of the attempt button.
+            // for the click event of the attempt button.(for the basic quiz)
             $('.quiz-table').delegate('.btnAttemptQuiz', 'click', function() {
                 var quizId = $(this).attr('data-id');
                 var quizName = $(this).attr('data-name');
@@ -1658,6 +1658,144 @@
                 }
                 return false;
             });   // end of click delegate event of the attempt quiz button.
+
+            // for the click event of the attempt button.(for the advanced quiz)
+            $('.quiz-table').delegate('.btnAttemptAdvQuiz', 'click', function() {
+                var quizId = $(this).attr('data-id');
+                var quizName = $(this).attr('data-name');
+
+                if(quizId == "-1" || quizId == "undefined" || quizId == undefined || quizId == "") {
+                    popup.children('p').remove();
+                    popup.append("<p>Oops! We encountered an error. Please refresh and select the assignment again.</p>").fadeIn();
+                }
+                else {
+                    $('.advanced-quiz-modal-title').html("<h3>Attempt " + quizName + "</h3>");
+                    // to get all the questions and options from the database.
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "46", quizId: quizId
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();     
+                            }
+                            else if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No quiz questions found in this course. Please try again.</p>").fadeIn();
+                            }
+                            else {
+                                console.log(response);
+                                var ques = $.parseJSON(response);
+                                // for all the questions to be shown
+                                $('.advQ1').html("Q1: " + ques[0]);
+                                $('.advQ2').html("Q2: " + ques[1]);
+                                $('.advQ3').html("Q3: " + ques[2]);
+                                $('.advQ4').html("Q4: " + ques[3]);
+                                $('.advQ5').html("Q5: " + ques[4]);
+
+                                // show the modal with the response embedded here.
+                                $('#advancedQuizModal').modal('show');
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });   // end of ajax request
+                }
+                return false;
+            });   // end of click delegate event of the attempt quiz button.
+
+            // for submitting the advanced quiz from the advanced Quiz modal.
+            $('#formSubmitAdvancedQuiz').submit(function() {
+
+                var quizId = $('.btnAttemptAdvQuiz').attr('data-id');
+                var assId = $('.quiz-assignment').children('select').val();
+                var id = $.cookie("id");
+                var email = $.cookie("email");
+                // to get all the answers selected.
+
+                var answers = [$('#advA1').val(), $('#advA2').val(), $('#advA3').val(), $('#advA4').val(), $('#advA5').val() ];
+                jsonAns = JSON.stringify(answers);
+
+                // now, check for the left over answers.
+                var left = 0;
+                for(var i = 0;i<answers.length;i++) {
+                    if(answers[i] == "") {
+                        left++;
+                    }
+                }
+
+                // now, send the selected answers to the server for evaluation.
+                var desc = false;
+                if(left > 0) {
+                    desc = confirm("You have not asnwered all the questions. Are you sure you want to submit?");
+                }
+                else {
+                    desc = true;
+                }
+
+                if(desc == true) {
+                    // make the ajax request for evaluation.
+                    if(quizId == "-1" || quizId == "undefined" || quizId == undefined || quizId == "") {
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error. Please reload the page and try again.</p>").fadeIn();
+                    }
+                    else {
+                        if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                            popup.children('p').remove();
+                            popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
+                        }
+                        // else if(email != globalEmail) {
+                        //     popup.children('p').remove();
+                        //     popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
+                        //     $('#overlay-error').removeClass('overlay-remove');
+                        //     $('#overlay-error').addClass('overlay-show');
+                        // }
+                        else {
+                            $('#advancedQuizModal').modal('hide');
+                            showLoading();
+                            $.ajax({
+                                type: "GET",
+                                url: "AJAXFunctions.php",
+                                data: {
+                                    no: "47", ans: jsonAns, quizId: quizId, assId: assId, menteeId: id, menteeId: id, menteeEmail: email
+                                },
+                                success: function(response) {
+                                    if(response == "1") {
+                                        popup.children('p').remove();
+                                        popup.append("<p>Your quiz has been submitted. <b>You will be notified through mail for the evaluted quiz and your score. Thank You.</b></p>").fadeIn();
+
+                                        // now, remove all the html content in the attempt quiz page. and make the link trigger click.
+                                        $('.quiz-table').html("");
+                                        $('.quiz').trigger('click');
+                                    }
+                                    else {
+                                        popup.children('p').remove();
+                                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();     
+                                    }
+                                },
+                                error: function() {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                                },
+                                complete: function() {
+                                    hideLoading();
+                                }
+                            });   // end of ajax.
+                        }   // end of else.
+                    }   // end of else.
+                }   // end of if.
+
+                return false;
+            });
 
             // for the submit event of the form for basic quiz.
             $('#formSubmitBasicQuiz').submit(function() {
@@ -2541,7 +2679,7 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
-    <!-- this is for showing the custom video using the video.js plugin inside the modal -->
+    <!-- for attempting the basic quiz on the mentee page -->
     <div class="modal fade" id="basicQuizModal">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -2645,6 +2783,88 @@
                             <tr>
                                 <td colspan="2">
                                     <input type="submit" value="Submit Quiz" id="btnSubmitBasicQuiz" class="btn btn-lg btn-primary btn-block" />
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <!-- for attempting the advanced quiz on the mentee page -->
+    <div class="modal fade" id="advancedQuizModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="advanced-quiz-modal-title">Attempt Basic Quiz</h4>
+                </div>
+                <div class="modal-body" id="advanced-quiz-modal-body">
+                    <!-- for the table containing all the questions -->
+                    <form id="formSubmitAdvancedQuiz">
+                        <table class="table">
+                            <tr>
+                                <td class="advQ1">
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="text" class="form-control" id="advA1" placeholder="Enter Answer 1" />
+                                </td>
+                            </tr>
+
+                           <tr>
+                                <td class="advQ2">
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="text" class="form-control" id="advA2" placeholder="Enter Answer 2" />
+                                </td>
+                            </tr>
+
+                           <tr>
+                                <td class="advQ3">
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="text" class="form-control" id="advA3" placeholder="Enter Answer 3" />
+                                </td>
+                            </tr>
+
+                           <tr>
+                                <td class="advQ4">
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="text" class="form-control" id="advA4" placeholder="Enter Answer 4" />
+                                </td>
+                            </tr>
+
+                           <tr>
+                                <td class="advQ5">
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="text" class="form-control" id="advA5" placeholder="Enter Answer 5" />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2">
+                                    <input type="submit" value="Submit Quiz" id="btnSubmitAdvancedQuiz" class="btn btn-lg btn-primary btn-block" />
                                 </td>
                             </tr>
                         </table>

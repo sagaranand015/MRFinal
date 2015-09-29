@@ -3039,7 +3039,7 @@
                 var deadline = $('#txtQuizDeadline').val();
 
                 // to get all the questions.
-                var question = [$('#txtQ1').val(), $('#txtQ2').val(), $('#txtQ3').val(), $('#txtQ4').val(), $('#txtQ5').val()];
+                var question = [$('#txtQ1').val().replace(/['"]/g, ''), $('#txtQ2').val().replace(/['"]/g, ''), $('#txtQ3').val().replace(/['"]/g, ''), $('#txtQ4').val().replace(/['"]/g, ''), $('#txtQ5').val().replace(/['"]/g, '')];
                 var jsonQues = JSON.stringify(question);
 
                 // to get all the options.
@@ -3062,7 +3062,7 @@
                 for(var i=0;i<ans.length;i++) {
                     j = "";
                     j += "#" + ans[i];
-                    answers.push($(j).val());
+                    answers.push($(j).val().replace(/['"]/g, ''));
                 }
                 jsonAns = JSON.stringify(answers);
 
@@ -3090,9 +3090,13 @@
                                 popup.children('p').remove();
                                 popup.append("<p>Quiz Added Successfully. Thank You.</p>").fadeIn();
                             }
-                            else if(r[0] == "-1" || r[1] == "-1") {
+                            else if(r[0] == '-1') {
                                 popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error adding the Quiz. Please try again.</p>").fadeIn();
+                                popup.append("<p>The Quiz wasn't registered. Please try again.</p>").fadeIn();
+                            }
+                            else if(r[0] == "1" && r[1] == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! The quiz was registered, but we could not upload the questions. Please contact the administrator(s).</p>").fadeIn();
                             }
                             else {
                                 popup.children('p').remove();
@@ -3111,8 +3115,74 @@
                 return false;
             });  //end of submit function.
 
+            // ------------------ adding advanced quiz ------------------
+            $('#form-add-advanced-quiz').submit(function() {
+                var email = $.cookie("email");
+                var id = $.cookie("id");
 
-            //------------------ mentee-status ------------------
+                var courseId = $('.quiz-course').children('select').val();
+                var assId = $('.quiz-assignment').children('select').val();
+
+                var quizName = $('#txtQuizName').val();
+                var deadline = $('#txtQuizDeadline').val();
+
+                // to get all the questions.
+                var question = [ $('#txtadvQ1').val().replace(/['"]/g, ''), $('#txtadvQ2').val().replace(/['"]/g, ''), $('#txtadvQ3').val().replace(/['"]/g, ''), $('#txtadvQ4').val().replace(/['"]/g, ''), $('#txtadvQ5').val().replace(/['"]/g, '')];
+                var jsonQues = JSON.stringify(question);
+
+                var answer = [$('#txtAdvA1').val().replace(/['"]/g, ''), $('#txtAdvA2').val().replace(/['"]/g, ''), $('#txtAdvA3').val().replace(/['"]/g, ''), $('#txtAdvA4').val().replace(/['"]/g, ''), $('#txtAdvA5').val().replace(/['"]/g, '')];
+                var jsonAns = JSON.stringify(answer);
+
+                if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not logged in properly. Please login and try again.</p>").fadeIn();
+                }
+                else if(quizName == "" || deadline == "") {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you missed either the Quiz Name or Quiz Deadline. Please recheck and try again.</p>");
+                }
+                else {
+                    // make the ajax request for adding the Advanced Quiz here.
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "45", courseId: courseId, assId: assId, quizName: quizName, deadline: deadline, questions: jsonQues, answers: jsonAns
+                        },
+                        success: function(response) {
+                            console.log(response);
+                            var r = response.split(" ~ ");
+                            if(r[0] == "1" && r[1] == "1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Quiz Added Successfully. Thank You.</p>").fadeIn();
+                            }
+                            else if(r[0] == '-1') {
+                                popup.children('p').remove();
+                                popup.append("<p>The Quiz wasn't registered. Please try again.</p>").fadeIn();
+                            }
+                            else if(r[0] == "1" && r[1] == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! The quiz was registered, but we could not upload the questions. Please contact the administrator(s).</p>").fadeIn();
+                            }
+                            else {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error adding the Quiz. Please try again.</p>").fadeIn();   
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }
+                return false;
+            });
+
+            // ------------------ mentee-status ------------------
 
             // for the mentee status link on the LHS.
             $('.status').on('click', function() {
@@ -3229,14 +3299,231 @@
                 return false;
             });   // end of the delegate change event of assignment ddl.
 
-            // for the annual report link on LHS.
-            $('.annual-report').on('click', function() {
-                showDiv($('.annual-report-div'));
+            // ------------------ evaluate quizzes ------------------
+            $('.evaluate').on('click', function() {
+                showDiv($('.evaluate-div'));
                 changeActiveState($(this).parent('li'));
 
-                return false;
-            })
+                $('.evaluate-div').children('.mentee-quiz-status-div').remove();   // remove the previous results.
 
+                // to get all the courses as a drop down list
+                showLoading();
+                $.ajax({
+                    type: "GET",
+                    url: "AJAXFunctions.php",
+                    data: {
+                        no: "6"
+                    },
+                    success: function(response) {
+                        // to show the courses drop down at appropriate place.
+                        if(response == "-1") {
+                            popup.children('p').remove();
+                            popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                        }
+                        else {
+                            $('.evaluate-course').children('select').remove();
+                            $('.evaluate-course').append(response);
+                        }
+                    }, 
+                    error: function() {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+                return false;
+            });
+            // to get the assignments on change of courses drop down.
+            $('.evaluate-div').delegate('#ddl-course', 'change', function() {
+                if($(this).val() == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not selected the course. Please do so before continuing.</p>").fadeIn();
+                }
+                else {
+                    // to get all the assignments as a drop down list
+                    var courseAssPDF = $(this).val();
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "10", courseAssPDF: courseAssPDF
+                        },
+                        success: function(response) {
+                            // to show the assignments drop down at appropriate place.
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>We could not retrieve the assignments from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                            }
+                            else {
+                                $('.evaluate-assignment').children('select').remove();
+                                $('.evaluate-assignment').append(response);
+                                $('.evaluate-quiz').children('select').remove();
+                            }
+                        }, 
+                        error: function() {
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }   // end of else.
+                return false;
+            });    // end of delegate for courseAssPDF
+            // to get the quizzes for the selected assignments
+            $('.evaluate-div').delegate('#ddl-assignment', 'change', function() {
+
+                // remove the quizzes drop down first
+                $('.evaluate-quiz').children('select').remove();
+
+                if($(this).val() == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not selected the Assignment. Please do so before continuing.</p>").fadeIn();
+                }
+                else {
+                    var assId = $(this).val();
+                    var courseId = $('.evaluate-course').children('select').val();
+
+                    // to get the quizes from the db, filtered by assId and courseId
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "48", assId: assId, courseId: courseId
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>We could not retrieve the Quizzes from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                            }
+                            else if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No Quizzes for the selected Course and Assignment. </p>").fadeIn();                                 
+                            }
+                            else {
+                                $('.evaluate-quiz').children('select').remove();
+                                $('.evaluate-quiz').append(response);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }
+                return false;
+            });  // end of delegate() of assignments.
+            // for the change event of the quizzes drop down
+            $('.evaluate-div').delegate('#ddl-quiz', 'change', function() {
+
+                // remove the previous mentee records first.
+                $('.evaluate-div').children('.mentee-quiz-status-div').remove();
+
+                if($(this).val() == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not selected the Quiz. Please do so before continuing.</p>").fadeIn();
+                }
+                else {
+                    var quizId = $(this).val();
+                    var courseId = $('.evaluate-course').children('select').val();
+                    var assId = $('.evaluate-assignment').children('select').val();
+
+                    //to get all the mentees and their answers.
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "49", assId: assId, courseId: courseId, quizId: quizId
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>We could not retrieve the requested information from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                            }
+                            else if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No submissions found for this Quiz. Please try again.</p>").fadeIn();                              
+                            }       
+                            else {
+                                $('.evaluate-div').children('.mentee-quiz-status-div').remove();
+                                $('.evaluate-div').append(response);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }
+                return false;
+            });   // end of delegate() for Quiz
+            // for the evaluate button for each of the mentees.
+            $('.evaluate-div').delegate('.btnEvaluate', 'click', function() {
+                var quizId = $(this).attr('data-quiz');
+                var assId = $(this).attr('data-assignment');
+                var menteeId = $(this).attr('data-mentee');
+                var courseId = $(this).attr('data-course');
+
+                if(quizId == undefined || quizId == "undefined" || quizId == "-1" || assId == undefined || assId == "undefined" || assId == "-1" || courseId == undefined || courseId == "undefined" || courseId == "-1" || menteeId == undefined || menteeId == "undefined" || menteeId == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Oops! We encountered an internal error. Please refresh the page and try again.</p>").fadeIn();
+                }
+                else {
+                    // make an ajax request to update the score.
+                    var score = $('#' + menteeId).val();
+                    if(score > 5 || score <= -2) {
+                        popup.children('p').remove();
+                        popup.append("Abbey! chutiya hai kya?! BC, 5 se zyada kaise ho sakta hai?.. Can you please bang your head on your screen?! *Pretty please* :/ ").fadeIn();
+                    }
+                    else {
+                        showLoading();
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "50", assId: assId, courseId: courseId, menteeId: menteeId, quizId: quizId, score: score
+                            },
+                            success: function(response) {
+                                if(response == "-1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                                }
+                                else {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Evaluation done successfully. </p>").fadeIn();    
+                                }
+                            },
+                            error: function() {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                            },
+                            complete: function() {
+                                hideLoading();
+                            }
+                        });
+                    }
+                }   // end of else.
+
+                return false;
+            });   // end of the click event of btnEvaluate
+
+ 
 
             // hide all the divs on page load. Except for first div.
             $('.main-div').hide();
@@ -3339,11 +3626,12 @@
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="assignment">Add Assignment Details</a></li>
                 	<li><a href="#" class="assignmentPDF">Add Assignment Material</a></li>
+                    <li><a href="#" class="assign-mentee">Assign Mentees</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="user">Add User</a></li>
                     <li><a href="#" class="quiz">Add Quiz</a></li>
-                    <li><a href="#" class="assign-mentee">Assign Mentees</a></li>
+                    <li><a href="#" class="evaluate">Evaluate Quizzes</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
                     
@@ -3354,6 +3642,43 @@
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <!-- for evaluating the quizzes submitted by the mentees -->
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div evaluate-div">
+            <h1 class="page-header">
+                Evaluate Quiz
+            </h1>
+
+            <table class="table">
+                <tr>
+                    <td>
+                        <label>Select Course: </label>
+                    </td>
+                    <td class="evaluate-course">
+                        <!-- data will come from ajax here -->
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Select Assignment: </label>
+                    </td>
+                    <td class="evaluate-assignment">
+                        <!-- data will come from ajax here -->
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Select Quiz: </label>
+                    </td>
+                    <td class="evaluate-quiz">
+                        <!-- data will come from ajax here -->
+                    </td>
+                </tr>
+            </table>
+
+            <!-- data will come in another table for each of the mentee and their answers -->
+
+        </div>   <!-- end of evaluate div -->
 
         <!-- for showing the statuses of the mentees under the mentor -->
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div status-div">

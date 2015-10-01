@@ -3523,6 +3523,256 @@
                 return false;
             });   // end of the click event of btnEvaluate
 
+            // for adding the team members
+            $('.team').on('click', function() {
+                showDiv($('.team-div'));
+                changeActiveState($(this).parent('li'));
+
+                var email = $.cookie("email");
+                var id = $.cookie("id");
+
+                // firstly, get the list of all the mentors first.
+                if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not logged in properly. Please login and try again.</p>").fadeIn();
+                }
+                else {
+                    
+                    // for getting the organisation and course ddls.
+                    showLoading();
+                    // $.ajax({
+                    //     type: "GET",
+                    //     url: "AJAXFunctions.php",
+                    //     data: {
+                    //         no: "6"
+                    //     },
+                    //     success: function(response) {
+                    //         // to show the courses drop down at appropriate place.
+                    //         if(response == "-1") {
+                    //             popup.children('p').remove();
+                    //             popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                    //         }
+                    //         else {
+                    //             $('.add-team-course').children('select').remove();
+                    //             $('.add-team-course').append(response);
+                    //         }
+                    //     }, 
+                    //     error: function() {
+                    //         alertMsg.children('p').remove();
+                    //         alertMsg.fadeOut();
+                    //         popup.children('p').remove();
+                    //         popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                    //     }
+                    // });
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "3"
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                            }
+                            else {
+
+                                $('.add-team-organ').children('select').remove();
+                                $('.add-team-organ').append(response);
+                            }
+                        },
+                        error: function() {
+                            alertMsg.children('p').remove();
+                            alertMsg.fadeOut();
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });   // end of second ajax request
+
+                }   // end of else
+                return false;
+            });
+
+            // for the change event of the organisation ddl
+            $('.team-div').delegate('#ddl-organisation', 'change', function() { 
+                // remove the course ddl here and get a new one.
+                $('.add-team-course').children('select').remove();
+                showLoading();
+                $.ajax({
+                    type: "GET",
+                    url: "AJAXFunctions.php",
+                    data: {
+                        no: "6"
+                    },
+                    success: function(response) {
+                        // to show the courses drop down at appropriate place.
+                        if(response == "-1") {
+                            popup.children('p').remove();
+                            popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                        }
+                        else {
+                            $('.add-team-course').children('select').remove();
+                            $('.add-team-course').append(response);
+                        }
+                    }, 
+                    error: function() {
+                        alertMsg.children('p').remove();
+                        alertMsg.fadeOut();
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+
+                return false;
+            });
+
+            // to show the list of mentors based on course and organ selection.
+            $('.team-div').delegate('#ddl-course', 'change', function() {
+                var organ = $('.add-team-organ').children('select').val();
+                var course = $('.add-team-course').children('select').val();
+
+                if(organ == "-1" || course == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not selected either organisation or course. Please do so before continuing.</p>").fadeIn();
+                }
+                else {
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "29", organ: organ, course: course
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                            }
+                            else if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No Mentors found in the database. Please try again.</p>").fadeIn();   
+                            }
+                            else {
+                                $('.add-team-mentor').children('select').remove();
+                                $('.add-team-mentor').append(response);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }  // end of else
+                return false;
+            });
+
+            // to show the list of mentees when the mentor is selected.
+            $('.team-div').delegate('#ddl-mentor', 'change', function() { 
+                var mentorId = $(this).val();
+
+                var email = $.cookie("email");
+                var id = $.cookie("id");
+
+                if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not logged in properly. Please login and try again.</p>").fadeIn();
+                }
+                else {
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "26", email: "", id: mentorId
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
+                            }
+                            else if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No mentees for the selected mentor</p>").fadeIn();       
+                            }
+                            else {
+                                $('.add-team-mentee').children('select').remove();
+                                $('.add-team-mentee').append(response);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }
+                return false;
+            });
+
+            // for submitting the form containing the email address of the mentee's team member
+            $('#add-team-member').submit(function() {
+                var email = $.cookie("email");
+                var id = $.cookie("id");
+
+                var course = $('.add-team-course').children('select').val();
+                var organ = $('.add-team-organ').children('select').val();
+                var mentor = $('.add-team-mentor').children('select').val();
+                var primary = $('.add-team-mentee').children('select').val();
+                var secondaryEmail = $('#txtTeamMember').val().trim();
+
+                // get all the parameters from the ddl lists and save the new team member
+                if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not logged in properly. Please login and try again.</p>").fadeIn();
+                }
+                else {
+                    if(course == "-1" || organ == "-1" || mentor == "-1" || primary == "-1") {
+                        popup.children('p').remove();
+                        popup.append("<p>Looks like you have not selected the paramtered properly. Please do so and try again.</p>").fadeIn();
+                    } 
+                    else {
+                        showLoading();
+                        $.ajax({
+                            type: "GET",
+                            url: "AJAXFunctions.php",
+                            data: {
+                                no: "51", primaryUser: primary, secondaryUser: secondaryEmail
+                            },
+                            success: function(response) {
+                                alert(response);
+                                if(response == "-1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
+                                }
+                                else {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Team member has been added. Thank You.</p>").fadeIn();
+                                }
+                            },
+                            error: function() {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+                            },
+                            complete: function() {
+                                hideLoading();
+                            }
+                        });
+                    }   // end of inner else.
+                }   // end of else
+                return false; 
+            });   // end of form submit
+
  
 
             // hide all the divs on page load. Except for first div.
@@ -3632,6 +3882,7 @@
                 	<li><a href="#" class="user">Add User</a></li>
                     <li><a href="#" class="quiz">Add Quiz</a></li>
                     <li><a href="#" class="evaluate">Evaluate Quizzes</a></li>
+                    <li><a href="#" class="team">Add Team(s)</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
                     
@@ -3642,6 +3893,70 @@
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <!-- for adding the teams and team members -->
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div team-div">
+            <h1 class="page-header">
+                Add Team(s)
+            </h1>
+
+            <table class="table" id="table-add-team">
+                 <tr>
+                    <td>
+                        <label>Select Organisation: </label>
+                    </td>
+                    <td class="add-team-organ">
+                        <!-- data will come from ajax here -->
+                    </td>
+                </tr>
+                 <tr>
+                    <td>
+                        <label>Select Course: </label>
+                    </td>
+                    <td class="add-team-course">
+                        <!-- data will come from ajax here -->
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Select Mentor: </label>
+                    </td>
+                    <td class="add-team-mentor">
+                        <!-- data will come from ajax here -->
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Select Mentee: </label>
+                    </td>
+                    <td class="add-team-mentee">
+                        <!-- data will come from ajax here -->
+                    </td>
+                </tr>
+            </table>
+
+            <br />
+
+            <form id="add-team-member">
+                <table class="table">
+                    <tr>
+                        <td>
+                            <label>Enter Team Member's Email</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="email" placeholder="Enter Team Member's Email" class="form-control" id="txtTeamMember" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="submit" class="btn btn-lg btn-primary btn-block" id="btnAddTeamMember" value="Add Member" />
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
 
         <!-- for evaluating the quizzes submitted by the mentees -->
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div evaluate-div">

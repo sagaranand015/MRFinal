@@ -148,6 +148,7 @@ function ForgotPassword($name, $email) {
 function Login($email, $pwd) {
 	$res = "-1";
 	$login = "";
+	$team = "";
 	$level = GetUserLevel($email);
 	if($level == "A") {  // go to admin table.
 		$login = LoginUtility($email, $pwd, "Admin", "AdminEmail", "AdminPwd");
@@ -186,6 +187,10 @@ function Login($email, $pwd) {
 		}		
 	}
 	else if($level == "D") {   // go to mentee table.
+
+		// check if the given user email address is in the team table.
+		$team = CheckTeamMember($email);
+
 		$login = LoginUtility($email, $pwd, "Mentee", "MenteeEmail", "MenteePwd");
 		if($login == "1") {
 			$res = "D";
@@ -203,6 +208,6 @@ function Login($email, $pwd) {
 	else if($level == "-1") {   // error condition.
 		$res = "-1";
 	}
-	echo $res;
+	echo $res . " ~~ " . $team;
 }
 

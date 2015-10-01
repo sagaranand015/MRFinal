@@ -8,6 +8,92 @@ include 'headers/databaseConn.php';
 // for mandrill mail sending API.
 require_once 'mandrill/Mandrill.php'; 
 
+// to check if a menteeEmail exists in the mentee table.
+function CheckIfMenteeExists($menteeEmail) {
+	$resp = "-1";
+	try {
+		$query = "select * from Mentee where MenteeEmail='$menteeEmail'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_fetch_array($rs) > 0) {
+				$resp = mysql_fetch_array($rs);
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// for adding the user to the User and the Specified table.
+function AddTeamUser($organ, $course, $email, $level) {
+	$resp = "-1";
+	$userAdd = "-1";
+	$userTable = "-1";
+	try {
+		if($level == "D") {
+
+			$exists = CheckIfMenteeExists($email);
+			if($exists == "0") {
+				$userAdd = AddToUserTable($email, $level);
+				$userTable = AddToMenteeTable($organ, $course, $email, "Mentee");
+			}
+			else if($exists == "-1") {
+				$resp = "-1";
+			}
+			else {
+				$resp = "0";  // record already exists in the table.
+			}
+		}
+		else {
+			$resp = "-1";
+		}
+
+		if($userAdd == "1" && $userTable == "1") {   // successful insertions.
+			SendTeamMemberMail($email);
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// to check if the memberEmail exists in the team table.
+function CheckMemberEmailInTeamTable($email, $memberEmail) {
+	$resp = "-1";
+	try {	
+		$query = "select * from Team where PrimaryUser='$email' and SecondaryUser='$memberEmail'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				$resp = mysql_fetch_array($rs);
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // to get the assignment submission link for the mentee only.
 function GetMenteeSubmissionFeedbackInTableFormatForAdminAndDirector($menteeId, $assId) {
 	$resp = "-1";
@@ -5487,6 +5573,20 @@ function ChangePasswordUtility($email, $newPassword, $table) {
 }
 
 // this is for sending the mail to the newly added user by the admin.
+function SendTeamMemberMail($email) {
+	$subject = "Team Member Added - " . $email;
+
+	$message = "Dear " . $email . "<br /><br />";
+	$message .= "Congratulations! You are now a part of the Mentored-Research Family. You have been added to the M-R database by your team member(s). To get started with your account, please <a href='http://mentored-research.com/login/signup.php' target='_blank'>Sign Up Here.</a>" . "<br /><br />";
+	$message .= "In case you face any issues, please put in a word to us at: guide@mentored-research.com <br /><br />";
+
+	$message .= "Team Mentored-Research<br />";
+	$message .= "info@mentored-research.com<br /><br />";
+	$message .= "Please do not reply to this automated mail.<br /><br />";
+	$res = SendMessage($email, $email, "info@mentored-research.com", "Mentored-Research", $subject, $message);
+}
+
+// this is for sending the mail to the newly added user by the admin.
 function SendNewUserMail($email) {
 	$subject = "User Added - " . $email;
 
@@ -5622,6 +5722,7 @@ function GetMenteeDetailsByEmail($menteeEmail) {
 		}
 		else {
 			while ($res = mysql_fetch_array($rs)) {
+				$mentee["MenteeID"] = $res["MenteeID"];
 				$mentee["MenteeName"] = $res["MenteeName"];
 				$mentee["MenteeEmail"] = $res["MenteeEmail"];
 				$mentee["MenteeContact"] = $res["MenteeContact"];
@@ -5748,7 +5849,7 @@ function GetMenteeDetails($menteeID) {
 				$mentee["MenteeProfile"] = $res["MenteeProfile"];
 				$mentee["MenteeCourse"] = $res["MenteeCourse"];
 				$mentee["MenteeOrgan"] = $res["MenteeOrgan"];
-				$mentee["MenteeDirector"] = $res["MenteeDirector"];
+				$mentee["MenteeMentor"] = $res["MenteeMentor"];
 			}
 			$resp = $mentee;
 		}

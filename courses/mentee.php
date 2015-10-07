@@ -293,6 +293,10 @@
         input.query-type {
             margin-left: 2%;
         }
+
+        #btnAddTeamMember {
+            cursor: pointer;
+        }
 		 
     </style>
 
@@ -2207,6 +2211,13 @@
                 return false;
             });   // end of add-team-member form submit()
 
+            // for add team member feature
+            $('#btnAddTeamMember').on('click', function() {
+                $('#notify-modal').modal('hide');
+                $('.team').trigger('click');
+                return false;
+            });
+        
         });    // end of ready function.
 
 	</script>
@@ -3022,6 +3033,8 @@
                     </p>
 
                     <p>However, please note that the assignment(s) can be submitted using only the Primary Account(The one the whole team has been using until now). These team accounts are for accessing the resources and attempting the quizzes.</p>
+
+                    <p><b>The Add Team Member feature of your M-R Portal is only for mentees participating in teams. Individual mentees may ignore this.</b></p>
 
                     <p>In case you have any doubts, do put in a word to us at <code>tech@mentored-research.com</code> and we'll be happy to help.</p>
 

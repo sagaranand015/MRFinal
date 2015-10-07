@@ -10,6 +10,31 @@ include 'headers/databaseConn.php';
 // for mandrill mail sending API.
 require_once 'mandrill/Mandrill.php'; 
 
+// to check if the user email is in the Team table or not.
+function CheckTeamMember($email) {
+	$resp = "-1";
+	try {
+		$query = "select * from Team where SecondaryUser='$email'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {   // record exists
+				$resp = mysql_fetch_array($rs);
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // for sending the message through mandrill API.
 function SendMail($to, $toName, $from, $fromName, $subject, $message) {
 	try {

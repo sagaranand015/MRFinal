@@ -222,6 +222,10 @@
 							alertMsg.children('p').remove();
 							alertMsg.fadeOut();
 
+                            var res = response.split(" ~~ ");
+                            var response = res[0];
+                            var team = res[1];
+
 							if(response == "A") {  // go to the admin page.
                                 $.cookie("email", email, {
                                     path: '/',
@@ -248,7 +252,18 @@
                                     path: '/',
                                     expires: 365
                                 });
-								window.location.href = "../courses/mentee.php";
+
+                                // check the team response and redirect accordingly.
+                                if(team == "0") {
+                                    window.location.href = "../courses/mentee.php";
+                                }
+                                else if(team == "-1") {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while logging in. Please refresh the page and try again.</p>").fadeIn();
+                                }
+                                else {
+                                    window.location.href = "../courses/member.php";   
+                                }
 							}
 							else if(response == "-A" || response == "-B" || response == "-C" || response == "-D") {   // error in password or username.
 								popup.children('p').remove();

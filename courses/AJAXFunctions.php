@@ -159,6 +159,67 @@ else if(isset($_GET["no"]) && $_GET["no"] == "49") {  // to get the mentee statu
 else if(isset($_GET["no"]) && $_GET["no"] == "50") {  // to evaluate/update the score of the mentee in the Advanced Quiz response
 	EvaluateAdvancedQuiz($_GET["assId"], $_GET["courseId"], $_GET["menteeId"], $_GET["quizId"], $_GET["score"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "51") {  // to add the primaryUser and secondaryUser to the Team table.
+	AddToTeam($_GET["primaryUser"], $_GET["secondaryUser"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "52") {  // to add the team member email to the Users table and Mentee table
+	AddTeamMember($_GET["email"], $_GET["id"], $_GET["memberEmail"]);
+}
+
+// to add the team member email to the Users table and Mentee table
+function AddTeamMember($email, $id, $memberEmail) {
+	$resp = "-1";
+	$exists = "-1";
+	$assign = "-1";
+	try {
+		$mentee = GetMenteeDetails($id);
+		// firstly, check if the memberEmail exists in the team Table.
+		$isMemberExists = CheckMemberEmailInTeamTable($email, $memberEmail);
+		if($isMemberExists == "-1") {
+			$exists = "-1";  // error
+		}
+		else if($isMemberExists == "0") {
+			$exists = "0";  // member email does not exists
+		}
+		else {
+			// add the user to the Users and Mentee Table and then assign the mentor to the newly added mentee.
+			$exists = "1";
+			$resp = AddTeamUser($mentee["MenteeOrgan"], $mentee["MenteeCourse"], $memberEmail, "D");
+			if($resp == "1") {
+				$newMember = GetMenteeDetailsByEmail($memberEmail);	
+				$assign = AssignMentor($mentee["MenteeMentor"], $newMember["MenteeID"]);
+			}
+		}
+		// $resp = 0 means that the newUser email already exists in the mentee table.
+		echo $exists . " ~~ " . $resp . " ~~ " . $assign;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// to add the primaryUser and secondaryUser to the Team table.
+function AddToTeam($primaryUser, $secondaryUser) {
+	$resp = "-1";
+	try {
+		$mentee = GetMenteeDetails($primaryUser);
+		$menteeEmail = $mentee["MenteeEmail"];
+		$query = "insert into Team(PrimaryUser, SecondaryUser) values('$menteeEmail', '$secondaryUser')";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // to evaluate/update the score of the mentee in the Advanced Quiz response
 function EvaluateAdvancedQuiz($assId, $courseId, $menteeId, $quizId, $score) {
@@ -1032,7 +1093,7 @@ function GetMenteesOfMentor($email, $id) {
 			if(mysql_num_rows($rs) > 0) {
 				$resp = "<select id='ddl-mentee' class='form-control'><option value='-1'> --Select Mentee-- </option>";
 				while ($res = mysql_fetch_array($rs)) {
-					$resp .= "<option value='" . $res["MenteeID"] . "' >" . $res["MenteeName"] . "</option>";
+					$resp .= "<option value='" . $res["MenteeID"] . "' >" . $res["MenteeEmail"] . " (" . $res["MenteeName"] . ")</option>";
 				}
 				$resp .= "</select>";
 			}

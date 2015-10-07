@@ -1251,7 +1251,6 @@
                             case 'application/vnd.ms-excel':
                             case 'video/mp4':
                             case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
                             case 'application/vnd.ms-excel':
                             case 'application/msexcel':
                             case 'application/x-msexcel':
@@ -1262,6 +1261,8 @@
                             case 'application/x-xls':
                             case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
                             case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+                            case 'application/vnd.openxmlformats-officedocument.presentationml.template':
+                            case 'application/vnd.openxmlformats-officedocument.presentationml.slideshow':
                                 break;
                             default:
                                 alertMsg.children('p').remove();
@@ -1370,7 +1371,6 @@
                             case 'application/vnd.ms-excel':
                             case 'video/mp4':
                             case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
                             case 'application/vnd.ms-excel':
                             case 'application/msexcel':
                             case 'application/x-msexcel':
@@ -1381,6 +1381,8 @@
                             case 'application/x-xls':
                             case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
                             case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+                            case 'application/vnd.openxmlformats-officedocument.presentationml.template':
+                            case 'application/vnd.openxmlformats-officedocument.presentationml.slideshow':
                                 break;
                             default:
                                 alertMsg.children('p').remove();

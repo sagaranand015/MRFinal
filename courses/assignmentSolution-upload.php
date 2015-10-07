@@ -41,7 +41,6 @@ if(isset($_FILES["fileAssignmentSolution"]) && $_FILES["fileAssignmentSolution"]
 	        case 'application/vnd.ms-excel':
 	        case 'video/mp4':
 	        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-	        case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
 	        case 'application/vnd.ms-excel':
 	        case 'application/msexcel':
 	        case 'application/x-msexcel':
@@ -52,6 +51,8 @@ if(isset($_FILES["fileAssignmentSolution"]) && $_FILES["fileAssignmentSolution"]
 	        case 'application/x-xls':
 	        case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
 	        case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+	        case 'application/vnd.openxmlformats-officedocument.presentationml.template':
+	        case 'application/vnd.openxmlformats-officedocument.presentationml.slideshow':
 				break;
 			default:
 				die('Unsupported File!'); //output error

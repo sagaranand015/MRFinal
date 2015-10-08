@@ -761,6 +761,8 @@ function updateSubmission($menteeId, $mentorId, $assId, $courseId, $updateAss) {
 		}
 		else {
 			$resp = "1";
+			// send the assignment submission email to the mentor and mentee.
+			$res = SendAssignmentSubmissionMail($menteeId, $mentorId, $assId, $updateAss, $courseId);
 		}
 		return $resp;
 	}

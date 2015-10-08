@@ -1393,6 +1393,7 @@
 				        popup.append("<p>Looks like you have not selected the Assignment Properly. Please do so first.</p>").fadeIn();	
 					}
 					else {
+                        var assVideoName = $('#txtAssVideoName').val().trim();
 						var assVideo = $('#txtAssVideo').val().trim();
 						var assID = $.cookie("assignmentAssPDF");
 						showLoading();
@@ -1400,7 +1401,7 @@
 							type: "GET",
 							url: "AJAXFunctions.php",
 							data: {
-								no: "11", assID: assID, assVideo: assVideo
+								no: "11", assID: assID, assVideo: assVideo, assVideoName: assVideoName
 							},
 							success: function(response) {
 								if(response == "-1") {
@@ -3773,7 +3774,102 @@
                 return false; 
             });   // end of form submit
 
- 
+            // // for updating the assignment material div
+            // $('.update-assignment').on('click', function() {
+            //     showDiv($('.update-assignment-div'));
+            //     changeActiveState($(this).parent('li'));
+
+            //     // to get all the courses as a drop down list
+            //     showLoading();
+            //     $.ajax({
+            //         type: "GET",
+            //         url: "AJAXFunctions.php",
+            //         data: {
+            //             no: "6"
+            //         },
+            //         success: function(response) {
+            //             // to show the courses drop down at appropriate place.
+            //             if(response == "-1") {
+            //                 popup.children('p').remove();
+            //                 popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+            //             }
+            //             else {
+            //                 $('.update-assignment-course').children('select').remove();
+            //                 $('.update-assignment-course').append(response);
+            //             }
+            //         }, 
+            //         error: function() {
+            //             alertMsg.children('p').remove();
+            //             alertMsg.fadeOut();
+            //             popup.children('p').remove();
+            //             popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+            //         },
+            //         complete: function() {
+            //             hideLoading();
+            //         }
+            //     });
+
+            //     // for the delegate function of courseList-assPDF
+            //     $('.update-assignment-div').delegate('#ddl-course', 'change', function() {
+            //         if($(this).val() == "-1") {
+            //             popup.children('p').remove();
+            //             popup.append("<p>Looks like you have not selected the course. Please do so before uploading the calender.</p>").fadeIn();
+            //         }
+            //         else {
+            //             // to get all the assignments as a drop down list
+            //             var courseAssPDF = $(this).val();
+            //             showLoading();
+            //             $.ajax({
+            //                 type: "GET",
+            //                 url: "AJAXFunctions.php",
+            //                 data: {
+            //                     no: "10", courseAssPDF: courseAssPDF
+            //                 },
+            //                 success: function(response) {
+            //                     // to show the assignments drop down at appropriate place.
+            //                     if(response == "-1") {
+            //                         popup.children('p').remove();
+            //                         popup.append("<p>We could not retrieve the assignments from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+            //                     }
+            //                     else {
+            //                         $('.update-assignment-ass').children('select').remove();
+            //                         $('.update-assignment-ass').append(response);
+            //                     }
+            //                 }, 
+            //                 error: function() {
+            //                     alertMsg.children('p').remove();
+            //                     alertMsg.fadeOut();
+            //                     popup.children('p').remove();
+            //                     popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+            //                 },
+            //                 complete: function() {
+            //                     hideLoading();
+            //                 }
+            //             });
+            //         }   // end of else.
+            //         return false;
+            //     });    // end of delegate
+            //     return false;
+            // });    // end of update-assignment link on LHS.
+
+            // // for the form submission of the update video in update assignment.
+            // $('#form-update-assignment-video').submit(function() {
+            //     var videoName = $('#txtVideoName').val().trim();
+            //     var videoUrl = $('#txtVideoUrl').val().trim();
+
+            //     alert("TODO: Update the assignment video name and url");
+
+            //     // make the AJAX Call here to update the video name and url
+            //     // $.ajax({
+            //     //     type: "GET",
+            //     //     url: "AJAXFunctions.php",
+            //     //     data: {
+
+            //     //     }
+            //     // });
+
+            //     return false;
+            // });
 
             // hide all the divs on page load. Except for first div.
             $('.main-div').hide();
@@ -3876,6 +3972,7 @@
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="assignment">Add Assignment Details</a></li>
                 	<li><a href="#" class="assignmentPDF">Add Assignment Material</a></li>
+                    <!-- <li><a href="#" class="update-assignment">Update Assignment Material</a></li> -->
                     <li><a href="#" class="assign-mentee">Assign Mentees</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
@@ -3893,6 +3990,55 @@
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <!-- for updating the assignment material -->
+        <!-- <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div update-assignment-div">
+            <h1 class="page-header">
+                Update Assignment
+            </h1>
+
+            <table class="table">
+                <tr>
+                    <td>
+                        <label>Select Course: </label>
+                    </td>
+                    <td class="update-assignment-course">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Select Assignment: </label>
+                    </td>
+                    <td class="update-assignment-ass">
+                    </td>
+                </tr>
+            </table>
+            <form id="form-update-assignment-video">
+                <table class="table">
+                    <tr>
+                        <td>
+                            <label>Enter Video Name: </label>
+                        </td>
+                        <td class="update-assignment-video-name">
+                            <input type="text" placeholder="Enter Video Name" id="txtVideoName" class="form-control" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Enter Video Url: </label>
+                        </td>
+                        <td class="update-assignment-video-url">
+                            <input type="text" placeholder="Enter Video Url" id="txtVideoUrl" class="form-control" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="submit" class="btn btn-lg btn-primary btn-block" value="Update Video" />
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div> -->   <!-- end of the update-assignment div -->
 
         <!-- for adding the teams and team members -->
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div team-div">
@@ -4716,6 +4862,14 @@
 					Add Video Lectures
 	    		</h3>
         		<table class="table">
+                    <tr>
+                        <td>
+                            <label>Add Video Name: </label>
+                        </td>
+                        <td>
+                            <input type="text" placeholder="Video Lecture Name" id="txtAssVideoName" class="form-control" required />
+                        </td>
+                    </tr>
 					<tr>
 						<td>
 							<label>Add Video Link: </label>

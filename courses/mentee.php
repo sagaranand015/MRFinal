@@ -677,6 +677,7 @@
 							// now, for the assignment Video tabs.
 							$('.videos').children('.assignment-video').remove();
 							var videos = response.AssVideo;
+                            var videoNames = response.AssVideoName;
 							var videoDiv = "";
 							for(var i=0;i<videos.length;i++) {
 								videoDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 assignment-video'";
@@ -687,7 +688,13 @@
 									videoDiv += "data-url='" + videos[i] +  "'>";
 								}
 								videoDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
-								videoDiv += "<p class='text-muted'>" + "Video Lecture " + (i+1) + "</p>";
+
+                                if(videoNames[i] == "" || videoNames[i] == "undefined" || videoNames[i] == undefined) {
+                                    videoDiv += "<p class='text-muted'>" + "Video Lecture " + (i+1) + "</p>";
+                                }
+                                else {
+                                    videoDiv += "<p class='text-muted'>" + videoNames[i] + "</p>";
+                                }
 								videoDiv += "</div>";
 							}
 							$('.videos').append(videoDiv);

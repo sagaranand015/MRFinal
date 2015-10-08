@@ -40,7 +40,7 @@ else if(isset($_GET["no"]) && $_GET["no"] == "10") {  // for getting the assignm
 	GetAssignmentsDropDown($_GET["courseAssPDF"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "11") {  // for adding the video link to the database for a particular assignment.
-	RegisterAssignmentVideo($_GET["assID"], $_GET["assVideo"]);
+	RegisterAssignmentVideo($_GET["assID"], $_GET["assVideo"], $_GET["assVideoName"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "12") {  // for getting the assignments based on a mentee email and id.
 	GetMenteeAssignment($_GET["email"], $_GET["id"]);
@@ -1478,6 +1478,9 @@ function GetAssignmentMaterial($assID) {
 	$resp = "-1";
 	$assignment = array();
 	$assVideo = array();
+
+	$assVideoName = array();
+
 	$assSampleReport = array();
 	$assOffTopic = array();
 	$assExtra = array();
@@ -1512,9 +1515,11 @@ function GetAssignmentMaterial($assID) {
 			$j = 0;
 			while ($videoRes = mysql_fetch_array($videoRs)) {
 				$assVideo[$j] = $videoRes["AssVideo"];  
+				$assVideoName[$j] = $videoRes["AssVideoName"];  
 				$j++;
 			}
 			$assignment["AssVideo"] = $assVideo;
+			$assignment["AssVideoName"] = $assVideoName;
 			$i++;
 		}
 
@@ -1621,10 +1626,10 @@ function GetMenteeAssignment($email, $id) {
 }
 
 // for adding the video link to the database for a particular assignment.
-function RegisterAssignmentVideo($assID, $assVideo) {
+function RegisterAssignmentVideo($assID, $assVideo, $assVideoName) {
 	$resp = "-1";
 	try {
-		$query = "insert into AssignmentVideo(AssID, AssVideo) values('$assID', '$assVideo')";
+		$query = "insert into AssignmentVideo(AssID, AssVideoName, AssVideo) values('$assID', '$assVideoName', '$assVideo')";
 		$rs = mysql_query($query);
 		if(!$rs) {
 			$resp = "-1";

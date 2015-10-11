@@ -165,6 +165,38 @@ else if(isset($_GET["no"]) && $_GET["no"] == "51") {  // to add the primaryUser 
 else if(isset($_GET["no"]) && $_GET["no"] == "52") {  // to add the team member email to the Users table and Mentee table
 	AddTeamMember($_GET["email"], $_GET["id"], $_GET["memberEmail"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "53") {  // to get the mentees based on courseId
+	GetMentorsFromCourse($_GET["courseId"]);
+}
+
+// // to get the mentees based on courseId
+function GetMentorsFromCourse($courseId) {
+	$resp = "-1";
+	try {
+		$query = "select * from Mentor where MentorCourse='$courseId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				$resp = "<select id='ddl-mentor' class='form-control'><option value='-1'> --Select Mentor-- </option>";
+				while ($res = mysql_fetch_array($rs)) {
+					$resp .= "<option value='" . $res["MentorID"] . "' >" . $res["MentorEmail"] . " (" . $res["MentorName"] . ")</option>";
+				}
+				$resp .= "</select>";
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // to add the team member email to the Users table and Mentee table
 function AddTeamMember($email, $id, $memberEmail) {
@@ -404,9 +436,21 @@ function GetDocumentsForMentee($email, $id) {
 // for sending the query regarding the assignments
 function SendDeadlineQuery($no, $email, $id, $name, $contact, $msg) {
 	$resp = "-1";
-	try {
+	try {;
+		$course = "Equity Research Initiative";
+		$from = "guide@mentored-research.com";
+		// get the course here and set the from email based on course.
+		$mentee = GetMenteeDetails($id);
+		if($mentee["MenteeCourse"] == "2") {
+			$from = "sadekar@mentored-research.com";
+			$course = "Technical Analysis Course";
+		}
+		else {
+			$from = "guide@mentored-research.com";
+		}
+
 		$subject = "Email Support message received";
-		$mail = "Dear Admin, here is the message received from the Email Support feature of the Mentored-Research's portal. following are the contents: <br /><br />";
+		$mail = "Dear Admin, here is the message received from the Email Support feature of the Mentored-Research's portal<b>(Course: " . $course . ")</b>. following are the contents: <br /><br />";
 		$mail .= "Name: <b>" . $name . " (" . $email .  ", " . $contact . ")</b><br />";
 		$mail .= "Message: <b>" . $msg . "</b><br /><br />";
 		$mail .= "Please contact the administrator in case of any doubts.<br /><br />";
@@ -427,7 +471,7 @@ function SendDeadlineQuery($no, $email, $id, $name, $contact, $msg) {
 	            //     'type' => 'cc'
 	            // ),
 	            array(
-	                'email' => 'guide@mentored-research.com',
+	                'email' => $from,
 	                'name' => 'Mentored-Research',
 	                'type' => 'cc'
 	            )
@@ -497,8 +541,20 @@ function SendTechnicalQuery($no, $email, $id, $name, $contact, $msg) {
 function SendAssignmentQuery($no, $email, $id, $name, $contact, $msg) {
 	$resp = "-1";
 	try {
+		$course = "Equity Research Initiative";
+		$from = "guide@mentored-research.com";
+		// get the course here and set the from email based on course.
+		$mentee = GetMenteeDetails($id);
+		if($mentee["MenteeCourse"] == "2") {
+			$from = "ta@mentored-research.com";
+			$course = "Technical Analysis Course";
+		}
+		else {
+			$from = "guide@mentored-research.com";
+		}
+
 		$subject = "Email Support message received";
-		$mail = "Dear Admin, here is the message received from the Email Support feature of the Mentored-Research's portal. following are the contents: <br /><br />";
+		$mail = "Dear Admin, here is the message received from the Email Support feature of the Mentored-Research's portal<b>(Course: " . $course . ")</b>. following are the contents: <br /><br />";
 		$mail .= "Name: <b>" . $name . " (" . $email .  ", " . $contact . ")</b><br />";
 		$mail .= "Message: <b>" . $msg . "</b><br /><br />";
 		$mail .= "Please contact the administrator in case of any doubts.<br /><br />";
@@ -519,7 +575,7 @@ function SendAssignmentQuery($no, $email, $id, $name, $contact, $msg) {
 	            //     'type' => 'cc'
 	            // ),
 	            array(
-	                'email' => 'guide@mentored-research.com',
+	                'email' => $from,
 	                'name' => 'Mentored-Research',
 	                'type' => 'cc'
 	            )

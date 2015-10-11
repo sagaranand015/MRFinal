@@ -393,31 +393,6 @@
 
             }   // end of else.
 
-            // for the notify modal showing and all.
-            var notify = $.cookie("notify");
-            if(notify == "undefined" || notify == undefined || notify == "1") {
-                $('#notify-modal').modal('show');
-            }
-            // for the closing event handler of the notify-modal.
-            // 1 for showing the modal and 0 for not showing the modal.
-            $('#notify-modal').on('hidden.bs.modal', function(event) {
-                var checkbox = $('#notify-checkbox');
-                if(checkbox.is(':checked')) {
-                    $.cookie("notify", "0", {
-                        path: '/',
-                        expires: 365
-                    });
-                }
-                else {   // if the checkbox is not checked.
-                    $.cookie("notify", "1", {
-                        path: '/',
-                        expires: 365
-                    });
-                }
-                return false;
-            });
-
-
             // hide all the divs on page load. Except for first div.
             // this is supposed to be done here and not in ready() function. Or else, it gives an error while loading the divs.
             $('.main-div').hide();
@@ -2219,13 +2194,6 @@
                 }
                 return false;
             });   // end of add-team-member form submit()
-
-            // for add team member feature
-            $('#btnAddTeamMember').on('click', function() {
-                $('#notify-modal').modal('hide');
-                $('.team').trigger('click');
-                return false;
-            });
         
         });    // end of ready function.
 
@@ -2339,6 +2307,8 @@
                     <tr>
                         <td>
                             <label>Enter the email address of your team member. We'll let them know that you have added them as your team member.</label>
+                            <br />
+                            <label>Individual Mentees can ignore this. Thank You.</label>
                         </td>
                     </tr>
                     <tr>
@@ -3033,30 +3003,6 @@
                     <h4 class="notify-modal-title"></h4>
                 </div>
                 <div class="modal-body" id="advanced-quiz-modal-body">
-                    <h1 class="page-header">
-                        Teams are here!
-                    </h1>
-
-                    <p>
-                        You can now add team members to your Mentored-Research's accounts. Just go to the <a id="btnAddTeamMember">Add Team Member</a> link on the LHS menu and enter the email address of your team mate. We'll let your team mate know about the signup formalities.
-                    </p>
-
-                    <p>However, please note that the assignment(s) can be submitted using only the Primary Account(The one the whole team has been using until now). These team accounts are for accessing the resources and attempting the quizzes.</p>
-
-                    <p><b>The Add Team Member feature of your M-R Portal is only for mentees participating in teams. Individual mentees may ignore this.</b></p>
-
-                    <p>In case you have any doubts, do put in a word to us at <code>tech@mentored-research.com</code> and we'll be happy to help.</p>
-
-                    <br />
-
-                    <p>Thank You, <br />
-                    Tech Team, <br />
-                    Mentored-Research</p>
-
-                    <br />
-
-                    <input type="checkbox" class="checkbox" id="notify-checkbox" style="float:left; display: inline-block;" /> &nbsp;&nbsp;
-                    <label for="notify-checkbox"><b>Don't show this message again</b></label>
 
                 </div>
                 <div class="modal-footer">

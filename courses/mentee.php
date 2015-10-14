@@ -680,14 +680,21 @@
 							var reportDiv = "";
 							for(var i=0;i<reports.length;i++) {
 								reportDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 assignment-report'";
-								if(reports[i] == undefined || reports[i] == "undefined" || reports[i] == "") {
+								if(reports[i].split(" ~~ ")[0] == undefined || reports[i].split(" ~~ ")[0] == "undefined" || reports[i].split(" ~~ ")[0] == "") {
 									reportDiv += "data-url='" + "" +  "'>";
 								}
 								else {
-									reportDiv += "data-url='" + reports[i] +  "'>";
+									reportDiv += "data-url='" + reports[i].split(" ~~ ")[0] +  "'>";
 								}
+
 								reportDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-pdf-o fa-stack-1x fa-inverse'></i></span>";
-								reportDiv += "<p class='text-muted'>" + "Sample Report " + (i+1) + "</p>";
+								// reportDiv += "<p class='text-muted'>" + "Sample Report " + (i+1) + "</p>";
+                                if(reports[i].split(" ~~ ")[1] == "" || reports[i].split(" ~~ ")[1] == "undefined" || reports[i].split(" ~~ ")[1] == undefined) {
+                                    reportDiv += "<p class='text-muted'>" + "Sample Report " + (i+1) + "</p>";
+                                }
+                                else {
+                                    reportDiv += "<p class='text-muted'>" + reports[i].split(" ~~ ")[1] + "</p>";
+                                }
 								reportDiv += "</div>";
 							}
 							$('.reports').append(reportDiv);

@@ -1534,10 +1534,10 @@ function GetAssignmentMaterial($assID) {
 	$resp = "-1";
 	$assignment = array();
 	$assVideo = array();
-
 	$assVideoName = array();
 
 	$assSampleReport = array();
+
 	$assOffTopic = array();
 	$assExtra = array();
 	$i = 0;   // for the main(Assignment) array index.
@@ -1588,7 +1588,7 @@ function GetAssignmentMaterial($assID) {
 		else {
 			$j = 0;
 			while ($reportRes = mysql_fetch_array($reportRs)) {
-				$assSampleReport[$j] = $reportRes["AssSampleReport"];  
+				$assSampleReport[$j] = $reportRes["AssSampleReport"] . " ~~ " . $reportRes["AssSampleReportName"];  
 				$j++;
 			}
 			$assignment["AssSampleReport"] = $assSampleReport;

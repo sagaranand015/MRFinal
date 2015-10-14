@@ -6044,10 +6044,10 @@ function RegisterAssignmentOffTopic($assID, $courseID, $offTopicLink) {
 
 // this is the function to register the Assignment Sample Report upload to the database in the Assignment table.
 // returns -1 on error. 1 on success.
-function RegisterAssignmentSampleReport($assID, $courseID, $sampleReportLink) {
+function RegisterAssignmentSampleReport($assID, $courseID, $sampleReportName, $sampleReportLink) {
 	$resp = "-1";
 	try {
-		$query = "insert into AssignmentSampleReport(AssID, AssSampleReport) values('$assID', '$sampleReportLink')";
+		$query = "insert into AssignmentSampleReport(AssID, AssSampleReportName, AssSampleReport) values('$assID', '$sampleReportName', '$sampleReportLink')";
 		$rs = mysql_query($query);
 		if(!$rs) {
 			$resp = "-1";

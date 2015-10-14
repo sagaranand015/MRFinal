@@ -3,10 +3,10 @@
 // for the PHP helper functions.
 include('helpers.php');
 
-if(isset($_FILES["fileAssignmentSampleReport"]) && $_FILES["fileAssignmentSampleReport"]["error"]== UPLOAD_ERR_OK)
+if(isset($_FILES["fileUploadFeedback"]) && $_FILES["fileUploadFeedback"]["error"]== UPLOAD_ERR_OK)
 {
 	############ Edit settings ##############
-	$UploadDirectory	= 'uploads/assignmentSampleReport/'; //specify upload directory ends with / (slash)
+	$UploadDirectory	= 'uploads/assignmentFeedback/'; //specify upload directory ends with / (slash)
 	##########################################
 	
 	/*
@@ -17,17 +17,17 @@ if(isset($_FILES["fileAssignmentSampleReport"]) && $_FILES["fileAssignmentSample
 	
 	//check if this is an ajax request
 	if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])){
-		die("Apparently, you did not select the course or Assignment before uploading the file. Please hit the back button and try again.");
+		die("Apparently, you did not select the Mentee or Assignment before uploading the file. Please hit the back button and try again.");
 	}
 	
 	
 	//Is file size is less than allowed size.
-	if ($_FILES["fileAssignmentSampleReport"]["size"] > 5242880) {
+	if ($_FILES["fileUploadFeedback"]["size"] > 5242880) {
 		die("File size is too big!");
 	}
 	
 	//allowed file type Server side check
-	switch(strtolower($_FILES['fileAssignmentSampleReport']['type']))
+	switch(strtolower($_FILES['fileUploadFeedback']['type']))
 		{
 			//allowed file types
 			case 'image/gif': 
@@ -42,6 +42,7 @@ if(isset($_FILES["fileAssignmentSampleReport"]) && $_FILES["fileAssignmentSample
             case 'video/mp4':
             case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
             case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+            case 'application/vnd.ms-excel':
             case 'application/msexcel':
             case 'application/x-msexcel':
             case 'application/x-ms-excel':
@@ -49,13 +50,14 @@ if(isset($_FILES["fileAssignmentSampleReport"]) && $_FILES["fileAssignmentSample
             case 'application/x-dos_ms_excel':
             case 'application/xls':
             case 'application/x-xls':
+            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
             case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
 				break;
 			default:
 				die('Unsupported File!'); //output error
 	}
 	
-	$File_Name          = strtolower($_FILES['fileAssignmentSampleReport']['name']);
+	$File_Name          = strtolower($_FILES['fileUploadFeedback']['name']);
 	$File_Ext           = substr($File_Name, strrpos($File_Name, '.')); //get file extention
 	$date = date_create();
 	$timestamp = date_timestamp_get($date);
@@ -63,35 +65,39 @@ if(isset($_FILES["fileAssignmentSampleReport"]) && $_FILES["fileAssignmentSample
 	$NewFileName = $timestamp . "_" . $File_Name;  //.$File_Ext; //new file name
 
 	// get the cookies here.
-	$courseAssPDF = "-1";
-	$assignmentAssPDF = "-1";
-	$register = "-1";
-	$sampleReportName = "-1";
-	if(isset($_COOKIE["courseAssPDF"])) {
-		$courseAssPDF = $_COOKIE["courseAssPDF"];
+	$assId = "-1";
+	$menteeId = "-1";
+	$mentorId = "-1";
+	if(isset($_COOKIE["assId"])) {
+		$assId = $_COOKIE["assId"];
 	}
-	if(isset($_COOKIE["assignmentAssPDF"])) {
-		$assignmentAssPDF = $_COOKIE["assignmentAssPDF"];
+	if(isset($_COOKIE["menteeId"])) {
+		$menteeId = $_COOKIE["menteeId"];
 	}
-	if(isset($_COOKIE["sampleReportName"])) {
-		$sampleReportName = $_COOKIE["sampleReportName"];
+	if(isset($_COOKIE["mentorId"])) {
+		$mentorId = $_COOKIE["mentorId"];
 	}
-	
-	if($courseAssPDF == "-1" || $assignmentAssPDF == "-1") {
-		die("Please select the correct course and/or assignment before uploading the Assignment PDF.");
-	}
-	else if($sampleReportName == "-1") {
-		die("You have not entered the name for the Sample Report uploaded. Please do so first.");
+	if($assId == "-1" || $menteeId == "-1" || $mentorId == "-1") {
+		die("Oops! We encountered an error while submitting your feedback. Please go back and try again.");
 	}
 	else {
-		if(move_uploaded_file($_FILES['fileAssignmentSampleReport']['tmp_name'], $UploadDirectory.$NewFileName )) {
-			// save the link to the database.
-			$register = RegisterAssignmentSampleReport($assignmentAssPDF, $courseAssPDF, $sampleReportName, $UploadDirectory.$NewFileName);
-			if($register == "-1") {
-				die("Oops! We encountered an error while uploading your Assignment PDF. Please try again.");
+		if(move_uploaded_file($_FILES['fileUploadFeedback']['tmp_name'], $UploadDirectory.$NewFileName )) {
+			$courseId = GetMenteeCourseById($menteeId);
+			if($courseId == "0") {
+				die("No record of the mentee found.");
+			}
+			else if($courseId == "-1") {
+				die("Error uploading file. Please try again.");
 			}
 			else {
-				die("Assignment Sample Report Successfully uploaded.");	
+				$resp = RegisterFeedback($mentorId, $menteeId, $assId, $courseId, $UploadDirectory.$NewFileName);
+			}
+
+			if($resp == "-1") {
+				die("oops! We encountered an error while submitting your feedback. Please try again."); 
+			}
+			else {
+				die("Feedback uploaded successfully. Thank You.");
 			}
 		}
 		else {

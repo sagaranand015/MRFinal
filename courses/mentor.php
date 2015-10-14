@@ -1455,7 +1455,7 @@
                     </tr>   
                 </table>    
             </form>
-        </div>  <!-- end of change-password div -->
+        </div>  <!-- end of upload feedback-div -->
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div password-div">
             <h1 class="page-header">

@@ -1138,7 +1138,6 @@
                                     case 'video/mp4':
                                     case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
                                     case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                                    case 'application/vnd.ms-excel':
                                     case 'application/msexcel':
                                     case 'application/x-msexcel':
                                     case 'application/x-ms-excel':
@@ -1146,7 +1145,6 @@
                                     case 'application/x-dos_ms_excel':
                                     case 'application/xls':
                                     case 'application/x-xls':
-                                    case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
                                     case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
                                         break;
                                     default:
@@ -1185,9 +1183,18 @@
                         }; 
                         // check for the courseAssPDF and assignmentAssPDF cookies first and then upload the form.
                         $('#formAssSampleReport').submit(function() { 
+
+                            // get the sample report name here and put it in a cookie and access on the upload-page.
+                            var sampleReportName = $('#txtSampleReportName').val().trim();
+                            $.cookie("sampleReportName", sampleReportName);
+
                             if($.cookie("courseAssPDF") == "undefined" || $.cookie("assignmentAssPDF") == "undefined" || $.cookie("courseAssPDF") == undefined || $.cookie("assignmentAssPDF") == undefined) {
                                 popup.children('p').remove();
                                 popup.append("<p>You havn't selected the Course and Assignment Properly. Please try again.</p>").fadeIn();
+                            }
+                            else if($.cookie("sampleReportName") == "undefined" || $.cookie("sampleReportName") == "" || $.cookie("sampleReportName") == undefined) {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! You did not enter the Name of the Sample Report. Please Recheck and try again.</p>").fadeIn();
                             }
                             else {
                                 $(this).ajaxSubmit(optionsAssignmentSampleReport);            
@@ -4894,6 +4901,14 @@
     				Upload Sample Reports
         		</h3>
         		<table class="table">
+                    <tr>
+                        <td>
+                            <label>Add Sample Report Name: </label>
+                        </td>
+                        <td>
+                            <input type="text" placeholder="Sample Report Name" id="txtSampleReportName" class="form-control" required />
+                        </td>
+                    </tr>
 					<tr>
 						<td>
 							<label>Upload Sample Report(less than 5MB): </label>

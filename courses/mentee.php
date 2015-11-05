@@ -319,7 +319,7 @@
 
             // show a popup message here.
             popup.children('p').remove();
-            popup.append("<p>We're experiencing high Assignment Upload Failures. In case your Assignment Upload fails, please mail your solution to <code>tam@mentored-research.com</code> and <code>tech@mentored-research.com</code>. You'll have access to the next Phase in 24 hours after assignment submission. Thank You for bearing with us. (:   </p>").fadeIn();
+            popup.append("<p>We're experiencing high Assignment Upload Failures. In case your Assignment Upload fails, please mail your solution to <code>tech@mentored-research.com</code> and your mentor. You'll have access to the next Phase in 24 hours after assignment submission. <br /><br /> Stock Pitch Videos should be sent directly to your mentor and <code>guide@mentored-research.com</code> Thank You for bearing with us. (:   </p>").fadeIn();
 
             var overlay = $('#overlay').addClass('overlay-remove');
             function showLoading() {

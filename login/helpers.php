@@ -430,10 +430,10 @@ function LoginUtility($email, $pwd, $table, $emailCol, $pwdCol) {
 			if($no > 0) {
 				$res = mysql_fetch_array($rs);
 	            $salt = $res["Salt"];
-	            $encrypted_password = $res[$table . "Pwd"];
 	            $hash = checkhashSSHA($salt, $pwd);
 	            // check for password equality
-	            if ($encrypted_password == $hash) {
+
+	            if ($res[$table . "Pwd"] == $hash) {
 	                $resp = "1";
 	                // set the global cookie here in PHP.
 	                // setcookie("globalEmail", $res[$table . "Email"], time() + (86400 * 30), "/");

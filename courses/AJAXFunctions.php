@@ -28,7 +28,7 @@ else if(isset($_GET["no"]) && $_GET["no"] == "6") {  // for getting the courses 
 	GetCoursesDropDown();
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "7") {  // for getting the calender image on the mentee page.
-	GetCalender($_GET["menteeEmail"]);
+	GetCalender($_GET["menteeEmail"], $_GET["course"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "8") {  // for getting the latest assignment from of the course
 	GetLatestAssignment($_GET["courseID"]);
@@ -43,13 +43,14 @@ else if(isset($_GET["no"]) && $_GET["no"] == "11") {  // for adding the video li
 	RegisterAssignmentVideo($_GET["assID"], $_GET["assVideo"], $_GET["assVideoName"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "12") {  // for getting the assignments based on a mentee email and id.
-	GetMenteeAssignment($_GET["email"], $_GET["id"]);
+	GetMenteeAssignment($_GET["email"], $_GET["id"], $_GET["course"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "13") {  // for getting the assignment material based on Assignment ID chosen by mentee.
 	GetAssignmentMaterial($_GET["assID"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "14") {  // for getting the mentor of a particular mentee.
-	GetMentorDetailsOfMentee($_GET["email"], $_GET["id"]);
+	// GetMentorDetailsOfMentee($_GET["email"], $_GET["id"]);
+	GetMentorDetailsOfMentee($_GET["email"], $_GET["id"], $_GET["course"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "15") {  // for sending the message from the mentee to the mentor.
 	SendMessageFromMenteeToMentor($_GET["toEmail"], $_GET["msg"], $_GET["email"]);
@@ -79,10 +80,10 @@ else if(isset($_GET["no"]) && $_GET["no"] == "23") {  // to send the invites to 
 	SendInvite($_GET["list"], $_GET["msg"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "24") {  // to get the latest assignment for the mentee.
-	GetLatestAssignmentMentee($_GET["email"], $_GET["id"]);
+	GetLatestAssignmentMentee($_GET["email"], $_GET["id"], $_GET["course"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "25") {  // to get the list of all the assignments submitted by the mentee
-	GetMenteeLastSubmittedAssignmentList($_GET["email"], $_GET["id"]);
+	GetMenteeLastSubmittedAssignmentList($_GET["email"], $_GET["id"], $_GET["course"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "26") {  // to get the list of all the mentees of a particular mentor.
 	GetMenteesOfMentor($_GET["email"], $_GET["id"]);
@@ -91,7 +92,8 @@ else if(isset($_GET["no"]) && $_GET["no"] == "27") {  // to get the list of all 
 	GetMenteeSubmittedAssignmentsForMentor($_GET["email"], $_GET["id"], $_GET["menteeId"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "28") {  // to get the list of all the assignments submitted by the mentee on the mentee page.
-	GetMenteeAssignments($_GET["email"], $_GET["id"]);
+	// GetMenteeAssignments($_GET["email"], $_GET["id"]);
+	GetMenteeAssignments($_GET["email"], $_GET["id"], $_GET["course"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "29") {  // to get the list of all the mentors based on organisation and courses.
 	GetMentorsFromOrganCourse($_GET["organ"], $_GET["course"]);
@@ -130,16 +132,16 @@ else if(isset($_GET["no"]) && $_GET["no"] == "40") {  // to get the mentee submi
 	GetMenteeStatusForAdminAndDirector($_GET["assId"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "41") {  // for sending the query regarding the assignments
-	SendAssignmentQuery($_GET["no"], $_GET["email"], $_GET["id"], $_GET["name"], $_GET["contact"], $_GET["msg"]);
+	SendAssignmentQuery($_GET["no"], $_GET["email"], $_GET["id"], $_GET["name"], $_GET["contact"], $_GET["msg"], $_GET["course"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "42") {  // for sending the query regarding the assignments
-	SendTechnicalQuery($_GET["no"], $_GET["email"], $_GET["id"], $_GET["name"], $_GET["contact"], $_GET["msg"]);
+	SendTechnicalQuery($_GET["no"], $_GET["email"], $_GET["id"], $_GET["name"], $_GET["contact"], $_GET["msg"], $_GET["course"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "43") {  // for sending the query regarding the assignments
-	SendDeadlineQuery($_GET["no"], $_GET["email"], $_GET["id"], $_GET["name"], $_GET["contact"], $_GET["msg"]);
+	SendDeadlineQuery($_GET["no"], $_GET["email"], $_GET["id"], $_GET["name"], $_GET["contact"], $_GET["msg"], $_GET["course"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "44") {  // for getting all the documents for mentor or mentee(based on courseID)
-	GetDocumentsForMentee($_GET["email"], $_GET["id"]);     // includes guides, annual reports and financial documents.
+	GetDocumentsForMentee($_GET["email"], $_GET["id"], $_GET["course"]);     // includes guides, annual reports and financial documents.
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "45") {  // to add the advanced quiz's quiestions and answers to the db
 	AddAdvancedQuiz($_GET["courseId"], $_GET["assId"], $_GET["quizName"], $_GET["deadline"], $_GET["questions"], $_GET["answers"]);
@@ -167,6 +169,41 @@ else if(isset($_GET["no"]) && $_GET["no"] == "52") {  // to add the team member 
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "53") {  // to get the mentees based on courseId
 	GetMentorsFromCourse($_GET["courseId"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "54") {  // to get all the courses a mentee is enrolled into.
+	getAllMenteeCourses($_GET["email"]);
+}
+
+// to get all the courses enrolled by the mentee
+function getAllMenteeCourses($email) {
+	$resp = array();
+	$resp[0] = "-1";
+	try {
+		$query = "select * from MenteeCourses where MenteeEmail='$email'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp[0] = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {  // records exist
+				$resp[0] = "1";
+				$i = 1;
+				while ($res = mysql_fetch_array($rs)) {
+					$resp[$i] = $res["MenteeCourse"] . " ~~ " . GetCourseNameById($res["MenteeCourse"]);
+					$i = $i + 1;
+				}
+			}
+			else {
+				$resp[0] = "0";
+			}
+		}
+		header('Content-Type: application/json');		
+		echo json_encode($resp);
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
 }
 
 // // to get the mentees based on courseId
@@ -352,13 +389,13 @@ function GetQuizDropDown($assId, $courseId) {
 
 // for getting all the documents for mentor or mentee(based on courseID)
 // includes guides, annual reports and financial documents.
-function GetDocumentsForMentee($email, $id) {
+function GetDocumentsForMentee($email, $id, $courseId) {
 	$resp = "-1";
 	$documents = array();
 	$guide = array();
 	$annualReport = array();
 	$financeDoc = array();
-	$courseId = GetMenteeCourse($email);
+	// $courseId = GetMenteeCourse($email);
 	//$i = 0;
 	try {
 		// for getting the guides
@@ -434,22 +471,17 @@ function GetDocumentsForMentee($email, $id) {
 
 
 // for sending the query regarding the assignments
-function SendDeadlineQuery($no, $email, $id, $name, $contact, $msg) {
+function SendDeadlineQuery($no, $email, $id, $name, $contact, $msg, $courseId) {
 	$resp = "-1";
-	try {;
-		$course = "Equity Research Initiative";
-		$from = "guide@mentored-research.com";
-		// get the course here and set the from email based on course.
-		$mentee = GetMenteeDetails($id);
-		if($mentee["MenteeCourse"] == "2") {
-			$from = "sadekar@mentored-research.com";
-			$course = "Technical Analysis Course";
-		}
-		else {
-			$from = "guide@mentored-research.com";
-		}
+	try {
 
-		$subject = "Email Support message received";
+		$mentee = GetMenteeDetails($id);
+		// get the course name here.
+		$course = GetCourseNameById($courseId);
+		// get the from email address based on course id here from the db
+		$toEmail = GetQueryEmail($courseId);
+
+		$subject = "Email Support message received(deadline/others query)";
 		$mail = "Dear Admin, here is the message received from the Email Support feature of the Mentored-Research's portal<b>(Course: " . $course . ")</b>. following are the contents: <br /><br />";
 		$mail .= "Name: <b>" . $name . " (" . $email .  ", " . $contact . ")</b><br />";
 		$mail .= "Message: <b>" . $msg . "</b><br /><br />";
@@ -471,12 +503,12 @@ function SendDeadlineQuery($no, $email, $id, $name, $contact, $msg) {
 	            //     'type' => 'cc'
 	            // ),
 	            array(
-	                'email' => $from,
+	                'email' => $toEmail,
 	                'name' => 'Mentored-Research',
 	                'type' => 'cc'
 	            )
 	        ),
-	        'headers' => array('Reply-To' => 'guide@mentored-research.com')
+	        'headers' => array('Reply-To' => $toEmail)
 	    );
 	    $async = false;
 	    $ip_pool = 'Main Pool';
@@ -492,11 +524,15 @@ function SendDeadlineQuery($no, $email, $id, $name, $contact, $msg) {
 }
 
 // for sending the query regarding the assignments
-function SendTechnicalQuery($no, $email, $id, $name, $contact, $msg) {
+function SendTechnicalQuery($no, $email, $id, $name, $contact, $msg, $courseId) {
 	$resp = "-1";
 	try {
-		$subject = "Email Support message received";
-		$mail = "Dear Admin, here is the message received from the Email Support feature of the Mentored-Research's portal. following are the contents: <br /><br />";
+
+		$course = GetCourseNameById($courseId);
+		$toEmail = "tech@mentored-research.com";   // this is hardcoded here coz of the nature of the query
+
+		$subject = "Email Support message received(tech)";
+		$mail = "Dear Admin, here is the message received from the Email Support feature of the Mentored-Research's portal for course<b>(" . $course .  ")</b>. following are the contents: <br /><br />";
 		$mail .= "Name: <b>" . $name . " (" . $email .  ", " . $contact . ")</b><br />";
 		$mail .= "Message: <b>" . $msg . "</b><br /><br />";
 		$mail .= "Please contact the administrator in case of any doubts.<br /><br />";
@@ -517,12 +553,12 @@ function SendTechnicalQuery($no, $email, $id, $name, $contact, $msg) {
 	            //     'type' => 'cc'
 	            // ),
 	            array(
-	                'email' => 'tech@mentored-research.com',
+	                'email' => $toEmail,
 	                'name' => 'Mentored-Research',
 	                'type' => 'cc'
 	            )
 	        ),
-	        'headers' => array('Reply-To' => 'tech@mentored-research.com')
+	        'headers' => array('Reply-To' => $toEmail)
 	    );
 	    $async = false;
 	    $ip_pool = 'Main Pool';
@@ -538,22 +574,16 @@ function SendTechnicalQuery($no, $email, $id, $name, $contact, $msg) {
 }
 
 // for sending the query regarding the assignments
-function SendAssignmentQuery($no, $email, $id, $name, $contact, $msg) {
+function SendAssignmentQuery($no, $email, $id, $name, $contact, $msg, $courseId) {
 	$resp = "-1";
 	try {
-		$course = "Equity Research Initiative";
-		$from = "guide@mentored-research.com";
-		// get the course here and set the from email based on course.
 		$mentee = GetMenteeDetails($id);
-		if($mentee["MenteeCourse"] == "2") {
-			$from = "ta@mentored-research.com";
-			$course = "Technical Analysis Course";
-		}
-		else {
-			$from = "guide@mentored-research.com";
-		}
+		// get the course name here.
+		$course = GetCourseNameById($courseId);
+		// get the from email address based on course id here from the db
+		$toEmail = GetQueryEmail($courseId);
 
-		$subject = "Email Support message received";
+		$subject = "Email Support message received(assignment query)";
 		$mail = "Dear Admin, here is the message received from the Email Support feature of the Mentored-Research's portal<b>(Course: " . $course . ")</b>. following are the contents: <br /><br />";
 		$mail .= "Name: <b>" . $name . " (" . $email .  ", " . $contact . ")</b><br />";
 		$mail .= "Message: <b>" . $msg . "</b><br /><br />";
@@ -575,12 +605,12 @@ function SendAssignmentQuery($no, $email, $id, $name, $contact, $msg) {
 	            //     'type' => 'cc'
 	            // ),
 	            array(
-	                'email' => $from,
+	                'email' => $toEmail,
 	                'name' => 'Mentored-Research',
 	                'type' => 'cc'
 	            )
 	        ),
-	        'headers' => array('Reply-To' => 'guide@mentored-research.com')
+	        'headers' => array('Reply-To' => $toEmail)
 	    );
 	    $async = false;
 	    $ip_pool = 'Main Pool';
@@ -1073,10 +1103,10 @@ function GetMentorsFromOrganCourse($organ, $course) {
 }
 
 // to get the list of all the assignments submitted by the mentee on the mentee page.
-function GetMenteeAssignments($email, $id) {
+function GetMenteeAssignments($email, $id, $courseId) {
 	$resp = "-1";
 	try {
-		$courseId = GetMenteeCourse($email);
+		// $courseId = GetMenteeCourse($email);
 		$query = "select * from SubmissionFeedback where MenteeID='$id' and CourseID='$courseId'";
 		$rs = mysql_query($query);
 		if(!$rs) {
@@ -1166,12 +1196,11 @@ function GetMenteesOfMentor($email, $id) {
 }
 
 // to get the list of all the assignments submitted by the mentee
-function GetMenteeLastSubmittedAssignmentList($email, $id) {
+function GetMenteeLastSubmittedAssignmentList($email, $id, $courseID) {
 	$resp = "-1";
 	try {
-		$courseID = GetMenteeCourse($email);
+		// $courseID = GetMenteeCourse($email);
 		$lastSubmitted = GetMenteeLastSubmitted($id, $courseID);
-
 		$query = "select * from Assignment where AssCourse='$courseID' and AssNo<='$lastSubmitted'";
 		$rs = mysql_query($query);
 		if(!$rs) {
@@ -1198,10 +1227,10 @@ function GetMenteeLastSubmittedAssignmentList($email, $id) {
 }
 
 //to get the latest assignment for the mentee.
-function GetLatestAssignmentMentee($email, $id) {
+function GetLatestAssignmentMentee($email, $id, $courseID) {
 	$resp = "-1";
 	try {
-		$courseID = GetMenteeCourse($email);
+		// $courseID = GetMenteeCourse($email);
 		$lastSubmitted = GetMenteeLastSubmitted($id, $courseID);
 		$assNo = intval($lastSubmitted) + 1;
 		$assignment = GetAssignmentByNumber($assNo, $courseID);
@@ -1504,22 +1533,58 @@ function SendMessageFromMenteeToMentor($toEmail, $msg, $email) {
 }
 
 // for getting the mentor of a particular mentee.
-function GetMentorDetailsOfMentee($email, $id) {
+// function GetMentorDetailsOfMentee($email, $id) {
+// 	$resp = "-1";
+// 	$mentor = array();
+// 	$mentorID = "0";
+// 	try {
+// 		$mentorID = GetMentorIDOfMentee($email, $id);
+// 		if($mentorID == "0") {
+// 			$resp = "-2";
+// 		}
+// 		else if($mentorID == "-1") {
+// 			$resp = "-1";
+// 		}
+// 		else {
+// 			$mentor = GetMentorDetails($mentorID);
+// 			header('Content-Type: application/json');
+// 			$resp = json_encode($mentor);
+// 		}
+// 		echo $resp;
+// 	}
+// 	catch(Exception $e) {
+// 		$resp = "-1";
+// 		echo $resp;
+// 	}
+// }
+
+function GetMentorDetailsOfMentee($email, $id, $course) {
 	$resp = "-1";
 	$mentor = array();
 	$mentorID = "0";
 	try {
-		$mentorID = GetMentorIDOfMentee($email, $id);
-		if($mentorID == "0") {
-			$resp = "-2";
-		}
-		else if($mentorID == "-1") {
+		$query = "select * from MenteeCourses where MenteeEmail='$email' and MenteeCourse='$course'";
+		$rs = mysql_query($query);
+		if(!$rs) {
 			$resp = "-1";
 		}
 		else {
-			$mentor = GetMentorDetails($mentorID);
-			header('Content-Type: application/json');
-			$resp = json_encode($mentor);
+			if(mysql_num_rows($rs) > 0) {
+				while ($res = mysql_fetch_array($rs)) {
+					$mentorID = $res["MentorID"];
+					if($mentorID == "0") {
+						$resp = "-2";
+					}
+					else if($mentorID == "-1") {
+						$resp = "-1";
+					}
+					else {
+						$mentor = GetMentorDetails($mentorID);
+						header('Content-Type: application/json');
+						$resp = json_encode($mentor);
+					}
+				}
+			}	
 		}
 		echo $resp;
 	}
@@ -1639,11 +1704,11 @@ function GetAssignmentMaterial($assID) {
 
 // for getting the assignments based on a mentee email and id.
 // returns -2 if the course is not assigned. -1 on error. html list on success.
-function GetMenteeAssignment($email, $id) {
+function GetMenteeAssignment($email, $id, $assCourse) {
 	$resp = "-1";
-	$assCourse = "-1";
+	// $assCourse = "-1";
 	try {
-		$assCourse = GetMenteeCourse($email);
+		// $assCourse = GetMenteeCourse($email);
 		if($assCourse == "0") {
 			$resp = "-2";
 		}
@@ -1772,9 +1837,9 @@ function GetLatestAssignment($courseID) {
 
 // for getting the calender image on the mentee page.
 // returns -2 if course is not assigned. -1 on error. CalenderURL on succes.
-function GetCalender($menteeEmail) {
+function GetCalender($menteeEmail, $courseID) {
 	$resp = "-1";
-	$courseID = GetMenteeCourse($menteeEmail);
+	// $courseID = GetMenteeCourse($menteeEmail);
 	$calender = "";
 	try {
 		if($courseID == "-1" || $courseID == "0") {

@@ -8,6 +8,30 @@ include 'headers/databaseConn.php';
 // for mandrill mail sending API.
 require_once 'mandrill/Mandrill.php'; 
 
+// get the query email address from the course id.
+function GetQueryEmail($courseId) {
+	$resp = "-1";
+	try {
+		$query = "select * from CourseQuery where CourseID='$courseId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				while ($res = mysql_fetch_array($rs)) {
+					$resp = $res["QueryEmail"];
+				}
+			}
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // to check if a menteeEmail exists in the mentee table.
 function CheckIfMenteeExists($menteeEmail) {
 	$resp = "-1";

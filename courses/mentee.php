@@ -387,11 +387,58 @@
                         popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
                     },
                     complete: function() {
-                        hideLoading();
                     }
                 });   // end of ajax request.
 
             }   // end of else.
+
+            // for getting the drop down of courses from the MentorCourses table.
+            $.ajax({
+                type: "GET",
+                url: "AJAXFunctions.php",
+                data: {
+                    no: "54", email: email
+                },
+                success: function(response) {
+                    console.log(response);
+                    if(response[0] == "1") {   // success case
+                        for(var i = 1;i<response.length;i++) {
+                            var courseInfo = response[i].split(" ~~ ");
+                            $('.dropdown-menu-course').append("<li><a style='color: black;' class='courses-link' href='#' data-courseid='" + courseInfo[0] + "' data-coursename='" + courseInfo[1] + "'>" + courseInfo[1] + "</a></li>");
+
+                            if($.cookie('course') == "" || $.cookie('course') == "undefined" || $.cookie('course') == undefined || $.cookie('coursename') == "" || $.cookie('coursename') == "undefined" || $.cookie('coursename') == undefined) {   // for the first time
+                                $.cookie('course', response[1].split(" ~~ ")[0], {     // setting the first course as the default
+                                    path: '/',
+                                    expires: 365
+                                });
+                                $.cookie('coursename', response[1].split(" ~~ ")[1], {     // setting the first course name as the default
+                                    path: '/',
+                                    expires: 365
+                                });
+
+                                // show it in the navbar.
+                                $('.dropdown-course').html($.cookie('coursename') + "<span class='caret'></span>");
+                            } 
+                        }
+                    } 
+                    else if(response[0] == "0") {
+                        popup.children('p').remove();
+                        popup.append("<p>No courses exist for this account in our databases. Please try again or contact us at: <code>tech@mentored-research.com</code></p>").fadeIn();    
+                    }
+                    else {
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We could not load your courses. Please try logging in again.</p>").fadeIn();    
+                    }
+                },
+                error: function(err) {
+                    popup.children('p').remove();
+                    popup.append("<p>Oops! We could not load your courses. Please try logging in again.</p>").fadeIn();
+                },
+                complete: function() {
+                    hideLoading();
+                }
+            });            
+
 
             // hide all the divs on page load. Except for first div.
             // this is supposed to be done here and not in ready() function. Or else, it gives an error while loading the divs.
@@ -490,6 +537,42 @@
             	return false;
             });
 
+            // ---------------------- for setting the global cookie for the selected course ----------------------------------
+            $('.dropdown-menu-course').delegate('.courses-link', 'click', function() {
+                var courseId = $(this).attr('data-courseid');
+                var courseName = $(this).attr('data-coursename');
+
+                if(courseId == $.cookie('course')) {
+                }
+                else {
+                    showLoading();
+                    $.cookie('course', courseId, {
+                        path: '/',
+                        expires: 365
+                    });
+                    $.cookie('coursename', courseName, {
+                        path: '/',
+                        expires: 365
+                    });
+
+                    if($.cookie('course') == "" || $.cookie('course') == "undefined" || $.cookie('course') == undefined) {
+                        popup.children('p').remove();
+                        popup.append("<p>Course could not be changed. Please logout and try again. If problem persists, drop in a mail to <code>tech@mentored-research.com</code></p>").fadeIn();
+                    } 
+                    else {
+                        popup.children('p').remove();
+                        popup.append("<p>Course changed successfully. Refreshing your dashboard.</p>").fadeIn();
+                        location.reload();         // reload the page after change of course
+                    }
+                }   // end of else.
+                return false;
+            });
+
+            // show the selected course in the navbar.
+            $('.dropdown-course').html($.cookie('coursename') + "<span class='caret'></span>");
+
+
+            // ------------------------ for all the client logic ------------------------------
             // for updating the profile fields
             $('#formProfile').validator().on('submit', function (e) {
             	if (e.isDefaultPrevented()) {
@@ -536,8 +619,7 @@
             	return false;
             });
 
-            // for all the links on the left hand side.
-
+            // ------------------------------------ for all the links on the left hand side. ------------------------------------ 
             // for the Central Resources page on LHS
             $('.CRP').on('click', function() {
             	showDiv($('.CRP-div'));
@@ -559,13 +641,17 @@
                 //     $('#overlay-error').removeClass('overlay-remove');
                 //     $('#overlay-error').addClass('overlay-show');
                 // }
+                if($.cookie('course') == "undefined" || $.cookie('course') == undefined || $.cookie('course') == "") {
+                    popup.children('p').remove();
+                    popup.append("<p>you have not selected any courses. Please try logging again.</p>").fadeIn();
+                }
             	else {
             		showLoading();
 	            	$.ajax({
 	            		type: "GET",
 	            		url: "AJAXFunctions.php",
 	            		data: {
-	            			no: "12", email: email, id: id
+	            			no: "12", email: email, id: id, course: $.cookie('course')
 	            		},
 	            		success: function(response) {
 	            			// to show the assignments drop down at appropriate place.
@@ -820,13 +906,17 @@
                 //     $('#overlay-error').removeClass('overlay-remove');
                 //     $('#overlay-error').addClass('overlay-show');
                 // }
+                else if($.cookie('course') == "" || $.cookie('course') == "undefined" || $.cookie('course') == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>you have not selected any courses. Please try logging again.</p>").fadeIn();
+                }
             	else {
             		showLoading();
 	            	$.ajax({
 	            		type: "GET",
 	            		url: "AJAXFunctions.php",
 	            		data: {
-	            			no: "7", menteeEmail: menteeEmail
+	            			no: "7", menteeEmail: menteeEmail, course: $.cookie('course')
 	            		},
 	            		success: function(response) {
                             if(response == "-1") {
@@ -887,9 +977,19 @@
 	            		type: "GET",
 	            		url: "AJAXFunctions.php",
 	            		data: {
-	            			no: "14", email: email, id: id
+	            			no: "14", email: email, id: id, course: $.cookie('course')
 	            		},
 	            		success: function(response) {
+
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();                     
+                            }
+                            else if(response == "-2") {
+                                popup.children('p').remove();
+                                popup.append("<p>No Mentor found in the database for your course. Please try again or put in a mail to us at: <code>tach@mentored-research.com</code></p>").fadeIn();                     
+                            }
+
 	            			if(response.MentorName == "undefined" || response.MentorName == undefined || response.MentorName == "") {
 	            				$('.mentor-name').html("No Data Available");
             				}
@@ -1079,7 +1179,7 @@
                         type: "GET",
                         url: "AJAXFunctions.php",
                         data: {
-                            no: "24", email: email, id: id
+                            no: "24", email: email, id: id, course: $.cookie('course')
                         },
                         success: function(response) {
                             if(response == "0") {
@@ -1108,35 +1208,36 @@
                                     $('.latest-assignment-name').html(assName);
                                     $('#btnSubmitSolution').attr('value', "Submit " + assName);
 
-                                    // for setting the cookies for uploading the files.
+                                    // for setting the parameters for uploading the files.
+                                    popup.children('p').remove();
                                     if(assId == "" || assId == "undefined" || assId == undefined) {
-                                        $('.latest-assignment-name').attr('data-id', "-1");   
-                                    }
-                                    else {
-                                        $('.latest-assignment-name').attr('data-id', assId);
-                                        $.cookie("assIdSolution", assId);
+                                        assId = "-1";
+                                        popup.append("<p>Oops! We could not gather the required data. Please try logging in again.</p>").fadeIn();
                                     }
                                     if(assCourse == "" || assCourse == "undefined" || assCourse == undefined) {
-                                        $('.latest-assignment-name').attr('data-assCourse', "-1");   
-                                    }
-                                    else {
-                                        $('.latest-assignment-name').attr('data-assCourse', assCourse);
-                                        $.cookie("assCourseSolution", assCourse);
+                                        assCourse = "-1";
+                                        popup.append("<p>Oops! We could not gather the required data. Please try logging in again.</p>").fadeIn();
                                     }
                                     if(assPdf == "" || assPdf == "undefined" || assPdf == undefined) {
-                                        $('.latest-assignment-name').attr('data-assPdf', "-1");   
-                                    }
-                                    else {
-                                        $('.latest-assignment-name').attr('data-assPdf', assPdf);
-                                        $.cookie("assPdfSolution", assPdf);
+                                        assPdf = "-1";
+                                        popup.append("<p>Oops! We could not gather the required data. Please try logging in again.</p>").fadeIn();
                                     }
                                     if(assNo == "" || assNo == "undefined" || assNo == undefined) {
-                                        $('.latest-assignment-name').attr('data-assNo', "-1");   
+                                        assNo = "-1";
+                                        popup.append("<p>Oops! We could not gather the required data. Please try logging in again.</p>").fadeIn();
                                     }
-                                    else {
-                                        $('.latest-assignment-name').attr('data-assNo', assNo);
-                                        $.cookie("assNoSolution", assNo);
-                                    }
+
+                                    $('.latest-assignment-name').attr('data-id', assId);
+                                    $('.latest-assignment-name').append("<input type='hidden' name='assIdSolution' value='" + assId + "' />");
+
+                                    $('.latest-assignment-name').attr('data-assCourse', assCourse);
+                                    $('.latest-assignment-name').append("<input type='hidden' name='assCourseSolution' value='" + assCourse + "' />");
+
+                                    $('.latest-assignment-name').attr('data-assPdf', assPdf);
+                                    $('.latest-assignment-name').append("<input type='hidden' name='assPdfSolution' value='" + assPdf + "' />");
+
+                                    $('.latest-assignment-name').attr('data-assNo', assNo);
+                                    $('.latest-assignment-name').append("<input type='hidden' name='assNoSolution' value='" + assNo + "' />");
 
                                     // for the click event on the Assignment name that shows as the heading.
                                     $('.latest-assignment-name').on('click', function() {
@@ -1166,7 +1267,7 @@
                         type: "GET",
                         url: "AJAXFunctions.php",
                         data: {
-                            no: "25", email: email, id: id
+                            no: "25", email: email, id: id, course: $.cookie('course')
                         },
                         success: function(response) {
                             if(response == "-1") {
@@ -1192,222 +1293,20 @@
                     });
                 }  // end of else that validates the logged in credentials
 
-
-                // for the helper functions for the file upload things.
-                //progress bar function
-                function OnProgress(event, position, total, percentComplete) {
-                    // show the loading overlay here, when the process of uploading starts.
-                    showLoading();
-                    popup.children('p').remove();
-                    popup.fadeIn();
-                    $('.progress').fadeIn();
-                    $('.progress-bar').width(percentComplete + '%') //update progressbar percent complete
-                    $('.progress-bar').html(percentComplete + '%'); //update status text
-                }
-                //function to format bites bit.ly/19yoIPO
-                function bytesToSize(bytes) {
-                   var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-                   if (bytes == 0) return '0 Bytes';
-                   var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-                   return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
-                }
-
-                //function to check file size before uploading.
-                function beforeSubmitAssignmentSolution() {
-                    alertMsg.children('p').remove();
-                    alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
-                    //check whether browser fully supports all File API
-                    if (window.File && window.FileReader && window.FileList && window.Blob) {
-                        if( !$('#fileAssignmentSolution').val()) {   //check empty input filed 
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
-                            return false;
-                        }
-                        var fsize = $('#fileAssignmentSolution')[0].files[0].size; //get file size
-                        var ftype = $('#fileAssignmentSolution')[0].files[0].type; // get file type
-                        //allow file types 
-                        switch(ftype) {
-                            case 'image/gif': 
-                            case 'image/jpeg': 
-                            case 'image/pjpeg':
-                            case 'text/plain':
-                            case 'text/html': //html file
-                            case 'application/x-zip-compressed':
-                            case 'application/pdf':
-                            case 'application/msword':
-                            case 'application/vnd.ms-excel':
-                            case 'video/mp4':
-                            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                            case 'application/vnd.ms-excel':
-                            case 'application/msexcel':
-                            case 'application/x-msexcel':
-                            case 'application/x-ms-excel':
-                            case 'application/x-excel':
-                            case 'application/x-dos_ms_excel':
-                            case 'application/xls':
-                            case 'application/x-xls':
-                            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                            case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-                            case 'application/vnd.openxmlformats-officedocument.presentationml.template':
-                            case 'application/vnd.openxmlformats-officedocument.presentationml.slideshow':
-                                break;
-                            default:
-                                alertMsg.children('p').remove();
-                                alertMsg.fadeOut();
-                                popup.children('p').remove();
-                                popup.append("<p>This file format is not supported by the server. Please upload the file in <b>.xlsx</b> format.</p>").fadeIn();
-                                return false;
-                        }
-                        //Allowed file size is less than 5 MB (1048576)
-                        if(fsize>5242880)   {
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
-                            return false;
-                        }
-                    }
-                    else  {
-                        alertMsg.children('p').remove();
-                        alertMsg.fadeOut();
-                        popup.children('p').remove();
-                        popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
-                        return false;
-                    }
-                    alertMsg.children('p').remove();
-                    alertMsg.fadeOut();
-                }   // end of beforeSubmitAssignmentSolution function.
-
-                function afterSuccessAssignmentSolution() {
-                    // to hide the loading overlay after the uploading is done.
-                    hideLoading();
-                    popup.children('p').remove();
-                    popup.fadeOut();
-                    $('.progress').fadeOut();
-                    alertMsg.fadeIn();
-                    // finally, trigger the solution button for reloading.
-                    $('.submitSolution').trigger('click');
-                    // to fadeOut the alertMsg after 10 seconds.
-                    setTimeout(function() {
-                        alertMsg.fadeOut();
-                    }, 10000);
-                }     // end of afterSuccessAssignmentSolution function
-
-
-                // code for assignmentSolution File upload
-                var optionsAssignmentSolution = { 
-                    target:   '#alertMsg',   // target element(s) to be updated with server response 
-                    beforeSubmit:  beforeSubmitAssignmentSolution,  // pre-submit callback 
-                    success:       afterSuccessAssignmentSolution,  // post-submit callback 
-                    uploadProgress: OnProgress, //upload progress callback 
-                    resetForm: true        // reset the form after successful submit 
-                };
-
-                // for the submission of the assignment solution, through form submission model.
-                $('#formSubmitSolution').submit(function() {
+                $('#form-submit-solution').submit(function() {
                     if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
                         popup.children('p').remove();
                         popup.append("Oops! Looks like you have not logged in properly. Please logout and try again.").fadeIn();
                     }
-                    // else if(email != globalEmail) {
-                    //     popup.children('p').remove();
-                    //     popup.append("<p>Looks like you have another session going on in the same browser. Please logout from either sessions and try <a href='http://mentored-research.com/login' style='color: black;'>Logging in</a> again. Thank you.</p>").fadeIn();
-                    //     $('#overlay-error').removeClass('overlay-remove');
-                    //     $('#overlay-error').addClass('overlay-show');
-                    // }
                     else {
-                        $(this).ajaxSubmit(optionsAssignmentSolution);    
+                        // $(this).ajaxSubmit(optionsAssignmentSolution);    
+                        showLoading();
+                        $(this).submit();    
                     }
                     return false;
                 });
 
                 // -------------------- for the assignment update solution --------------------
-
-                //for the delegate event of the change of the drop down list that contains the submitted assignments.
-                $('.submitSolution-div').delegate('#ddl-assignment', 'change', function() {
-                    var assID = $(this).val();
-                    $.cookie("assIdUpdate", assID);
-                    return false;
-                });
-
-                //function to check file size before uploading for the update Solution
-                function beforeSubmitUpdateSolution() {
-                    alertMsg.children('p').remove();
-                    alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
-                    //check whether browser fully supports all File API
-                    if (window.File && window.FileReader && window.FileList && window.Blob) {
-                        if( !$('#fileUpdateSolution').val()) {   //check empty input filed 
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
-                            return false;
-                        }
-                        var fsize = $('#fileUpdateSolution')[0].files[0].size; //get file size
-                        var ftype = $('#fileUpdateSolution')[0].files[0].type; // get file type
-                        //allow file types 
-                        switch(ftype) {
-                            case 'image/gif': 
-                            case 'image/jpeg': 
-                            case 'image/pjpeg':
-                            case 'text/plain':
-                            case 'text/html': //html file
-                            case 'application/x-zip-compressed':
-                            case 'application/pdf':
-                            case 'application/msword':
-                            case 'application/vnd.ms-excel':
-                            case 'video/mp4':
-                            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                            case 'application/vnd.ms-excel':
-                            case 'application/msexcel':
-                            case 'application/x-msexcel':
-                            case 'application/x-ms-excel':
-                            case 'application/x-excel':
-                            case 'application/x-dos_ms_excel':
-                            case 'application/xls':
-                            case 'application/x-xls':
-                            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                            case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-                            case 'application/vnd.openxmlformats-officedocument.presentationml.template':
-                            case 'application/vnd.openxmlformats-officedocument.presentationml.slideshow':
-                                break;
-                            default:
-                                alertMsg.children('p').remove();
-                                alertMsg.fadeOut();
-                                popup.children('p').remove();
-                                popup.append("<p>This file format is not supported by the server. Please upload the file in <b>.xlsx</b> format.</p>").fadeIn();
-                                return false;
-                        }
-                        //Allowed file size is less than 5 MB (1048576)
-                        if(fsize>5242880)   {
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
-                            return false;
-                        }
-                    }
-                    else  {
-                        alertMsg.children('p').remove();
-                        alertMsg.fadeOut();
-                        popup.children('p').remove();
-                        popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
-                        return false;
-                    }
-                    alertMsg.children('p').remove();
-                    alertMsg.fadeOut();
-                }   // end of beforeSubmitUpdateSolution function.
-
-                // code for updateSolution File upload
-                var optionsUpdateSolution = { 
-                    target:   '#alertMsg',   // target element(s) to be updated with server response 
-                    beforeSubmit:  beforeSubmitUpdateSolution,  // pre-submit callback 
-                    success:       afterSuccessAssignmentSolution,  // post-submit callback 
-                    uploadProgress: OnProgress, //upload progress callback 
-                    resetForm: true        // reset the form after successful submit 
-                };
 
                 // now, for the uploading of the file that contains the updated assignment solution
                 $('#formUpdateSolution').submit(function() {
@@ -1449,7 +1348,7 @@
                         type: "GET",
                         url: "AJAXFunctions.php",
                         data: {
-                            no: "28", email: email, id: id
+                            no: "28", email: email, id: id, course: $.cookie('course')
                         },
                         success: function(response) {
                             if(response == "-1") {
@@ -1525,7 +1424,7 @@
                         type: "GET",
                         url: "AJAXFunctions.php",
                         data: {
-                            no: "12", email: email, id: id
+                            no: "12", email: email, id: id, course: $.cookie('course')
                         },
                         success: function(response) {
                             // to show the assignments drop down at appropriate place.
@@ -1960,7 +1859,7 @@
                         type: "GET",
                         url: "AJAXFunctions.php",
                         data: {
-                            no: no, email: email, id: id, name: name, contact: contact, msg: msg
+                            no: no, email: email, id: id, name: name, contact: contact, msg: msg, course: $.cookie('course')
                         },
                         success: function(response) {
                             if(response == "-1") {
@@ -2010,7 +1909,7 @@
                         type: "GET",
                         url: "AJAXFunctions.php",
                         data: {
-                            no: "44", email: email, id: id
+                            no: "44", email: email, id: id, course: $.cookie('course')
                         },
                         success: function(response) {
                             //console.log(response);
@@ -2026,35 +1925,45 @@
                                 $('.guides').children('.course-guide').remove();
                                 var guides = response.guide;
                                 var guideDiv = "";
-                                for(var i=0;i<guides.length;i++) {
-                                    guideDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 course-guide'";
-                                    if(guides[i] == undefined || guides[i] == "undefined" || guides[i] == "") {
-                                        guideDiv += "data-url='" + "" +  "'>";
-                                    }
-                                    else {
-                                        guideDiv += "data-url='" + guides[i] +  "'>";
-                                    }
-                                    guideDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
-                                    guideDiv += "<p class='text-muted'>" + "Guide " + (i+1) + "</p>";
-                                    guideDiv += "</div>";
+                                if(guides[0] == "0") {   // nothing exists in the db
+                                    guideDiv += "None Available.";
                                 }
+                                else {
+                                    for(var i=0;i<guides.length;i++) {
+                                        guideDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 course-guide'";
+                                        if(guides[i] == undefined || guides[i] == "undefined" || guides[i] == "") {
+                                            guideDiv += "data-url='" + "" +  "'>";
+                                        }
+                                        else {
+                                            guideDiv += "data-url='" + guides[i] +  "'>";
+                                        }
+                                        guideDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
+                                        guideDiv += "<p class='text-muted'>" + "Guide " + (i+1) + "</p>";
+                                        guideDiv += "</div>";
+                                    }
+                                }   // end of else.
                                 $('.guides').append(guideDiv);
 
                                 // for the annual reports here.
                                 $('.ann-reports').children('.course-ann-report').remove();
                                 var annReports = response.annualReport;
                                 var annReportDiv = "";
-                                for(var i=0;i<annReports.length;i++) {
-                                    annReportDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 course-ann-report'";
-                                    if(annReports[i] == undefined || annReports[i] == "undefined" || annReports[i] == "") {
-                                        annReportDiv += "data-url='" + "" +  "'>";
+                                if(annReports[0] == "0") {
+                                    annReportDiv += "None Available.";
+                                } 
+                                else {
+                                    for(var i=0;i<annReports.length;i++) {
+                                        annReportDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 course-ann-report'";
+                                        if(annReports[i] == undefined || annReports[i] == "undefined" || annReports[i] == "") {
+                                            annReportDiv += "data-url='" + "" +  "'>";
+                                        }
+                                        else {
+                                            annReportDiv += "data-url='" + annReports[i] +  "'>";
+                                        }
+                                        annReportDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
+                                        annReportDiv += "<p class='text-muted'>" + "Annual Report " + (i+1) + "</p>";
+                                        annReportDiv += "</div>";
                                     }
-                                    else {
-                                        annReportDiv += "data-url='" + annReports[i] +  "'>";
-                                    }
-                                    annReportDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
-                                    annReportDiv += "<p class='text-muted'>" + "Annual Report " + (i+1) + "</p>";
-                                    annReportDiv += "</div>";
                                 }
                                 $('.ann-reports').append(annReportDiv);  
 
@@ -2062,17 +1971,22 @@
                                 $('.finances').children('.course-finance').remove();
                                 var finances = response.financeDoc;
                                 var financeDiv = "";
-                                for(var i=0;i<finances.length;i++) {
-                                    financeDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 course-finance'";
-                                    if(finances[i] == undefined || finances[i] == "undefined" || finances[i] == "") {
-                                        financeDiv += "data-url='" + "" +  "'>";
+                                if(finances[0] == "0") {
+                                    financeDiv += "None Available.";
+                                }
+                                else {
+                                    for(var i=0;i<finances.length;i++) {
+                                        financeDiv += "<div class='col-lg-3 col-md-3 col-sm-6 col-xs-6 course-finance'";
+                                        if(finances[i] == undefined || finances[i] == "undefined" || finances[i] == "") {
+                                            financeDiv += "data-url='" + "" +  "'>";
+                                        }
+                                        else {
+                                            financeDiv += "data-url='" + finances[i] +  "'>";
+                                        }
+                                        financeDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
+                                        financeDiv += "<p class='text-muted'>" + "Financial Document " + (i+1) + "</p>";
+                                        financeDiv += "</div>";
                                     }
-                                    else {
-                                        financeDiv += "data-url='" + finances[i] +  "'>";
-                                    }
-                                    financeDiv += "<span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-file-video-o fa-stack-1x fa-inverse'></i></span>";
-                                    financeDiv += "<p class='text-muted'>" + "Financial Document " + (i+1) + "</p>";
-                                    financeDiv += "</div>";
                                 }
                                 $('.finances').append(financeDiv);                                
 
@@ -2127,80 +2041,82 @@
                 return false;
             });   // end of document link on LHS.
 
+            
+            // --------------------------- TEAM MEMBER THING (not required anymore) ---------------------------
             // for the Add member link on LHS
-            $('.team').on('click', function() {
-                showDiv($('.team-div'));
-                changeActiveState($(this).parent('li'));
+            // $('.team').on('click', function() {
+            //     showDiv($('.team-div'));
+            //     changeActiveState($(this).parent('li'));
 
-                return false;
-            });   // end of team link on LHS.
+            //     return false;
+            // });   // end of team link on LHS.
 
             // for submitting the add-team-member form
-            $('#add-team-member').submit(function() {
-                var email = $.cookie("email");
-                var id = $.cookie("id");
+            // $('#add-team-member').submit(function() {
+            //     var email = $.cookie("email");
+            //     var id = $.cookie("id");
 
-                var memberEmail = $('#txtMemberEmail').val().trim();
+            //     var memberEmail = $('#txtMemberEmail').val().trim();
 
-                if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
-                    popup.children('p').remove();
-                    popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
-                }
-                else {
-                    showLoading();
-                    $.ajax({
-                        type: "GET",
-                        url: "AJAXFunctions.php",
-                        data: {
-                            no: "52", email: email, id: id, memberEmail: memberEmail
-                        },
-                        success: function(response) {
-                            console.log(response);
-                            var r = response.split(" ~~ ");
-                            var exists = r[0];
-                            var resp = [1];
-                            var assign = r[2];
+            //     if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
+            //         popup.children('p').remove();
+            //         popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
+            //     }
+            //     else {
+            //         showLoading();
+            //         $.ajax({
+            //             type: "GET",
+            //             url: "AJAXFunctions.php",
+            //             data: {
+            //                 no: "52", email: email, id: id, memberEmail: memberEmail
+            //             },
+            //             success: function(response) {
+            //                 console.log(response);
+            //                 var r = response.split(" ~~ ");
+            //                 var exists = r[0];
+            //                 var resp = [1];
+            //                 var assign = r[2];
 
-                            if(exists == "1") {
-                                if(resp == "1") {
-                                    if(assign == "1") {
-                                        popup.children('p').remove();
-                                        popup.append("<p>Your Team member has been successfully added. We'll notify your team member regarding the Signup formalities. Thank You.</p>").fadeIn();
-                                    }
-                                    else {
-                                        popup.children('p').remove();
-                                        popup.append("<p>Your Team member has been successfully added. We'll notify your team member regarding the Signup formalities. Thank You.</p>").fadeIn();
-                                    }
-                                }
-                                else if(resp == "0") {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Looks like you have already added this Email address as a team member. Please use a different Email address.</p>").fadeIn();
-                                }
-                                else {
-                                    popup.children('p').remove();
-                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-                                }
-                            }
-                            else if(exists == "0") {
-                                popup.children('p').remove();
-                                popup.append("<p>Looks like the email address you entered could be verified. Maybe you're using a different email address than the one given by your team member. Please double check and revert back. Thank You.</p>").fadeIn();
-                            }
-                            else {
-                                popup.children('p').remove();
-                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
-                            }
-                        },
-                        error: function() {
-                            popup.children('p').remove();
-                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-                        },
-                        complete: function() {
-                            hideLoading();
-                        }
-                    });
-                }
-                return false;
-            });   // end of add-team-member form submit()
+            //                 if(exists == "1") {
+            //                     if(resp == "1") {
+            //                         if(assign == "1") {
+            //                             popup.children('p').remove();
+            //                             popup.append("<p>Your Team member has been successfully added. We'll notify your team member regarding the Signup formalities. Thank You.</p>").fadeIn();
+            //                         }
+            //                         else {
+            //                             popup.children('p').remove();
+            //                             popup.append("<p>Your Team member has been successfully added. We'll notify your team member regarding the Signup formalities. Thank You.</p>").fadeIn();
+            //                         }
+            //                     }
+            //                     else if(resp == "0") {
+            //                         popup.children('p').remove();
+            //                         popup.append("<p>Looks like you have already added this Email address as a team member. Please use a different Email address.</p>").fadeIn();
+            //                     }
+            //                     else {
+            //                         popup.children('p').remove();
+            //                         popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+            //                     }
+            //                 }
+            //                 else if(exists == "0") {
+            //                     popup.children('p').remove();
+            //                     popup.append("<p>Looks like the email address you entered could be verified. Maybe you're using a different email address than the one given by your team member. Please double check and revert back. Thank You.</p>").fadeIn();
+            //                 }
+            //                 else {
+            //                     popup.children('p').remove();
+            //                     popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
+            //                 }
+            //             },
+            //             error: function() {
+            //                 popup.children('p').remove();
+            //                 popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
+            //             },
+            //             complete: function() {
+            //                 hideLoading();
+            //             }
+            //         });
+            //     }
+            //     return false;
+            // });   // end of add-team-member form submit()
         
         });    // end of ready function.
 
@@ -2261,6 +2177,12 @@
                     <li class="hidden">
                         <a class="scrolly" href="#page-top"></a>
                     </li>
+                    <li class="dropdown">
+                    <a href="#" class="dropdown-toggle dropdown-course" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Your Courses<span class="caret"></span></a>
+                        <ul class="dropdown-menu dropdown-menu-course">
+                            <!-- data will come from ajax here -->
+                        </ul>
+                    </li>
                     <li>
                     	<a href="#" class="btnLogout">Logout</a>
                     </li>
@@ -2286,7 +2208,7 @@
                 	<li><a href="#" class="profile">Profile</a></li>
                     <li><a href="#" class="password">Change Password</a></li>
                 	<li><a href="#" class="mentor">Mentor Profile</a></li>
-                    <li><a href="#" class="team">Add Team Member</a></li>
+                    <!-- <li><a href="#" class="team">Add Team Member</a></li> -->
                 </ul>
                 <ul class="nav nav-sidebar">
                     <li><a href="#" class="submitSolution">Submit Assignment Solution</a></li>
@@ -2303,8 +2225,8 @@
         	Menu
         </button>
 
-        <!-- for adding the team member of the mentee -->
-        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div team-div">
+        <!-- for adding the team member of the mentee (This is not required) -->
+        <!-- <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div team-div">
             <h1 class="page-header">
                 Add Team Member
             </h1>
@@ -2330,7 +2252,7 @@
                     </tr>
                 </table>
             </form>
-        </div>
+        </div> -->
 
         <!-- for showing the guides and documents -->
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div document-div">
@@ -2366,6 +2288,7 @@
             <h1 class="page-header">
                 Email Support
             </h1>
+            <h6>Please select the correct course before submitting your queries. Queries intended for one course, but submitted in another course might not be answered. Thank you.</h6>
 
             <div>
                 <h4 class="page-header">Select Query Type:</h4>
@@ -2471,7 +2394,8 @@
             <h3 class="page-header">
                 Latest Pending Assignment:
             </h3>
-            <form id="formSubmitSolution" action="assignmentSolution-upload.php" method="post" enctype="multipart/form-data">
+            <!-- <form id="formSubmitSolution" action="assignmentSolution-upload.php" method="post" enctype="multipart/form-data"> -->
+            <form id="form-submit-solution" action="assignment-solution-upload.php" method="post" enctype="multipart/form-data">
                 <table class="table">
                     <tr>
                         <td>

@@ -400,25 +400,31 @@
                     no: "54", email: email
                 },
                 success: function(response) {
+
                     console.log(response);
+
                     if(response[0] == "1") {   // success case
                         for(var i = 1;i<response.length;i++) {
                             var courseInfo = response[i].split(" ~~ ");
                             $('.dropdown-menu-course').append("<li><a style='color: black;' class='courses-link' href='#' data-courseid='" + courseInfo[0] + "' data-coursename='" + courseInfo[1] + "'>" + courseInfo[1] + "</a></li>");
 
-                            if($.cookie('course') == "" || $.cookie('course') == "undefined" || $.cookie('course') == undefined || $.cookie('coursename') == "" || $.cookie('coursename') == "undefined" || $.cookie('coursename') == undefined) {   // for the first time
-                                $.cookie('course', response[1].split(" ~~ ")[0], {     // setting the first course as the default
-                                    path: '/',
-                                    expires: 365
-                                });
-                                $.cookie('coursename', response[1].split(" ~~ ")[1], {     // setting the first course name as the default
-                                    path: '/',
-                                    expires: 365
-                                });
+                            // ----------- for setting the course ------------
+                            $.cookie('course', response[1].split(" ~~ ")[0]);
+                            $.cookie('coursename', response[1].split(" ~~ ")[1]);
 
-                                // show it in the navbar.
-                                $('.dropdown-course').html($.cookie('coursename') + "<span class='caret'></span>");
+                            // show it in the navbar.
+                            $('.dropdown-course').html($.cookie('coursename') + "<span class='caret'></span>");
+
+                            if($.cookie('course') == "" || $.cookie('course') == "undefined" || $.cookie('course') == undefined) {   // for the first time
+                                popup.children('p').remove();
+                                popup.append("<p>We could not load the required courses. Please refresh the page or try logging in again. If the problem persists, please drop in a mail to us at: <code>tech@mentored-research.com</code></p>").fadeIn();
                             } 
+
+                            // hide all the divs on page load. Except for first div.
+                            // this is supposed to be done here and not in ready() function. Or else, it gives an error while loading the divs.
+                            $('.main-div').hide();
+                            $('.CRP').trigger('click');
+
                         }
                     } 
                     else if(response[0] == "0") {
@@ -438,12 +444,6 @@
                     hideLoading();
                 }
             });            
-
-
-            // hide all the divs on page load. Except for first div.
-            // this is supposed to be done here and not in ready() function. Or else, it gives an error while loading the divs.
-            $('.main-div').hide();
-            $('.CRP').trigger('click');
 
 		});   // end of load function.
 
@@ -546,14 +546,8 @@
                 }
                 else {
                     showLoading();
-                    $.cookie('course', courseId, {
-                        path: '/',
-                        expires: 365
-                    });
-                    $.cookie('coursename', courseName, {
-                        path: '/',
-                        expires: 365
-                    });
+                    $.cookie('course', courseId);
+                    $.cookie('coursename', courseName);
 
                     if($.cookie('course') == "" || $.cookie('course') == "undefined" || $.cookie('course') == undefined) {
                         popup.children('p').remove();
@@ -642,8 +636,8 @@
                 //     $('#overlay-error').addClass('overlay-show');
                 // }
                 if($.cookie('course') == "undefined" || $.cookie('course') == undefined || $.cookie('course') == "") {
-                    popup.children('p').remove();
-                    popup.append("<p>you have not selected any courses. Please try logging again.</p>").fadeIn();
+                    // this is to reload the page if course is null or undefined.
+                    location.reload();
                 }
             	else {
             		showLoading();
@@ -1293,6 +1287,7 @@
                     });
                 }  // end of else that validates the logged in credentials
 
+                // -------------------- for uploading the assignment solution --------------------
                 $('#form-submit-solution').submit(function() {
                     if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
                         popup.children('p').remove();
@@ -1307,20 +1302,21 @@
                 });
 
                 // -------------------- for the assignment update solution --------------------
-
                 // now, for the uploading of the file that contains the updated assignment solution
-                $('#formUpdateSolution').submit(function() {
+                $('#form-update-solution').submit(function() {
                     var assID = $('.update-solution-assignment').children('select').val();
                     if(assID == "-1") {
                         popup.children('p').remove();
                         popup.append("<p>Please select the assignment before updating the submitted solution. Thank You.</p>").fadeIn();
                     }
                     else {   // upload the updated solution here
-                        $(this).ajaxSubmit(optionsUpdateSolution);
+                        // $(this).ajaxSubmit(optionsUpdateSolution);
+                        $('.update-solution-assignment').append("<input type='hidden' name='assIdUpdate' value=" + assID + " />");
+                        showLoading();
+                        $(this).submit();
                     }
                     return false;
                 });
-
                 return false;
             });   // end of Submitsolution-div
 
@@ -2417,7 +2413,7 @@
                 </table>
             </form>
 
-            <form id="formUpdateSolution" action="updateSolution-upload.php" method="post" enctype="multipart/form-data">
+            <form id="form-update-solution" action="assignment-solution-update-upload.php" method="post" enctype="multipart/form-data">
                 <h3 class="page-header">
                     Update Assignment Solution
                 </h3>

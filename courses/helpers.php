@@ -181,7 +181,7 @@ function GetMenteeSubmissionFeedbackInTableFormat($menteeId) {
 	$assignmentName = "";
 	$menteeArr = array();
 	try {
-		$query = "select * from SubmissionFeedback where MenteeID='$menteeId'";
+		$query = "select * from SubmissionFeedback where MenteeID='$menteeId' LIMIT 1;";
 		$rs = mysql_query($query);
 		if(!$rs) {
 			$resp = "-1";
@@ -787,6 +787,42 @@ function updateSubmission($menteeId, $mentorId, $assId, $courseId, $updateAss) {
 			$resp = "1";
 			// send the assignment submission email to the mentor and mentee.
 			$res = SendAssignmentSubmissionMail($menteeId, $mentorId, $assId, $updateAss, $courseId);
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// to get all the mentees in an array from the menteeCourses table.
+function GetAllMentees($menteeId) {
+	$resp = "-1";
+	$mentees = array();
+	try {
+		$query = "select * from Mentee where MenteeID='$menteeId'";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				$i = 0;
+				while ($res = mysql_fetch_array($rs)) {
+					$mentee[$i]["MenteeName"] = $res["MenteeName"];
+					$mentee[$i]["MenteeEmail"] = $res["MenteeEmail"];
+					$mentee[$i]["MenteeContact"] = $res["MenteeContact"];
+					$mentee[$i]["MenteeProfile"] = $res["MenteeProfile"];
+					$mentee[$i]["MenteeCourse"] = $res["MenteeCourse"];
+					$mentee[$i]["MenteeOrgan"] = $res["MenteeOrgan"];
+					$mentee[$i]["MenteeMentor"] = $res["MenteeMentor"];
+				}
+				$resp = $mentee;
+			} 
+			else {
+				$resp = "0";
+			}
 		}
 		return $resp;
 	}

@@ -192,7 +192,7 @@
 
 	        // for navigating to the dashboard link
 	        $('.btn-dashboard').on('click', function() {
-	        	window.location.href = "mentee.php";
+	        	window.location.href = "mentor.php";
 	        	return false;
 	        });
 
@@ -286,56 +286,57 @@
 					// for the PHP helper functions.
 					include('helpers.php');
 
-					$assId = $_POST["assIdSolution"];
-					$assCourse = $_POST["assCourseSolution"];
-					$assPdf = $_POST["assPdfSolution"];
-					$assNo = $_POST["assNoSolution"];
+                    $assId = "-1";
+                    $menteeId = "-1";
 
-					if(isset($_FILES["fileAssignmentSolution"]) && $_FILES["fileAssignmentSolution"]["error"]== UPLOAD_ERR_OK)
+                    $assId = $_POST["feedback-assignment"];
+                    $menteeId = $_POST["feedback-mentee"];
+
+					if(isset($_FILES["fileUploadFeedback"]) && $_FILES["fileUploadFeedback"]["error"]== UPLOAD_ERR_OK)
 					{
 						############ Edit settings ##############
-						$uploadDirectory	= 'uploads/assignmentSolution/'; //specify upload directory ends with / (slash)
+						$uploadDirectory	= 'uploads/assignmentFeedback/'; //specify upload directory ends with / (slash)
 						##########################################
 
-						$fileName         	= strtolower($_FILES['fileAssignmentSolution']['name']);
+						$fileName         	= strtolower($_FILES['fileUploadFeedback']['name']);
 						$fileExt           	= substr($fileName, strrpos($fileName, '.')); //get file extention
 						$date 				= date_create();
 						$timestamp 			= date_timestamp_get($date);
 						$newFileName 		= $timestamp . "_" . $fileName;  //.$File_Ext; //new file name	
 
-						// get the email and id cookies here
-						$email = "-1";
+						// get the id cookies here
 						$id = "-1";
-						if(isset($_COOKIE["email"])) {
-							$email = $_COOKIE["email"];
-						} 
 						if(isset($_COOKIE["id"])) {
 							$id = $_COOKIE["id"];
 						}
 
-						// validate the paramteres and upload the files 
-						if($assId == "-1" || $assCourse == "-1" || $assPdf == "-1" || $assNo == "-1" || $email == "-1" || $id == "-1") {
-							// die("Looks like the parametere for solution upload are not correct. Please try again or contact us at: <code>tech@mentored-research.com</code>");
-							echo "<h3 class='page-header'>Upload failed</h3><p>Looks like the parameters for solution upload are not correct. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";
-						}
-						else {
-							if(move_uploaded_file($_FILES['fileAssignmentSolution']['tmp_name'], $uploadDirectory.$newFileName )) {
-								// save the link to the database.
-								$mentorId = GetMentorIDOfMentee($email, $id);
-								// there are 2 cases here. if the $assNo is 1, then insert into the LastSubmittedAssignment table. Otherwise, upate the LastSubmittedAssignment table entry.
-								$resp = RegisterSubmission($email, $id, $mentorId, $assId, $uploadDirectory.$newFileName, $assCourse, $assNo);
-								if($resp == "-1") {
-									// echo "Oops! We encountered an error while submitting your assignment solution. Please try again.";
-									echo "<h3 class='page-header'>Upload failed</h3><p>Looks like we could not register the uploaded file. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";
-								}
-								else {
-									echo "<h3 class='page-header'>Upload Success</h3><p>You assignment solution has been successfully submitted.</p>";
-								}
-							}
-							else {
-								echo "<h3 class='page-header'>Upload failed</h3><p>The file was not uploaded. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";
-							}
-						}
+                        if($assId == "-1" || $menteeId == "-1" || $id == "-1") {
+                            echo "<h3 class='page-header'>Upload failed</h3><p>Looks like the parameters for solution upload are not correct. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";
+                        }
+                        else {
+                            if(move_uploaded_file($_FILES['fileUploadFeedback']['tmp_name'], $uploadDirectory.$newFileName )) {
+                                $courseId = GetMenteeCourseById($menteeId);
+                                if($courseId == "0") {
+                                    echo "<h3 class='page-header'>Upload failed</h3><p>The Course of the mentee could not be found. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";
+                                }
+                                else if($courseId == "-1") {
+                                    echo "<h3 class='page-header'>Upload failed</h3><p>The Course of the mentee could not be found. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";   
+                                }
+                                else {
+                                    $resp = RegisterFeedback($id, $menteeId, $assId, $courseId, $uploadDirectory.$newFileName);
+                                }
+
+                                if($resp == "-1") {
+                                    echo "<h3 class='page-header'>Upload failed</h3><p>Looks like we could not register the uploaded file. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";
+                                }
+                                else {
+                                    echo "<h3 class='page-header'>Upload Success</h3><p>You assignment feedback has been successfully submitted.</p>";
+                                }
+                            }
+                            else {
+                                echo "<h3 class='page-header'>Upload failed</h3><p>The file was not uploaded. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";
+                            }
+                        }
 					}
 					else {
 						echo "<h3 class='page-header'>Upload failed</h3><p>Looks like the file is too huge to be uploaded. Please try again with the file of smaller size or contact us at: <code>tech@mentored-research.com</code></p>";

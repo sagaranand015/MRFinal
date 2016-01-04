@@ -1168,9 +1168,10 @@ function GetMenteeSubmittedAssignmentsForMentor($email, $id, $menteeId) {
 //to get the list of all the mentees of a particular mentor.
 function GetMenteesOfMentor($email, $id) {
 	$resp = "-1";
+	$mentee = array();
 	try {
 		$courseId = GetMentorCourseById($id);
-		$query = "select * from Mentee where MenteeMentor='$id' and MenteeCourse='$courseId'";
+		$query = "select * from MenteeCourses where MenteeCourse='$courseId' and MentorID='$id' group by MenteeID;";
 		$rs = mysql_query($query);
 		if(!$rs) {
 			$resp = "-1";
@@ -1179,7 +1180,8 @@ function GetMenteesOfMentor($email, $id) {
 			if(mysql_num_rows($rs) > 0) {
 				$resp = "<select id='ddl-mentee' class='form-control'><option value='-1'> --Select Mentee-- </option>";
 				while ($res = mysql_fetch_array($rs)) {
-					$resp .= "<option value='" . $res["MenteeID"] . "' >" . $res["MenteeEmail"] . " (" . $res["MenteeName"] . ")</option>";
+					$mentee = GetMenteeDetails($res["MenteeID"]);
+					$resp .= "<option value='" . $res["MenteeID"] . "' >" . $mentee["MenteeEmail"] . " (" . $mentee["MenteeName"] . ")</option>";
 				}
 				$resp .= "</select>";
 			}
@@ -1194,6 +1196,36 @@ function GetMenteesOfMentor($email, $id) {
 		echo $resp;
 	}
 }
+
+// //to get the list of all the mentees of a particular mentor.
+// function GetMenteesOfMentor($email, $id) {
+// 	$resp = "-1";
+// 	try {
+// 		$courseId = GetMentorCourseById($id);
+// 		$query = "select * from Mentee where MenteeMentor='$id' and MenteeCourse='$courseId'";
+// 		$rs = mysql_query($query);
+// 		if(!$rs) {
+// 			$resp = "-1";
+// 		}
+// 		else {
+// 			if(mysql_num_rows($rs) > 0) {
+// 				$resp = "<select id='ddl-mentee' class='form-control'><option value='-1'> --Select Mentee-- </option>";
+// 				while ($res = mysql_fetch_array($rs)) {
+// 					$resp .= "<option value='" . $res["MenteeID"] . "' >" . $res["MenteeEmail"] . " (" . $res["MenteeName"] . ")</option>";
+// 				}
+// 				$resp .= "</select>";
+// 			}
+// 			else {
+// 				$resp = "0";
+// 			}
+// 		}
+// 		echo $resp;
+// 	}
+// 	catch(Exception $e) {
+// 		$resp = "-1";
+// 		echo $resp;
+// 	}
+// }
 
 // to get the list of all the assignments submitted by the mentee
 function GetMenteeLastSubmittedAssignmentList($email, $id, $courseID) {

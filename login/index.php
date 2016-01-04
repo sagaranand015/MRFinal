@@ -272,7 +272,7 @@
 								popup.append("<p>Oops! Looks like the Username and Password combination is incorrect. Please recheck and try again.</p>").fadeIn();									
 							}
 							else if(response == "0") {   // email not there in the User table.
-								// window.location.href = "others.php?source=not_added";
+								window.location.href = "others.php?source=not_added";
 							}
 							else {   // error condition
 								popup.children('p').remove();

@@ -567,7 +567,6 @@
 							no: "13", assID: assID
 						},
 						success: function(response) {
-							console.log(response);
 							// now, parse the data and show all the results.
 							if(response.AssName == "" || response.AssName == undefined) { 
 								$('.assignment-name').html("No Assignment Name");	
@@ -994,8 +993,6 @@
                             }
                         },
                         error: function(err) {
-                            console.log(err);
-
                             popup.children('p').remove();
                             popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();  
                         },
@@ -1284,7 +1281,6 @@
                             no: "39", toEmail: toEmail, msg: msg, fromEmail: email
                         },
                         success: function(response) {
-                            console.log(response);
                             if(response[0]["status"] == "sent") {
                                 popup.children('p').remove();
                                 popup.append("<p>Your Message has been sent. Thank You.</p>").fadeIn();

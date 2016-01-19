@@ -181,7 +181,7 @@ function GetMenteeSubmissionFeedbackInTableFormat($menteeId) {
 	$assignmentName = "";
 	$menteeArr = array();
 	try {
-		$query = "select * from SubmissionFeedback where MenteeID='$menteeId' LIMIT 1;";
+		$query = "select distinct * from SubmissionFeedback where MenteeID='$menteeId' group by AssID, CourseID, MentorID, MenteeID;";
 		$rs = mysql_query($query);
 		if(!$rs) {
 			$resp = "-1";

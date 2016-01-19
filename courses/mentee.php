@@ -297,6 +297,12 @@
         #btnAddTeamMember {
             cursor: pointer;
         }
+
+        .calender-img {
+            width: 90%;
+            height: 90%;
+            overflow: scroll;
+        }
 		 
     </style>
 
@@ -400,9 +406,6 @@
                     no: "54", email: email
                 },
                 success: function(response) {
-
-                    console.log(response);
-
                     if(response[0] == "1") {   // success case
                         for(var i = 1;i<response.length;i++) {
                             var courseInfo = response[i].split(" ~~ ");
@@ -445,7 +448,13 @@
                 }
             });            
 
-		});   // end of load function.
+            // for the notification-modal for the new edition
+            // if the cookie is undefined or not already set to 1, then show the modal.
+            if($.cookie('notify') == "undefined" || $.cookie('notify') == undefined || $.cookie('notify') == "" || $.cookie('notify') != "1") {
+                $('#notification-modal').modal('show');
+            }
+
+		});   // end of window.load function.
 
         $(document).ready(function() {
 
@@ -924,7 +933,7 @@
                             else {
                                 // show the course calender in the calender-div.
                                 $('.calender-div').children('img').remove();
-                                $('.calender-div').append("<img src='" + response + "' />");
+                                $('.calender-div').append("<img class='calender-img' src='" + response + "' />");
                             }
 	            		},
 	            		error: function() {
@@ -2037,82 +2046,15 @@
                 return false;
             });   // end of document link on LHS.
 
-            
-            // --------------------------- TEAM MEMBER THING (not required anymore) ---------------------------
-            // for the Add member link on LHS
-            // $('.team').on('click', function() {
-            //     showDiv($('.team-div'));
-            //     changeActiveState($(this).parent('li'));
-
-            //     return false;
-            // });   // end of team link on LHS.
-
-            // for submitting the add-team-member form
-            // $('#add-team-member').submit(function() {
-            //     var email = $.cookie("email");
-            //     var id = $.cookie("id");
-
-            //     var memberEmail = $('#txtMemberEmail').val().trim();
-
-            //     if(email == "" || email == "undefined" || email == undefined || id == "" || id == "undefined" || id == undefined) {
-            //         popup.children('p').remove();
-            //         popup.append("<p>Looks like you have not logged in properly. Please try logging in again.</p>").fadeIn();
-            //     }
-            //     else {
-            //         showLoading();
-            //         $.ajax({
-            //             type: "GET",
-            //             url: "AJAXFunctions.php",
-            //             data: {
-            //                 no: "52", email: email, id: id, memberEmail: memberEmail
-            //             },
-            //             success: function(response) {
-            //                 console.log(response);
-            //                 var r = response.split(" ~~ ");
-            //                 var exists = r[0];
-            //                 var resp = [1];
-            //                 var assign = r[2];
-
-            //                 if(exists == "1") {
-            //                     if(resp == "1") {
-            //                         if(assign == "1") {
-            //                             popup.children('p').remove();
-            //                             popup.append("<p>Your Team member has been successfully added. We'll notify your team member regarding the Signup formalities. Thank You.</p>").fadeIn();
-            //                         }
-            //                         else {
-            //                             popup.children('p').remove();
-            //                             popup.append("<p>Your Team member has been successfully added. We'll notify your team member regarding the Signup formalities. Thank You.</p>").fadeIn();
-            //                         }
-            //                     }
-            //                     else if(resp == "0") {
-            //                         popup.children('p').remove();
-            //                         popup.append("<p>Looks like you have already added this Email address as a team member. Please use a different Email address.</p>").fadeIn();
-            //                     }
-            //                     else {
-            //                         popup.children('p').remove();
-            //                         popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-            //                     }
-            //                 }
-            //                 else if(exists == "0") {
-            //                     popup.children('p').remove();
-            //                     popup.append("<p>Looks like the email address you entered could be verified. Maybe you're using a different email address than the one given by your team member. Please double check and revert back. Thank You.</p>").fadeIn();
-            //                 }
-            //                 else {
-            //                     popup.children('p').remove();
-            //                     popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    
-            //                 }
-            //             },
-            //             error: function() {
-            //                 popup.children('p').remove();
-            //                 popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-            //             },
-            //             complete: function() {
-            //                 hideLoading();
-            //             }
-            //         });
-            //     }
-            //     return false;
-            // });   // end of add-team-member form submit()
+            // for the hide event of the notification modal.
+            $('#notification-modal').on('hide.bs.modal', function() {
+                var checkNotify = $('#check-notification').is(':checked');
+                if(checkNotify == true) {
+                    $.cookie('notify', '1');
+                } else {
+                    $.cookie('notify', "");
+                }
+            });
         
         });    // end of ready function.
 
@@ -2197,14 +2139,13 @@
 
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="CRP">Central Resources</a></li>
-                    <li><a href="#" class="document">Guides & Documents</a></li>
-                    <li><a href="#" class="calender">Program Calender</a></li>
+                    <li><a href="#" class="document">Guides &amp; Documents</a></li>
+                    <li><a href="#" class="calender">Program Calendar</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="profile">Profile</a></li>
                     <li><a href="#" class="password">Change Password</a></li>
-                	<li><a href="#" class="mentor">Mentor Profile</a></li>
-                    <!-- <li><a href="#" class="team">Add Team Member</a></li> -->
+                	<li><a href="#" class="mentor">Feedback &amp; Communications Team</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
                     <li><a href="#" class="submitSolution">Submit Assignment Solution</a></li>
@@ -2220,35 +2161,6 @@
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
-
-        <!-- for adding the team member of the mentee (This is not required) -->
-        <!-- <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div team-div">
-            <h1 class="page-header">
-                Add Team Member
-            </h1>
-
-            <form id="add-team-member">
-                <table class="table">
-                    <tr>
-                        <td>
-                            <label>Enter the email address of your team member. We'll let them know that you have added them as your team member.</label>
-                            <br />
-                            <label>Individual Mentees can ignore this. Thank You.</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input type="email" class="form-control" placeholder="Enter Team member's Email" id="txtMemberEmail" required />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input type="submit" class="btn btn-lg btn-primary btn-block" value="Submit" id="btnAddMember" />
-                        </td>
-                    </tr>
-                </table>
-            </form>
-        </div> -->
 
         <!-- for showing the guides and documents -->
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div document-div">
@@ -2625,7 +2537,7 @@
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div calender-div">
         	<h1 class="page-header">
-	        	Programme Calender
+	        	Programme Calendar
 	        </h1>
 	        <!-- image of the calender will come from ajax -->
         </div>   <!-- end of Programme calender div -->
@@ -2930,6 +2842,42 @@
                     <h4 class="notify-modal-title"></h4>
                 </div>
                 <div class="modal-body" id="advanced-quiz-modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <!-- for notifications on the mentee page -->
+    <div class="modal fade" id="notification-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="notification-modal-title">New Version!</h4>
+                </div>
+                <div class="modal-body">
+                    <h1 class="page-header">
+                        We just revamped!
+                    </h1>
+
+                    <p>
+                        Welcome to the new verion of M-R portal! <br />
+                    </p>
+
+                    <p>We have revamped the M-R portal to give you more flexibility. Remember to select your course from the top right corner of your dashboard. Please note that only the courses enrolled by you under the hood of Mentored-Research will be visible in the list.</p>
+
+                    <p>Also, please select the appropriate course before submitting any requests for assistance. That'll help us keep things sorted.</p>
+
+                    <p>For any more related queries or issues, please drop in a mail to us at: <code>tech@mentored-research.com</code></p>
+
+                    <br />
+
+                    <input type="checkbox" name="check-notification" id="check-notification" class="checkbox" style="float:left;" />
+                    <label for="check-notification">&nbsp;&nbsp;Got it! Don't show this message again</label>
 
                 </div>
                 <div class="modal-footer">

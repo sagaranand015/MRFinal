@@ -1019,14 +1019,41 @@
             				}	
 	            		},
 	            		error: function() {
-	            			alertMsg.children('p').remove();
-	                        alertMsg.fadeOut();
 	                        popup.children('p').remove();
 	                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();            			
 	            		},
 	            		complete: function() {
-	            			hideLoading();
-	            		}
+
+                            // ajax request to get the secondary mentors for a mentee.
+                            $('.mentor-div').children('.secondary-mentor-table, p').remove();
+                            $.ajax({
+                                type: "GET",
+                                url: "AJAXFunctions.php",
+                                data: {
+                                    no: "56", course: $.cookie('course')
+                                },
+                                success: function(response) {
+                                    console.log(response);
+                                    if(response == "0") {
+                                        $('.mentor-div').append("<p>No Secondary Mentors in this course.</p>");
+                                    } 
+                                    else if(response == "-1") {
+                                        popup.children('p').remove();
+                                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();                     
+                                    }
+                                    else {
+                                        $('.mentor-div').append(response);
+                                    }
+                                },
+                                error: function() {
+                                    popup.children('p').remove();
+                                    popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();                     
+                                },
+                                complete: function() {
+                                    hideLoading();
+                                }
+                            });
+	            		}   // end of complete promise.
 	            	});   // end of ajax request
             	}  // end of else.
             	return false;
@@ -2544,7 +2571,7 @@
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div mentor-div">
         	<h1 class="page-header">
-	        	Your Mentor Details
+	        	Primary Mentor Details
 	        </h1>
 	        <table class="table">
 	        	<tr>
@@ -2585,6 +2612,9 @@
 	        		</td>
 	        	</tr>
 	        </table>
+
+            <!-- secondary mentor(s) data will come from ajax here -->
+
         </div>   <!-- end of Programme calender div -->
     </div>   <!-- end of main container-fluid div -->
 
@@ -2600,7 +2630,7 @@
 					<table class="table">
 						<tr>
 							<td>
-								<input type="email" id="txtSendMessageEmail" placeholder="Email Address" required class="form-control" disabled="disabled" />
+								<input type="email" id="txtSendMessageEmail" placeholder="Email Address" required class="form-control" />
 							</td>
 						</tr>
 						<tr>

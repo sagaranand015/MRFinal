@@ -171,11 +171,70 @@ else if(isset($_GET["no"]) && $_GET["no"] == "53") {  // to get the mentees base
 	GetMentorsFromCourse($_GET["courseId"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "54") {  // to get all the courses a mentee is enrolled into.
-	getAllMenteeCourses($_GET["email"]);
+	GetAllMenteeCourses($_GET["email"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "55") {  // to add the alternate mentors into the db for each course.
+	AddAlternateMentor($_GET["name"], $_GET["email"], $_GET["contact"], $_GET["profile"], $_GET["course"]);	
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "56") {  // to get the alternate mentors based on a course.
+	GetAlternateMentors($_GET["course"]);
+}
+
+// to get the alternate mentors based on a course.
+function GetAlternateMentors($course) {
+	try {
+		$query = "select * from AlternateMentors where AltMentorCourse='$course';";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "";
+			if(mysql_num_rows($rs) > 0) {
+				$resp = "<h2 class='page-header'>Secondary Mentor Details</h2>";
+				while ($res = mysql_fetch_array($rs)) {
+					$resp .= "<table class='table secondary-mentor-table'>";
+					$resp .= "<tr><td><label>Mentor Name</label></td><td>" . $res["AltMentorName"] . "</td></tr>";
+					$resp .= "<tr><td><label>Mentor Email</label></td><td>" . $res["AltMentorEmail"] . "</td></tr>";
+					$resp .= "<tr><td><label>Mentor Contact</label></td><td>" . $res["AltMentorContact"] . "</td></tr>";
+					$resp .= "<tr><td><label>Mentor Profile</label></td><td>" . $res["AltMentorProfile"] . "</td></tr>";
+					$resp .= "</table> <hr />";
+				}
+			}
+			else {
+				$resp = "0";
+			}
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
+
+// to add the alternate mentors into the db for each course.
+function AddAlternateMentor($name, $email, $contact, $profile, $course) {
+	$resp = "-1";
+	try {
+		$query = "insert into AlternateMentors(AltMentorName, AltMentorEmail, AltMentorContact, AltMentorProfile, AltMentorCourse) values('$name', '$email', '$contact', '$profile', '$course');";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
 }
 
 // to get all the courses enrolled by the mentee
-function getAllMenteeCourses($email) {
+function GetAllMenteeCourses($email) {
 	$resp = array();
 	$resp[0] = "-1";
 	try {
@@ -631,8 +690,9 @@ function GetMenteeStatusForAdminAndDirector($assId) {
 	$submission = "";
 	$feedback = "";
 	$mentee = array();
+	$mentor = array();
 	try {
-		$query = "select * from SubmissionFeedback where AssID='$assId'";
+		$query = "select * from SubmissionFeedback where AssID='$assId';";
 		$rs = mysql_query($query);
 		if(!$rs) {
 			$resp = "-1";
@@ -642,8 +702,9 @@ function GetMenteeStatusForAdminAndDirector($assId) {
 			if(mysql_num_rows($rs) > 0) {
 				while ($res = mysql_fetch_array($rs)) {
 					$mentee = GetMenteeDetails($res["MenteeID"]);
-					$resp .= "<h4>" . $mentee["MenteeName"] . " (" . $mentee["MenteeEmail"] . ")</h4>";
-					$resp .= GetMenteeSubmissionFeedbackInTableFormatForAdminAndDirector($res["MenteeID"], $assId);
+					$mentor = GetMentorDetails($mentee["MenteeMentor"]);
+					$resp .= "<h4 class='page-header'>" . $mentor["MentorName"] . " (" . $mentor["MentorEmail"] . ")</h4>";
+					$resp .= GetMenteeSubmissionFeedbackInTableFormatForAdminAndDirector($mentee["MenteeName"], $res["MenteeID"], $assId);
 				}
 			}
 			else {

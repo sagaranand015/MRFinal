@@ -119,14 +119,14 @@ function CheckMemberEmailInTeamTable($email, $memberEmail) {
 }
 
 // to get the assignment submission link for the mentee only.
-function GetMenteeSubmissionFeedbackInTableFormatForAdminAndDirector($menteeId, $assId) {
+function GetMenteeSubmissionFeedbackInTableFormatForAdminAndDirector($menteeName, $menteeId, $assId) {
 	$resp = "-1";
 	$submission = "#";
 	$feedback = "#";
 	$assignmentName = "";
 	$menteeArr = array();
 	try {
-		$query = "select * from SubmissionFeedback where MenteeID='$menteeId' and AssID='$assId'";
+		$query = "select * from SubmissionFeedback where MenteeID='$menteeId' and AssID='$assId' group by AssID;";
 		$rs = mysql_query($query);
 		if(!$rs) {
 			$resp = "-1";
@@ -141,22 +141,22 @@ function GetMenteeSubmissionFeedbackInTableFormatForAdminAndDirector($menteeId, 
 					if($res["Submission"] != "" && $res["Feedback"] != "") {
 						$submission = $res["Submission"];
 						$feedback = $res["Feedback"];
-						$resp .= "<tr><td>" . $assignmentName . "</td><td>" . "<a href='http://www.mentored-research.com/courses/" . $submission . "' target='_blank'>Submission</a></td><td>" . "<a href='http://www.mentored-research.com/courses/" . $feedback . "' target='_blank'>Feedback link</a></td></tr>";
+						$resp .= "<tr><td>" . $menteeName . "</td><td>" . $assignmentName . "</td><td>" . "<a href='http://www.mentored-research.com/courses/" . $submission . "' target='_blank'>Submission</a></td><td>" . "<a href='http://www.mentored-research.com/courses/" . $feedback . "' target='_blank'>Feedback link</a></td></tr>";
 					}
 					else if($res["Submission"] == "" && $res["Feedback"] != "") {
 						$submission = "#";
 						$feedback = $res["Feedback"];
-						$resp .= "<tr><td>" . $assignmentName . "</td><td>" . "<a href='#'>No Submission</a></td><td>" . "<a href='http://www.mentored-research.com/courses/" . $feedback . "' target='_blank'>Feedback link</a></td></tr>";
+						$resp .= "<tr><td>" . $menteeName . "</td><td>" . $assignmentName . "</td><td>" . "<a href='#'>No Submission</a></td><td>" . "<a href='http://www.mentored-research.com/courses/" . $feedback . "' target='_blank'>Feedback link</a></td></tr>";
 					}
 					else if($res["Feedback"] == "" && $res["Submission"] != "") {
 						$feedback = "#";
 						$submission = $res["Submission"];
-						$resp .= "<tr><td>" . $assignmentName . "</td><td>" . "<a href='http://www.mentored-research.com/courses/" . $submission . "' target='_blank'>Submission</a></td><td>" . "<a href='#'> No Feedback</a></td></tr>";
+						$resp .= "<tr><td>" . $menteeName . "</td><td>" . $assignmentName . "</td><td>" . "<a href='http://www.mentored-research.com/courses/" . $submission . "' target='_blank'>Submission</a></td><td>" . "<a href='#'> No Feedback</a></td></tr>";
 					}
 					else if($res["Feedback"] == "" && $res["Submission"] == "") {
 						$submission = "#";
 						$feedback = "#";
-						$resp .= "<tr><td>" . $assignmentName . "</td><td>" . "<a href='#'>No Submission</a></td><td>" . "<a href='#'>No Feedback</a></td></tr>";
+						$resp .= "<tr><td>" . $menteeName . "</td><td>" . $assignmentName . "</td><td>" . "<a href='#'>No Submission</a></td><td>" . "<a href='#'>No Feedback</a></td></tr>";
 					}
 				}
 				$resp .= "</table>";
@@ -5914,6 +5914,42 @@ function GetMenteeDetails($menteeID) {
 				$mentee["MenteeMentor"] = $res["MenteeMentor"];
 			}
 			$resp = $mentee;
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// for getting the mentor details in a json response based on mentor ID
+// returns -1 on error. array of mentor details on success.
+function GetAllMenteeDetails() {
+	$resp = "-1";
+	$mentee = array();
+	try {
+		$query = "select * from Mentee;";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			if(mysql_num_rows($rs) > 0) {
+				while ($res = mysql_fetch_array($rs)) {
+					$mentee["MenteeName"] = $res["MenteeName"];
+					$mentee["MenteeEmail"] = $res["MenteeEmail"];
+					$mentee["MenteeContact"] = $res["MenteeContact"];
+					$mentee["MenteeProfile"] = $res["MenteeProfile"];
+					$mentee["MenteeCourse"] = $res["MenteeCourse"];
+					$mentee["MenteeOrgan"] = $res["MenteeOrgan"];
+					$mentee["MenteeMentor"] = $res["MenteeMentor"];
+				}
+				$resp = $mentee;
+			} 
+			else {
+				$resp = "0";  // no mentees.
+			}
 		}
 		return $resp;
 	}

@@ -3283,6 +3283,7 @@
                             no: "40", assId: assId
                         },
                         success: function(response) {
+                            console.log(response);
                             if(response == "0") {
                                 popup.children('p').remove();
                                 popup.append("<p>No Submission/Feedback Records found.</p>").fadeIn();
@@ -3781,102 +3782,83 @@
                 return false; 
             });   // end of form submit
 
-            // // for updating the assignment material div
-            // $('.update-assignment').on('click', function() {
-            //     showDiv($('.update-assignment-div'));
-            //     changeActiveState($(this).parent('li'));
+            // for adding the alternate mentors to the table.
+            $('.alternate-mentor').on('click', function() {
+                showDiv($('.alternate-mentor-div'));
+                changeActiveState($(this).parent('li'));
 
-            //     // to get all the courses as a drop down list
-            //     showLoading();
-            //     $.ajax({
-            //         type: "GET",
-            //         url: "AJAXFunctions.php",
-            //         data: {
-            //             no: "6"
-            //         },
-            //         success: function(response) {
-            //             // to show the courses drop down at appropriate place.
-            //             if(response == "-1") {
-            //                 popup.children('p').remove();
-            //                 popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();                              
-            //             }
-            //             else {
-            //                 $('.update-assignment-course').children('select').remove();
-            //                 $('.update-assignment-course').append(response);
-            //             }
-            //         }, 
-            //         error: function() {
-            //             alertMsg.children('p').remove();
-            //             alertMsg.fadeOut();
-            //             popup.children('p').remove();
-            //             popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
-            //         },
-            //         complete: function() {
-            //             hideLoading();
-            //         }
-            //     });
+                // to get all the courses as a drop down list
+                showLoading();
+                $.ajax({
+                    type: "GET",
+                    url: "AJAXFunctions.php",
+                    data: {
+                        no: "6"
+                    },
+                    success: function(response) {
+                        if(response == "-1") {
+                            popup.children('p').remove();
+                            popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                        }
+                        else {
+                            $('.alternate-mentor-course').children('select').remove();
+                            $('.alternate-mentor-course').append(response);
+                        }
+                    }, 
+                    error: function() {
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+                return false;
+            });
 
-            //     // for the delegate function of courseList-assPDF
-            //     $('.update-assignment-div').delegate('#ddl-course', 'change', function() {
-            //         if($(this).val() == "-1") {
-            //             popup.children('p').remove();
-            //             popup.append("<p>Looks like you have not selected the course. Please do so before uploading the calender.</p>").fadeIn();
-            //         }
-            //         else {
-            //             // to get all the assignments as a drop down list
-            //             var courseAssPDF = $(this).val();
-            //             showLoading();
-            //             $.ajax({
-            //                 type: "GET",
-            //                 url: "AJAXFunctions.php",
-            //                 data: {
-            //                     no: "10", courseAssPDF: courseAssPDF
-            //                 },
-            //                 success: function(response) {
-            //                     // to show the assignments drop down at appropriate place.
-            //                     if(response == "-1") {
-            //                         popup.children('p').remove();
-            //                         popup.append("<p>We could not retrieve the assignments from the database. Please check your internet connection and try again.</p>").fadeIn();                              
-            //                     }
-            //                     else {
-            //                         $('.update-assignment-ass').children('select').remove();
-            //                         $('.update-assignment-ass').append(response);
-            //                     }
-            //                 }, 
-            //                 error: function() {
-            //                     alertMsg.children('p').remove();
-            //                     alertMsg.fadeOut();
-            //                     popup.children('p').remove();
-            //                     popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
-            //                 },
-            //                 complete: function() {
-            //                     hideLoading();
-            //                 }
-            //             });
-            //         }   // end of else.
-            //         return false;
-            //     });    // end of delegate
-            //     return false;
-            // });    // end of update-assignment link on LHS.
+            // for the form submit event of the alternate-mentor form.
+            $('#form-add-alternate-mentor').submit(function() {
 
-            // // for the form submission of the update video in update assignment.
-            // $('#form-update-assignment-video').submit(function() {
-            //     var videoName = $('#txtVideoName').val().trim();
-            //     var videoUrl = $('#txtVideoUrl').val().trim();
+                var name = $('#txt-alternate-mentor-name').val().trim();
+                var email = $('#txt-alternate-mentor-email').val().trim();
+                var contact = $('#txt-alternate-mentor-contact').val().trim();
+                var profile = $('#txt-alternate-mentor-profile').val().trim();
 
-            //     alert("TODO: Update the assignment video name and url");
-
-            //     // make the AJAX Call here to update the video name and url
-            //     // $.ajax({
-            //     //     type: "GET",
-            //     //     url: "AJAXFunctions.php",
-            //     //     data: {
-
-            //     //     }
-            //     // });
-
-            //     return false;
-            // });
+                var course = $('.alternate-mentor-course').children('select').val();
+                if(course == "-1" || course == "0" || course == "undefined" || course == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select the course before adding the mentor</p>").fadeIn(); 
+                } 
+                else {
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "55", name: name, email: email, contact: contact, profile: profile, course: course
+                        },
+                        success: function(response) {
+                            console.log(response);
+                            if(response == "1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Alternate Mentor has been added successfully.</p>").fadeIn();     
+                            } 
+                            else {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();     
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }
+                return false;
+            });
 
             // hide all the divs on page load. Except for first div.
             $('.main-div').hide();
@@ -3975,6 +3957,7 @@
             		<li><a href="#" class="organisation">Add an organisation</a></li>
             		<li><a href="#" class="calender">Add Course Calender</a></li>
             		<li><a href="#" class="guide">Add Guides/Documents</a></li>
+                    <li><a href="#" class="alternate-mentor">Add Alternate Mentors</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="assignment">Add Assignment Details</a></li>
@@ -3998,54 +3981,62 @@
         	Menu
         </button>
 
-        <!-- for updating the assignment material -->
-        <!-- <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div update-assignment-div">
+        <!-- for adding the alternate mentors -->
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div alternate-mentor-div">
             <h1 class="page-header">
-                Update Assignment
+                Add Alternate Mentor(s)
             </h1>
 
-            <table class="table">
-                <tr>
-                    <td>
-                        <label>Select Course: </label>
-                    </td>
-                    <td class="update-assignment-course">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label>Select Assignment: </label>
-                    </td>
-                    <td class="update-assignment-ass">
-                    </td>
-                </tr>
-            </table>
-            <form id="form-update-assignment-video">
+            <form id="form-add-alternate-mentor">
                 <table class="table">
                     <tr>
                         <td>
-                            <label>Enter Video Name: </label>
+                            <label>Select Course: </label>
                         </td>
-                        <td class="update-assignment-video-name">
-                            <input type="text" placeholder="Enter Video Name" id="txtVideoName" class="form-control" />
+                        <td class="alternate-mentor-course">
+                            <!-- data will come from ajax here -->
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <label>Enter Video Url: </label>
+                            <label>Mentor Name: </label>
                         </td>
-                        <td class="update-assignment-video-url">
-                            <input type="text" placeholder="Enter Video Url" id="txtVideoUrl" class="form-control" />
+                        <td>
+                            <input type="text" class="form-control" id="txt-alternate-mentor-name" placeholder="Enter Mentor's Name" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Mentor Email: </label>
+                        </td>
+                        <td>
+                            <input type="email" class="form-control" id="txt-alternate-mentor-email" placeholder="Enter Mentor's Email" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Mentor Contact: </label>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" id="txt-alternate-mentor-contact" placeholder="Enter Mentor's Contact" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Mentor Profile: </label>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" id="txt-alternate-mentor-profile" placeholder="Enter Mentor's Profile" />
                         </td>
                     </tr>
                     <tr>
                         <td colspan="2">
-                            <input type="submit" class="btn btn-lg btn-primary btn-block" value="Update Video" />
+                            <input type="submit" class="btn btn-lg btn-primary btn-block" id="btn-alternate-mentor-submit" value="Add Mentor" />
                         </td>
                     </tr>
                 </table>
             </form>
-        </div> -->   <!-- end of the update-assignment div -->
+        </div>
 
         <!-- for adding the teams and team members -->
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div team-div">

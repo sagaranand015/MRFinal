@@ -703,7 +703,7 @@ function GetMenteeStatusForMentor($mentorId, $mentorEmail) {
 			if(mysql_num_rows($rs) > 0) {
 				while ($res = mysql_fetch_array($rs)) {
 					$mentee = GetMenteeDetails($res["MenteeID"]);
-					$resp .= "<h4>" . $mentee["MenteeName"] . " (" . $mentee["MenteeEmail"] . ")</h4>";
+					$resp .= "<h4 class='page-header'>" . $mentee["MenteeName"] . " (" . $mentee["MenteeEmail"] . ")</h4>";
 					$resp .= GetMenteeSubmissionFeedbackInTableFormat($res["MenteeID"]);
 				}
 			}
@@ -1139,7 +1139,7 @@ function GetMenteeSubmittedAssignmentsForMentor($email, $id, $menteeId) {
 	$name = "";
 	try {
 		$courseId = GetMenteeCourseById($menteeId);
-		$query = "select * from SubmissionFeedback where MentorID='$id' and MenteeID='$menteeId' and CourseID='$courseId'";
+		$query = "select * from SubmissionFeedback where MentorID='$id' and MenteeID='$menteeId' and CourseID='$courseId' group by AssID, CourseID, MentorID, MenteeID;";
 		$rs = mysql_query($query);
 		if(!$rs) {
 			$resp = "-1";

@@ -217,7 +217,7 @@ function GetMenteeSubmissionFeedbackInTableFormat($menteeId) {
 				$resp .= "</table>";
 			}
 			else {
-				$resp = "0";
+				$resp = "Nothing submitted yet!";
 			}
 		}
 		return $resp;

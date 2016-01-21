@@ -192,7 +192,7 @@
 
 	        // for navigating to the dashboard link
 	        $('.btn-dashboard').on('click', function() {
-	        	window.location.href = "mentee.php";
+	        	window.location.href = "admin.php";
 	        	return false;
 	        });
 
@@ -286,71 +286,54 @@
 					// for the PHP helper functions.
 					include('helpers.php');
 
-					if(isset($_FILES["fileAssignmentSolution"]) && $_FILES["fileAssignmentSolution"]["error"]== UPLOAD_ERR_OK)
-					{
-						############ Edit settings ##############
-						$uploadDirectory	= 'uploads/assignmentSolution/'; //specify upload directory ends with / (slash)
-						##########################################
+                    if(isset($_FILES["fileCalender"]) && $_FILES["fileCalender"]["error"]== UPLOAD_ERR_OK)
+                    {
+                        ############ Edit settings ##############
+                        $uploadDirectory    = 'uploads/calender/'; //specify upload directory ends with / (slash)
+                        ##########################################
+                        
+                        $fileName           = strtolower($_FILES['fileCalender']['name']);
+                        $fileExt            = substr($fileName, strrpos($fileName, '.')); //get file extention
+                        $date               = date_create();
+                        $timestamp          = date_timestamp_get($date);
+                        $newFileName        = $timestamp . "_" . $fileName;  //.$File_Ext; //new file name  
 
-						$fileName         	= strtolower($_FILES['fileAssignmentSolution']['name']);
-						$fileExt           	= substr($fileName, strrpos($fileName, '.')); //get file extention
-						$date 				= date_create();
-						$timestamp 			= date_timestamp_get($date);
-						$newFileName 		= $timestamp . "_" . $fileName;  //.$File_Ext; //new file name	
+                        // get the email and id cookies here
+                        $email = "-1";
+                        $id = "-1";
+                        $course = "-1";
+                        if(isset($_COOKIE["email"])) {
+                            $email = $_COOKIE["email"];
+                        } 
+                        if(isset($_COOKIE["id"])) {
+                            $id = $_COOKIE["id"];
+                        }
+                        if(isset($_POST["calender-course"])) {
+                            $course = $_POST["calender-course"];
+                        } 
 
-						// get the email and id cookies here
-						$email = "-1";
-						$id = "-1";
-                        $assId = "-1";
-                        $assCourse = "-1";
-                        $assPdf = "-1";
-                        $assNo = "-1";
-						if(isset($_COOKIE["email"])) {
-							$email = $_COOKIE["email"];
-						} 
-						if(isset($_COOKIE["id"])) {
-							$id = $_COOKIE["id"];
-						}
-                        if(isset($_POST["assIdSolution"])) {
-                            $assId = $_POST["assIdSolution"];
+                        if($course == "-1") {
+                            echo "<h3 class='page-header'>Upload failed</h3><p>Looks like the parameters for calendar upload are not correct. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";
                         }
-                        if(isset($_POST["assCourseSolution"])) {
-                            $assCourse = $_POST["assCourseSolution"];
+                        else {
+                            if(move_uploaded_file($_FILES['fileCalender']['tmp_name'], $uploadDirectory.$newFileName )) {
+                                // put url of the calender file here.
+                                $register = RegisterCalenderUrl($course, $uploadDirectory.$newFileName);
+                                if($register == "1") {
+                                    echo "<h3 class='page-header'>Upload Success</h3><p>Your Calendar upload is successful.</p>";
+                                }
+                                else if($resp == "-1") {
+                                    echo "<h3 class='page-header'>Upload failed</h3><p>Looks like we could not register the uploaded file. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";
+                                }
+                            }
+                            else {
+                                echo "<h3 class='page-header'>Upload failed</h3><p>The file was not uploaded. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";
+                            }
                         }
-                        if(isset($_POST["assPdfSolution"])) {
-                            $assPdf = $_POST["assPdfSolution"];
-                        }
-                        if(isset($_POST["assNoSolution"])) {
-                            $assNo = $_POST["assNoSolution"];
-                        }
-
-						// validate the paramteres and upload the files 
-						if($assId == "-1" || $assCourse == "-1" || $assPdf == "-1" || $assNo == "-1" || $email == "-1" || $id == "-1") {
-							// die("Looks like the parametere for solution upload are not correct. Please try again or contact us at: <code>tech@mentored-research.com</code>");
-							echo "<h3 class='page-header'>Upload failed</h3><p>Looks like the parameters for solution upload are not correct. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";
-						}
-						else {
-							if(move_uploaded_file($_FILES['fileAssignmentSolution']['tmp_name'], $uploadDirectory.$newFileName )) {
-								// save the link to the database.
-								$mentorId = GetMentorIDOfMentee($email, $id);
-								// there are 2 cases here. if the $assNo is 1, then insert into the LastSubmittedAssignment table. Otherwise, upate the LastSubmittedAssignment table entry.
-								$resp = RegisterSubmission($email, $id, $mentorId, $assId, $uploadDirectory.$newFileName, $assCourse, $assNo);
-								if($resp == "-1") {
-									// echo "Oops! We encountered an error while submitting your assignment solution. Please try again.";
-									echo "<h3 class='page-header'>Upload failed</h3><p>Looks like we could not register the uploaded file. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";
-								}
-								else {
-									echo "<h3 class='page-header'>Upload Success</h3><p>Your assignment solution has been successfully submitted.</p>";
-								}
-							}
-							else {
-								echo "<h3 class='page-header'>Upload failed</h3><p>The file was not uploaded. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";
-							}
-						}
-					}
-					else {
-						echo "<h3 class='page-header'>Upload failed</h3><p>Looks like the file is too huge to be uploaded. Please try again with the file of smaller size or contact us at: <code>tech@mentored-research.com</code></p>";
-					}
+                    }
+                    else {
+                        echo "<h3 class='page-header'>Upload failed</h3><p>Looks like the file is too huge to be uploaded. Please try again with the file of smaller size or contact us at: <code>tech@mentored-research.com</code></p>";
+                    }
 				?>
 
 				<div class="col-lg-4 col-md-4 col-sm-10 nav-div">

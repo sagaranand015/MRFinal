@@ -409,19 +409,24 @@
                     if(response[0] == "1") {   // success case
                         for(var i = 1;i<response.length;i++) {
                             var courseInfo = response[i].split(" ~~ ");
+
                             $('.dropdown-menu-course').append("<li><a style='color: black;' class='courses-link' href='#' data-courseid='" + courseInfo[0] + "' data-coursename='" + courseInfo[1] + "'>" + courseInfo[1] + "</a></li>");
 
-                            // ----------- for setting the course ------------
-                            $.cookie('course', response[1].split(" ~~ ")[0]);
-                            $.cookie('coursename', response[1].split(" ~~ ")[1]);
-
-                            // show it in the navbar.
-                            $('.dropdown-course').html($.cookie('coursename') + "<span class='caret'></span>");
-
                             if($.cookie('course') == "" || $.cookie('course') == "undefined" || $.cookie('course') == undefined) {   // for the first time
-                                popup.children('p').remove();
-                                popup.append("<p>We could not load the required courses. Please refresh the page or try logging in again. If the problem persists, please drop in a mail to us at: <code>tech@mentored-research.com</code></p>").fadeIn();
-                            } 
+
+                                // ----------- for setting the course ------------
+                                $.cookie('course', response[1].split(" ~~ ")[0]);
+                                $.cookie('coursename', response[1].split(" ~~ ")[1]);
+
+                                // show it in the navbar.
+                                $('.dropdown-course').html($.cookie('coursename') + "<span class='caret'></span>");
+
+                                if($.cookie('course') == "" || $.cookie('course') == "undefined" || $.cookie('course') == undefined) {   // for the first time
+                                    popup.children('p').remove();
+                                    popup.append("<p>We could not load the required courses. Please refresh the page or try logging in again. If the problem persists, please drop in a mail to us at: <code>tech@mentored-research.com</code></p>").fadeIn();
+                                } 
+
+                            }
 
                             // hide all the divs on page load. Except for first div.
                             // this is supposed to be done here and not in ready() function. Or else, it gives an error while loading the divs.

@@ -1499,23 +1499,19 @@
                     popup.append("<p>Looks like you have not selected a course. Please do so before uploading the calender.</p>").fadeIn();
                 }
                 else {
-                    $.cookie("courseID", $(this).val());
-                    // for uploading the calender to the server.
-                    var options = { 
-                        target:   '#alertMsg',   // target element(s) to be updated with server response 
-                        beforeSubmit:  beforeSubmit,  // pre-submit callback 
-                        success:       afterSuccess,  // post-submit callback 
-                        uploadProgress: OnProgress, //upload progress callback 
-                        resetForm: true        // reset the form after successful submit 
-                    }; 
-
-                    $('#formCalender').submit(function() { 
-                        $(this).ajaxSubmit(options);            
-                        // always return false to prevent standard browser submit and page navigation 
-                        return false; 
-                    });      
+                    $('.courseList').append("<input type='hidden' name='calender-course' value='" + $(this).val() + "' />");
                 }   // end of else
             });  // end of change (delegate) function in calender-div courses list
+            $('#form-calender').submit(function() {
+                var course = $('.courseList').children('select').val();
+                if(course == "-1" || course == "undefined" || course == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not selected a course. Please do so before uploading the calender.</p>").fadeIn();   
+                } else {
+                    showLoading();
+                    $(this).submit();
+                }
+            });
 
 			// for the add course calender link on LHS
             $('.guide').on('click', function() {
@@ -1531,14 +1527,22 @@
             			no: "6"
             		},
             		success: function(response) {
-            			// to show the courses drop down at appropriate place.
             			if(response == "-1") {
 							popup.children('p').remove();
 				        	popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();	            				
             			}
             			else {
-            				$('.courseList').children('select').remove();
-            				$('.courseList').append(response);
+                            // for the guides
+            				$('.course-list-guide').children('select').remove();
+            				$('.course-list-guide').append(response);
+
+                            // for the annual reports
+                            $('.course-list-annual-report').children('select').remove();
+                            $('.course-list-annual-report').append(response);
+
+                            // for the finance docs
+                            $('.course-list-finance-doc').children('select').remove();
+                            $('.course-list-finance-doc').append(response);
             			}
             		}, 
             		error: function() {
@@ -1553,366 +1557,75 @@
             	});
             	return false;
             });   // end of guide link on LHS.
-			// for the onfocusout event of the guide name
-			$('#txtGuideName').on('focusout', function() {
-				$.cookie("guideName", $(this).val());
-				return false;
-			});
+			
+            // ----------------- for the course guide ----------------------------
 			// for the delegate event of the change of the course drop down on calender upload.
-            $('.guide-div').delegate('#ddl-course', 'change', function() {
+            $('#form-guide').delegate('#ddl-course', 'change', function() {
                 if($(this).val() == "-1") {
                     popup.children('p').remove();
                     popup.append("<p>Looks like you have not selected a course. Please do so before uploading the calender.</p>").fadeIn();
                 }
-                else {
-                    $.cookie("courseID", $(this).val());
-
-                    //function to check file size before uploading.
-		            function beforeSubmitCourseGuide() {
-		            	alertMsg.children('p').remove();
-		            	alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
-		                //check whether browser fully supports all File API
-		                if (window.File && window.FileReader && window.FileList && window.Blob) {
-		                    if( !$('#fileGuide').val()) {   //check empty input filed 
-		                        alertMsg.children('p').remove();
-		                        alertMsg.fadeOut();
-		                        popup.children('p').remove();
-		                        popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
-		                        return false;
-		                    }
-		                    var fsize = $('#fileGuide')[0].files[0].size; //get file size
-		                    var ftype = $('#fileGuide')[0].files[0].type; // get file type
-		                    //allow file types 
-		                    switch(ftype) {
-		                        case 'image/gif': 
-                                case 'image/jpeg': 
-                                case 'image/pjpeg':
-                                case 'text/plain':
-                                case 'text/html': //html file
-                                case 'application/x-zip-compressed':
-                                case 'application/pdf':
-                                case 'application/msword':
-                                case 'application/vnd.ms-excel':
-                                case 'video/mp4':
-                                case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                                case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                                case 'application/vnd.ms-excel':
-                                case 'application/msexcel':
-                                case 'application/x-msexcel':
-                                case 'application/x-ms-excel':
-                                case 'application/x-excel':
-                                case 'application/x-dos_ms_excel':
-                                case 'application/xls':
-                                case 'application/x-xls':
-                                case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                                case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-		                            break;
-		                        default:
-		                            alertMsg.children('p').remove();
-		                        	alertMsg.fadeOut();
-		                            popup.children('p').remove();
-		                            popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
-		                            return false;
-		                    }
-		                    //Allowed file size is less than 5 MB (1048576)
-		                    if(fsize>5242880)   {
-		                        alertMsg.children('p').remove();
-		                    	alertMsg.fadeOut();
-		                        popup.children('p').remove();
-		                        popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
-		                        return false;
-		                    }
-		                }
-		                else  {
-		                    alertMsg.children('p').remove();
-		                	alertMsg.fadeOut();
-		                    popup.children('p').remove();
-		                    popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
-		                    return false;
-		                }
-		                alertMsg.children('p').remove();
-		            	alertMsg.fadeOut();
-		            }   // end of beforeSubmit function.
-
-		            //function after succesful file upload (when server response)
-		            function afterSuccessCourseGuide() {
-		                // to hide the loading overlay after the uploading is done.
-		                hideLoading();
-		                popup.children('p').remove();
-		                popup.fadeOut();
-		                $('.progress').fadeOut();
-		                alertMsg.fadeIn();
-		                // finally, remove the courseID cookie here.
-		                $.removeCookie("courseID");
-		            	$.removeCookie("guideName");
-		            	// to fadeOut the alertMsg and Reload after 3 seconds.
-		                setTimeout(function() {
-		                    alertMsg.fadeOut();
-		                    location.reload();
-		                }, 5000);
-		            }     // end of afterSuccess function
-
-                    // for uploading the calender to the server.
-                    var optionsCourseGuide = { 
-                        target:   '#alertMsg',   // target element(s) to be updated with server response 
-                        beforeSubmit:  beforeSubmitCourseGuide,  // pre-submit callback 
-                        success:       afterSuccessCourseGuide,  // post-submit callback 
-                        uploadProgress: OnProgress, //upload progress callback 
-                        resetForm: true        // reset the form after successful submit 
-                    }; 
-
-                    $('#formGuide').submit(function() { 
-                    	if($.cookie("courseID") == "undefined" || $.cookie("courseID") == undefined || $.cookie("guideName") == "undefined" || $.cookie("guideName") == undefined) {
-                    		popup.children('p').remove();
-                    		popup.append("<p>Please select the course or add the Guide Name. Something's not right.</p>").fadeIn();
-                    	}
-                    	else if($.cookie("guideName") == "" || $('#txtGuideName').val() == "") {
-                    		popup.children('p').remove();
-                    		popup.append("<p>Oops! Looks like you have not added the Guide Name. Please do so first.</p>").fadeIn();	
-                    	}
-                    	else {
-                    		$(this).ajaxSubmit(optionsCourseGuide);            
-                    	}
-                        // always return false to prevent standard browser submit and page navigation 
-                        return false; 
-                    });      
-
-                    // ---------------------- for the uploading of Annual Report ----------------------
-
-                    // for the onfocusout event of the guide name
-                    $('#txtAnnualReportName').on('focusout', function() {
-                        $.cookie("annualReportName", $(this).val());
-                        return false;
-                    });
-                    //function to check file size before uploading.
-                    function beforeSubmitAnnualReport() {
-                        alertMsg.children('p').remove();
-                        alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
-                        //check whether browser fully supports all File API
-                        if (window.File && window.FileReader && window.FileList && window.Blob) {
-                            if( !$('#fileAnnualReport').val()) {   //check empty input filed 
-                                alertMsg.children('p').remove();
-                                alertMsg.fadeOut();
-                                popup.children('p').remove();
-                                popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
-                                return false;
-                            }
-                            var fsize = $('#fileAnnualReport')[0].files[0].size; //get file size
-                            var ftype = $('#fileAnnualReport')[0].files[0].type; // get file type
-                            //allow file types 
-                            switch(ftype) {
-                                case 'image/gif': 
-                                case 'image/jpeg': 
-                                case 'image/pjpeg':
-                                case 'text/plain':
-                                case 'text/html': //html file
-                                case 'application/x-zip-compressed':
-                                case 'application/pdf':
-                                case 'application/msword':
-                                case 'application/vnd.ms-excel':
-                                case 'video/mp4':
-                                case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                                case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                                case 'application/vnd.ms-excel':
-                                case 'application/msexcel':
-                                case 'application/x-msexcel':
-                                case 'application/x-ms-excel':
-                                case 'application/x-excel':
-                                case 'application/x-dos_ms_excel':
-                                case 'application/xls':
-                                case 'application/x-xls':
-                                case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                                case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-                                    break;
-                                default:
-                                    alertMsg.children('p').remove();
-                                    alertMsg.fadeOut();
-                                    popup.children('p').remove();
-                                    popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
-                                    return false;
-                            }
-                            //Allowed file size is less than 5 MB (1048576)
-                            if(fsize>5242880)   {
-                                alertMsg.children('p').remove();
-                                alertMsg.fadeOut();
-                                popup.children('p').remove();
-                                popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
-                                return false;
-                            }
-                        }
-                        else  {
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
-                            return false;
-                        }
-                        alertMsg.children('p').remove();
-                        alertMsg.fadeOut();
-                    }   // end of beforeSubmit function.
-
-                    //function after succesful file upload (when server response)
-                    function afterSuccessAnnualReport() {
-                        // to hide the loading overlay after the uploading is done.
-                        hideLoading();
-                        popup.children('p').remove();
-                        popup.fadeOut();
-                        $('.progress').fadeOut();
-                        alertMsg.fadeIn();
-                        // finally, remove the courseID cookie here.
-                        $.removeCookie("courseID");
-                        $.removeCookie("annualReportName");
-                        // to fadeOut the alertMsg and Reload after 3 seconds.
-                        setTimeout(function() {
-                            alertMsg.fadeOut();
-                            location.reload();
-                        }, 5000);
-                    }     // end of afterSuccess function
-
-                    // for uploading the calender to the server.
-                    var optionsAnnualReport = { 
-                        target:   '#alertMsg',   // target element(s) to be updated with server response 
-                        beforeSubmit:  beforeSubmitAnnualReport,  // pre-submit callback 
-                        success:       afterSuccessAnnualReport,  // post-submit callback 
-                        uploadProgress: OnProgress, //upload progress callback 
-                        resetForm: true        // reset the form after successful submit 
-                    }; 
-
-                    $('#formAnnualReport').submit(function() { 
-                        if($.cookie("courseID") == "undefined" || $.cookie("courseID") == undefined || $.cookie("annualReportName") == "undefined" || $.cookie("annualReportName") == undefined) {
-                            popup.children('p').remove();
-                            popup.append("<p>Please select the course or add the Annual Report. Something's not right.</p>").fadeIn();
-                        }
-                        else if($.cookie("annualReportName") == "" || $('#txtAnnualReportName').val() == "") {
-                            popup.children('p').remove();
-                            popup.append("<p>Oops! Looks like you have not added the Guide Name. Please do so first.</p>").fadeIn();    
-                        }
-                        else {
-                            $(this).ajaxSubmit(optionsAnnualReport);            
-                        }
-                        // always return false to prevent standard browser submit and page navigation 
-                        return false; 
-                    });      
-
-                    // ---------------------- for the uploading of Finance documents ----------------------
-
-                    // for the onfocusout event of the guide name
-                    $('#txtFinanceDocName').on('focusout', function() {
-                        $.cookie("financeDocName", $(this).val());
-                        return false;
-                    });
-                    //function to check file size before uploading.
-                    function beforeSubmitFinanceDoc() {
-                        alertMsg.children('p').remove();
-                        alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
-                        //check whether browser fully supports all File API
-                        if (window.File && window.FileReader && window.FileList && window.Blob) {
-                            if( !$('#fileFinanceDoc').val()) {   //check empty input filed 
-                                alertMsg.children('p').remove();
-                                alertMsg.fadeOut();
-                                popup.children('p').remove();
-                                popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
-                                return false;
-                            }
-                            var fsize = $('#fileFinanceDoc')[0].files[0].size; //get file size
-                            var ftype = $('#fileFinanceDoc')[0].files[0].type; // get file type
-                            //allow file types 
-                            switch(ftype) {
-                                case 'image/gif': 
-                                case 'image/jpeg': 
-                                case 'image/pjpeg':
-                                case 'text/plain':
-                                case 'text/html': //html file
-                                case 'application/x-zip-compressed':
-                                case 'application/pdf':
-                                case 'application/msword':
-                                case 'application/vnd.ms-excel':
-                                case 'video/mp4':
-                                case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                                case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                                case 'application/vnd.ms-excel':
-                                case 'application/msexcel':
-                                case 'application/x-msexcel':
-                                case 'application/x-ms-excel':
-                                case 'application/x-excel':
-                                case 'application/x-dos_ms_excel':
-                                case 'application/xls':
-                                case 'application/x-xls':
-                                case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                                case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-                                    break;
-                                default:
-                                    alertMsg.children('p').remove();
-                                    alertMsg.fadeOut();
-                                    popup.children('p').remove();
-                                    popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the correct format.</p>").fadeIn();
-                                    return false;
-                            }
-                            //Allowed file size is less than 5 MB (1048576)
-                            if(fsize>5242880)   {
-                                alertMsg.children('p').remove();
-                                alertMsg.fadeOut();
-                                popup.children('p').remove();
-                                popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
-                                return false;
-                            }
-                        }
-                        else  {
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
-                            return false;
-                        }
-                        alertMsg.children('p').remove();
-                        alertMsg.fadeOut();
-                    }   // end of beforeSubmit function.
-
-                    //function after succesful file upload (when server response)
-                    function afterSuccessFinanceDoc() {
-                        // to hide the loading overlay after the uploading is done.
-                        hideLoading();
-                        popup.children('p').remove();
-                        popup.fadeOut();
-                        $('.progress').fadeOut();
-                        alertMsg.fadeIn();
-                        // finally, remove the courseID cookie here.
-                        $.removeCookie("courseID");
-                        $.removeCookie("financeDocName");
-                        // to fadeOut the alertMsg and Reload after 3 seconds.
-                        setTimeout(function() {
-                            alertMsg.fadeOut();
-                            location.reload();
-                        }, 5000);
-                    }     // end of afterSuccess function
-
-                    // for uploading the calender to the server.
-                    var optionsFinanceDoc = { 
-                        target:   '#alertMsg',   // target element(s) to be updated with server response 
-                        beforeSubmit:  beforeSubmitFinanceDoc,  // pre-submit callback 
-                        success:       afterSuccessFinanceDoc,  // post-submit callback 
-                        uploadProgress: OnProgress, //upload progress callback 
-                        resetForm: true        // reset the form after successful submit 
-                    }; 
-
-                    $('#formFinanceDoc').submit(function() { 
-                        if($.cookie("courseID") == "undefined" || $.cookie("courseID") == undefined || $.cookie("financeDocName") == "undefined" || $.cookie("financeDocName") == undefined) {
-                            popup.children('p').remove();
-                            popup.append("<p>Please select the course or add the Financial Document. Something's not right.</p>").fadeIn();
-                        }
-                        else if($.cookie("financeDocName") == "" || $('#txtFinanceDocName').val() == "") {
-                            popup.children('p').remove();
-                            popup.append("<p>Oops! Looks like you have not added the Financial Document Name. Please do so first.</p>").fadeIn();    
-                        }
-                        else {
-                            $(this).ajaxSubmit(optionsFinanceDoc);            
-                        }
-                        // always return false to prevent standard browser submit and page navigation 
-                        return false; 
-                    });      
-
+                else {      
+                    $('.course-list-guide').append("<input type='hidden' name='course-guide' value='" + $(this).val() + "' />");
                 }   // end of else
-            });  // end of change (delegate) function in guide-div courses list
+            }); 
+            // for the form submit of the calendar upload.
+            $('#form-guide').submit(function() {
+                var course = $('.course-list-guide').children('select').val();
+                if(course == "-1" || course == undefined || course == "undefined") {
+                    popup.children('p').remove();
+                    popup.append("<p>You havn't selected the course. Please do so first.</p>").fadeIn();
+                } else {
+                    showLoading();
+                    $(this).submit();
+                }
+            });  // end of form-guide submit
+
+            // -------------- for the course annual reports -----------------------
+            // for the delegate event of the change of the course drop down on calender upload.
+            $('#form-annual-report').delegate('#ddl-course', 'change', function() {
+                if($(this).val() == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not selected a course. Please do so before uploading the calender.</p>").fadeIn();
+                }
+                else {      
+                    $('.course-list-annual-report').append("<input type='hidden' name='course-annual-report' value='" + $(this).val() + "' />");
+                }   // end of else
+            }); 
+            // for the form submit of the calendar upload.
+            $('#form-annual-report').submit(function() {
+                var course = $('.course-list-annual-report').children('select').val();
+                if(course == "-1" || course == undefined || course == "undefined") {
+                    popup.children('p').remove();
+                    popup.append("<p>You havn't selected the course in the annual report. Please do so first.</p>").fadeIn();
+                } else {
+                    showLoading();
+                    $(this).submit();
+                }
+            });  // end of form-guide submit
+
+            // -------------- for the course financial docs -----------------------
+            // for the delegate event of the change of the course drop down on finance docs upload.
+            $('#form-finance-doc').delegate('#ddl-course', 'change', function() {
+                if($(this).val() == "-1") {
+                    popup.children('p').remove();
+                    popup.append("<p>Looks like you have not selected a course. Please do so before uploading the calender.</p>").fadeIn();
+                }
+                else {      
+                    $('.course-list-finance-doc').append("<input type='hidden' name='course-finance-doc' value='" + $(this).val() + "' />");
+                }   // end of else
+            }); 
+            // for the form submit of the calendar upload.
+            $('#form-finance-doc').submit(function() {
+                var course = $('.course-list-finance-doc').children('select').val();
+                if(course == "-1" || course == undefined || course == "undefined") {
+                    popup.children('p').remove();
+                    popup.append("<p>You havn't selected the course in the annual report. Please do so first.</p>").fadeIn();
+                } else {
+                    showLoading();
+                    $(this).submit();
+                }
+            });  // end of form-guide submit
 
 
 			 // for the add user link on LHS
@@ -3955,8 +3668,8 @@
                 <ul class="nav nav-sidebar">
             		<li><a href="#" class="course">Add a Course</a></li>
             		<li><a href="#" class="organisation">Add an organisation</a></li>
-            		<li><a href="#" class="calender">Add Course Calender</a></li>
-            		<li><a href="#" class="guide">Add Guides/Documents</a></li>
+            		<li><a href="#" class="calender">Add Course Calendar</a></li>
+            		<li><a href="#" class="guide">Add Guides &amp; Documents</a></li>
                     <li><a href="#" class="alternate-mentor">Add Alternate Mentors</a></li>
                 </ul>
                 <ul class="nav nav-sidebar">
@@ -4968,31 +4681,25 @@
 
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div guide-div">
 
-            <h4 class="page-header">
-                Select Course:
-            </h4>
-            <table class="table">
-                <tr>
-                    <td>
-                        <label id="lblCourseDdl" for="ddlCourse">Select Course: </label>
-                    </td>
-                    <td class="courseList">
-                        <!-- course list will come from ajax -->
-                    </td>
-                </tr>
-            </table>
-
-            <form action="guide-upload.php" method="post" enctype="multipart/form-data" id="formGuide">
+            <form action="guide-upload-admin.php" method="post" enctype="multipart/form-data" id="form-guide">
                 <h4 class="page-header">
                     Upload Course Guide
                 </h4>
     		    <table class="table">
+                    <tr>
+                        <td>
+                            <label id="lblCourseDdl" for="ddlCourse">Select Course: </label>
+                        </td>
+                        <td class="course-list-guide">
+                            <!-- course list will come from ajax -->
+                        </td>
+                    </tr>
     		    	<tr>
     		    		<td>
     		    			<label>Guide Content/Name: </label>
     		    		</td>
     		    		<td>
-    		    			<input type="text" placeholder="Course Guide Content/Name" id="txtGuideName" class="form-control" required />
+    		    			<input type="text" placeholder="Course Guide Content/Name" name="txtGuideName" id="txtGuideName" class="form-control" required />
     		    		</td>
     		    	</tr>
                     <tr>
@@ -5000,7 +4707,7 @@
                             <label>Upload Course Guide: </label>
                         </td>
                         <td>
-                            <input name="fileGuide" id="fileGuide" type="file" class="btn btn-lg btn-primary btn-block" />            
+                            <input name="fileGuide" id="fileGuide" type="file" class="btn btn-lg btn-primary btn-block" required/>            
                         </td>
                     </tr>
                     <tr>
@@ -5011,17 +4718,25 @@
                 </table>
             </form>
 
-            <form action="annualReport-upload.php" method="post" enctype="multipart/form-data" id="formAnnualReport">
+            <form action="annual-report-upload.php" method="post" enctype="multipart/form-data" id="form-annual-report">
                 <h4 class="page-header">
                     Upload Annual Report
                 </h4>
                 <table class="table">
                     <tr>
                         <td>
+                            <label id="lblCourseDdl" for="ddlCourse">Select Course: </label>
+                        </td>
+                        <td class="course-list-annual-report">
+                            <!-- course list will come from ajax -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
                             <label>Annual Report Content/Name: </label>
                         </td>
                         <td>
-                            <input type="text" placeholder="Annual Report Content/Name" id="txtAnnualReportName" class="form-control" required />
+                            <input type="text" placeholder="Annual Report Content/Name" id="txtAnnualReportName" name="txtAnnualReportName" class="form-control" required />
                         </td>
                     </tr>
                     <tr>
@@ -5029,7 +4744,7 @@
                             <label>Upload Annual Report: </label>
                         </td>
                         <td>
-                            <input name="fileAnnualReport" id="fileAnnualReport" type="file" class="btn btn-lg btn-primary btn-block" />            
+                            <input name="fileAnnualReport" id="fileAnnualReport" type="file" class="btn btn-lg btn-primary btn-block" required />            
                         </td>
                     </tr>
                     <tr>
@@ -5040,17 +4755,25 @@
                 </table>
             </form> 
 
-            <form action="financeDoc-upload.php" method="post" enctype="multipart/form-data" id="formFinanceDoc">
+            <form action="finance-doc-upload.php" method="post" enctype="multipart/form-data" id="form-finance-doc">
                 <h4 class="page-header">
                     Upload Finance Documents
                 </h4>
                 <table class="table">
                     <tr>
                         <td>
+                            <label id="lblCourseDdl" for="ddlCourse">Select Course: </label>
+                        </td>
+                        <td class="course-list-finance-doc">
+                            <!-- course list will come from ajax -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
                             <label>Finance Document Content/Name: </label>
                         </td>
                         <td>
-                            <input type="text" placeholder="Finance Document Content/Name" id="txtFinanceDocName" class="form-control" required />
+                            <input type="text" placeholder="Finance Document Content/Name" id="txtFinanceDocName" name="txtFinanceDocName" class="form-control" required />
                         </td>
                     </tr>
                     <tr>
@@ -5058,7 +4781,7 @@
                             <label>Upload Annual Report: </label>
                         </td>
                         <td>
-                            <input name="fileFinanceDoc" id="fileFinanceDoc" type="file" class="btn btn-lg btn-primary btn-block" />            
+                            <input name="fileFinanceDoc" id="fileFinanceDoc" type="file" class="btn btn-lg btn-primary btn-block" required/>            
                         </td>
                     </tr>
                     <tr>
@@ -5243,11 +4966,11 @@
 
       	<div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div calender-div">
 		    <h1 class="page-header">
-		    	Upload Course Calender
+		    	Upload Course Calendar
 		    </h1>
 
 		    <!-- Data will come from the AJAX here -->
-            <form action="calender-upload.php" method="post" enctype="multipart/form-data" id="formCalender">
+            <form action="calendar-upload.php" method="post" enctype="multipart/form-data" id="form-calender">
     		    <table class="table">
     		    	<tr>
     		    		<td>
@@ -5267,7 +4990,7 @@
                     </tr>
                     <tr>
                         <td colspan="2">
-                            <input type="submit"  id="submit-btn" value="Upload Calender" class="btn btn-lg btn-primary btn-block" />                
+                            <input type="submit"  id="submit-btn" value="Upload Calendar" class="btn btn-lg btn-primary btn-block" />                
                         </td>
                     </tr>
                 </table>

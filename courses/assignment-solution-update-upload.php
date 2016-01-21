@@ -298,7 +298,7 @@
 						$email = "-1";
 						$id = "-1";
                         $assCourse = "-1";
-                        $assId = $_POST["assIdUpdate"];
+                        $assId = "-1";
 
 						if(isset($_COOKIE["email"])) {
 							$email = $_COOKIE["email"];
@@ -308,6 +308,9 @@
 						}
                         if(isset($_COOKIE["course"])) {
                             $assCourse = $_COOKIE["course"];
+                        }
+                        if(isset($_POST["assIdUpdate"])) {
+                            $assId = $_POST["assIdUpdate"];
                         }
 
                         // echo "<h1 class='page-header'>" . $email . " --> " . $id . " --> " . $course . " --> " . $_POST["assIdUpdate"] . "</h1>";

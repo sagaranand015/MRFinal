@@ -286,43 +286,45 @@
 					// for the PHP helper functions.
 					include('helpers.php');
 
-                    if(isset($_FILES["fileCalender"]) && $_FILES["fileCalender"]["error"]== UPLOAD_ERR_OK)
+                    if(isset($_FILES["fileAssignmentSampleReport"]) && $_FILES["fileAssignmentSampleReport"]["error"]== UPLOAD_ERR_OK)
                     {
                         ############ Edit settings ##############
-                        $uploadDirectory    = 'uploads/calender/'; //specify upload directory ends with / (slash)
+                        $uploadDirectory    = 'uploads/assignmentSampleReport/'; //specify upload directory ends with / (slash)
                         ##########################################
                         
-                        $fileName           = strtolower($_FILES['fileCalender']['name']);
+                        $fileName           = strtolower($_FILES['fileAssignmentSampleReport']['name']);
                         $fileExt            = substr($fileName, strrpos($fileName, '.')); //get file extention
                         $date               = date_create();
                         $timestamp          = date_timestamp_get($date);
                         $newFileName        = $timestamp . "_" . $fileName;  //.$File_Ext; //new file name  
 
-                        // get the email and id cookies here
-                        $email = "-1";
-                        $id = "-1";
-                        $course = "-1";
-                        if(isset($_COOKIE["email"])) {
-                            $email = $_COOKIE["email"];
-                        } 
-                        if(isset($_COOKIE["id"])) {
-                            $id = $_COOKIE["id"];
+                        $courseId = "-1";
+                        $assId = "-1";
+                        $sampleReportName = "-1";
+                        if(isset($_POST["course-list-ass-sample-report"])) {
+                            $courseId = $_POST["course-list-ass-sample-report"];
                         }
-                        if(isset($_POST["calender-course"])) {
-                            $course = $_POST["calender-course"];
-                        } 
-
-                        if($course == "-1") {
-                            echo "<h3 class='page-header'>Upload failed</h3><p>Looks like the parameters for calendar upload are not correct. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";
+                        if(isset($_POST["assignment-list-ass-sample-report"])) {
+                            $assId = $_POST["assignment-list-ass-sample-report"];
+                        }
+                        if(isset($_POST["txtSampleReportName"])) {
+                            $sampleReportName = $_POST["txtSampleReportName"];
+                        }
+                        
+                        if($courseId == "-1" || $assId == "-1") {
+                            echo "<h3 class='page-header'>Upload failed</h3><p>Looks like the parameters for Sample Report upload are not correct. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";
+                        }
+                        else if($sampleReportName == "-1") {
+                            echo "<h3 class='page-header'>Upload failed</h3><p>Looks like you have not entered the Sample Report name. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";
                         }
                         else {
-                            if(move_uploaded_file($_FILES['fileCalender']['tmp_name'], $uploadDirectory.$newFileName )) {
-                                // put url of the calender file here.
-                                $register = RegisterCalenderUrl($course, $uploadDirectory.$newFileName);
+                            if(move_uploaded_file($_FILES['fileAssignmentSampleReport']['tmp_name'], $uploadDirectory.$newFileName )) {
+                                // save the link to the database.
+                                $register = RegisterAssignmentSampleReport($assId, $courseId, $sampleReportName, $uploadDirectory.$newFileName);
                                 if($register == "1") {
-                                    echo "<h3 class='page-header'>Upload Success</h3><p>Your Calendar upload is successful.</p>";
+                                    echo "<h3 class='page-header'>Upload Success</h3><p>Your Assignment Sample Report upload is successful.</p>";   
                                 }
-                                else if($resp == "-1") {
+                                else {
                                     echo "<h3 class='page-header'>Upload failed</h3><p>Looks like we could not register the uploaded file. Please try again or contact us at: <code>tech@mentored-research.com</code></p>";
                                 }
                             }
@@ -334,6 +336,7 @@
                     else {
                         echo "<h3 class='page-header'>Upload failed</h3><p>Looks like the file is too huge to be uploaded. Please try again with the file of smaller size or contact us at: <code>tech@mentored-research.com</code></p>";
                     }
+
 				?>
 
 				<div class="col-lg-4 col-md-4 col-sm-10 nav-div">

@@ -1110,56 +1110,6 @@
                 return false;
             });     // end of form submit for form-ass-video 
 
-			// for adding the video link to the database.
-			// $('#formAssVideo').validator().on('submit', function (e) { 
-			// 	if (e.isDefaultPrevented()) {
-			// 		alertMsg.children('p').remove();
-   //                  alertMsg.fadeOut();
-   //                  popup.children('p').remove();
-   //                  popup.append("<p>Oops! Looks like you have not provided the Video Link. Please Recheck and try again.</p>").fadeIn();
-			// 	}
-			// 	else {
-			// 		// put the ajax Request for the Video link to the database.
-			// 		if($.cookie("assignmentAssPDF") == "undefined" ||  $.cookie("assignmentAssPDF") == undefined) {
-			// 			popup.children('p').remove();
-			// 	        popup.append("<p>Looks like you have not selected the Assignment Properly. Please do so first.</p>").fadeIn();	
-			// 		}
-			// 		else {
-   //                      var assVideoName = $('#txtAssVideoName').val().trim();
-			// 			var assVideo = $('#txtAssVideo').val().trim();
-			// 			var assID = $.cookie("assignmentAssPDF");
-			// 			showLoading();
-			// 			$.ajax({
-			// 				type: "GET",
-			// 				url: "AJAXFunctions.php",
-			// 				data: {
-			// 					no: "11", assID: assID, assVideo: assVideo, assVideoName: assVideoName
-			// 				},
-			// 				success: function(response) {
-			// 					if(response == "-1") {
-			// 						popup.children('p').remove();
-			// 	        			popup.append("<p>Oops! We encountered an error while registering the Video link. Please try again.</p>").fadeIn();	
-			// 					}
-			// 					else {
-			// 						popup.children('p').remove();
-			// 	        			popup.append("<p>Assignment Video Added Successfully.</p>").fadeIn();		
-			// 					}
-			// 				},
-			// 				error: function() {
-			// 					alertMsg.children('p').remove();
-			// 			        alertMsg.fadeOut();
-			// 			        popup.children('p').remove();
-			// 			        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
-			// 				},
-			// 				complete: function() {
-			// 					hideLoading();
-			// 				}
-			// 			});
-			// 		}  // end of inner else.
-			// 	}   // end of outer else.
-			// 	return false;
-			// });  // end of add video link form
-
 			// for the profile link on LHS
             $('.profile').on('click', function() {
             	showDiv($('.profile-div'));
@@ -1531,8 +1481,13 @@
                             if(response == "1") {
                                 popup.children('p').remove();
                                 popup.append("<p>Mentee Successfully Added. Thank You.</p>").fadeIn();
-                            }
-                            else {
+                            } else if(response == "-2") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while adding the Mentee. Please try again.</p>").fadeIn();
+                            } else if(response == "-3") {
+                                popup.children('p').remove();
+                                popup.append("<p>We registered the Mentee in the database, but could not assign the course. Please check the backend or contact us at: <code>tech@mentored-research.com</code></p>").fadeIn();
+                            } else {
                                 popup.children('p').remove();
                                 popup.append("<p>Oops! We encountered an error while adding the Mentee. Please try again.</p>").fadeIn();
                             }
@@ -1550,198 +1505,44 @@
                 }
                 return false;
             });   // end of submit() of form-add-mentee
-            
-            //function to check file size before uploading for the update Solution
-            function beforeSubmitMenteeExcel() {
-                alertMsg.children('p').remove();
-                alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
-                //check whether browser fully supports all File API
-                if (window.File && window.FileReader && window.FileList && window.Blob) {
-                    if( !$('#fileAddMentee').val()) {   //check empty input filed 
-                        alertMsg.children('p').remove();
-                        alertMsg.fadeOut();
-                        popup.children('p').remove();
-                        popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
-                        return false;
-                    }
-                    var fsize = $('#fileAddMentee')[0].files[0].size; //get file size
-                    var ftype = $('#fileAddMentee')[0].files[0].type; // get file type
-                    //allow file types 
-                    switch(ftype) {
-                        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                        case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                        case 'application/vnd.ms-excel':
-                        case 'application/msexcel':
-                        case 'application/x-msexcel':
-                        case 'application/x-ms-excel':
-                        case 'application/x-excel':
-                        case 'application/x-dos_ms_excel':
-                        case 'application/xls':
-                        case 'application/x-xls':
-                            break;
-                        default:
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the Excel format only.</p>").fadeIn();
-                            return false;
-                    }
-                    //Allowed file size is less than 5 MB (1048576)
-                    if(fsize>5242880)   {
-                        alertMsg.children('p').remove();
-                        alertMsg.fadeOut();
-                        popup.children('p').remove();
-                        popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
-                        return false;
-                    }
-                }
-                else  {
-                    alertMsg.children('p').remove();
-                    alertMsg.fadeOut();
-                    popup.children('p').remove();
-                    popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
-                    return false;
-                }
-                alertMsg.children('p').remove();
-                alertMsg.fadeOut();
-            }   // end of beforeSubmitMenteeExcel function.
-
-            function afterSuccessMenteeExcel() {
-                // to hide the loading overlay after the uploading is done.
-                hideLoading();
-                popup.children('p').remove();
-                popup.fadeOut();
-                $('.progress').fadeOut();
-                alertMsg.fadeIn();
-                // finally, remove the courseID cookie here.
-                $('.user').trigger('click');
-                // to fadeOut the alertMsg and reload the page after 3 seconds.
-                setTimeout(function() {
-                    alertMsg.fadeOut();
-                    location.reload();
-                }, 3000);
-            }     // end of afterSuccessAssignmentSolution function
-
-            // code for updateSolution File upload
-            var optionsMenteeExcel = { 
-                target:   '#alertMsg',   // target element(s) to be updated with server response 
-                beforeSubmit:  beforeSubmitMenteeExcel,  // pre-submit callback 
-                success:       afterSuccessMenteeExcel,  // post-submit callback 
-                uploadProgress: OnProgress, //upload progress callback 
-                resetForm: true        // reset the form after successful submit 
-            };
 
             // for adding the mentees through the excel sheets.
             $('#form-add-mentee-excel').submit(function() {
-                var organ1 = $('.add-mentee-organ').children('select').val();
-                var course1 = $('.add-mentee-course').children('select').val();
-                $.cookie("addMenteeOrgan", organ1);
-                $.cookie("addMenteeCourse", course1);
+                var organ = $('.add-mentee-organ').children('select').val();
+                var course = $('.add-mentee-course').children('select').val();
 
-                var email = $.cookie("email");
-                var id = $.cookie("id");
+                // append the hidden input fields here.
+                $('.col-add-mentee-excel').append("<input type='hidden' name='add-mentee-excel-course' value='" + course + "' />");
+                $('.col-add-mentee-excel').append("<input type='hidden' name='add-mentee-excel-organ' value='" + organ + "' />");
 
-                //alert($.cookie("addMenteeCourse") + " --> " + $.cookie("addMenteeOrgan"));
-                if(organ1 == "-1" || course1 == "-1") {
+                if(organ == undefined || organ == "-1" || organ == "undefined" || course == "undefined" || course == "-1" || course == undefined) {
                     popup.children('p').remove();
-                    popup.append("<p>Please select the organisation and course before uploading files. Thank You.</p>").fadeIn();
+                    popup.append("<p>looks like you have not selected the course or organization. Please do so first.</p>").fadeIn();
+                } else {
+                    showLoading();
+                    $(this).submit();
                 }
-                else if(email == "-1" || id == "-1" || email == undefined || email == "undefined" || id == "undefined" || id == undefined) {
-                    popup.children('p').remove();
-                    popup.append("<p>Looks like you have not logged in properly. Please login again and try again.</p>").fadeIn();
-                }
-                else {
-                    $(this).ajaxSubmit(optionsMenteeExcel);
-                }
+
                 return false;
             });   // end of submit() of form-add-mentee-excel
 
-            //function to check file size before uploading for the update Solution
-            function beforeSubmitMentorExcel() {
-                alertMsg.children('p').remove();
-                alertMsg.append("<p>Please wait while we prepare the files for upload...</p>").fadeIn();
-                //check whether browser fully supports all File API
-                if (window.File && window.FileReader && window.FileList && window.Blob) {
-                    if( !$('#fileAddMentor').val()) {   //check empty input filed 
-                        alertMsg.children('p').remove();
-                        alertMsg.fadeOut();
-                        popup.children('p').remove();
-                        popup.append("<p>Apparently, you have not uploaded the file yet. Please do so.</p>").fadeIn();
-                        return false;
-                    }
-                    var fsize = $('#fileAddMentor')[0].files[0].size; //get file size
-                    var ftype = $('#fileAddMentor')[0].files[0].type; // get file type
-                    //allow file types 
-                    switch(ftype) {
-                        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                        case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                        case 'application/vnd.ms-excel':
-                        case 'application/msexcel':
-                        case 'application/x-msexcel':
-                        case 'application/x-ms-excel':
-                        case 'application/x-excel':
-                        case 'application/x-dos_ms_excel':
-                        case 'application/xls':
-                        case 'application/x-xls':
-                            break;
-                        default:
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
-                            popup.children('p').remove();
-                            popup.append("<p>The file uploaded is not supported by the server. Please upload the file in the Excel format only.</p>").fadeIn();
-                            return false;
-                    }
-                    //Allowed file size is less than 5 MB (1048576)
-                    if(fsize>5242880)   {
-                        alertMsg.children('p').remove();
-                        alertMsg.fadeOut();
-                        popup.children('p').remove();
-                        popup.append("<p><b>"+bytesToSize(fsize) +"</b> Too big file! <br />File is too big, it should be less than 5 MB.</p>").fadeIn();
-                        return false;
-                    }
-                }
-                else  {
-                    alertMsg.children('p').remove();
-                    alertMsg.fadeOut();
-                    popup.children('p').remove();
-                    popup.append("<p>Please upgrade your browser, because your current browser lacks some new features we need!</p>").fadeIn();
-                    return false;
-                }
-                alertMsg.children('p').remove();
-                alertMsg.fadeOut();
-            }   // end of beforeSubmitMentorExcel function.
-
-
-            // code for updateSolution File upload
-            var optionsMentorExcel = { 
-                target:   '#alertMsg',   // target element(s) to be updated with server response 
-                beforeSubmit:  beforeSubmitMentorExcel,  // pre-submit callback 
-                success:       afterSuccessMenteeExcel,  // post-submit callback 
-                uploadProgress: OnProgress, //upload progress callback 
-                resetForm: true        // reset the form after successful submit 
-            };
-
             // for adding the mentees through the excel sheets.
             $('#form-add-mentor-excel').submit(function() {
-                var organ1 = $('.add-mentor-organ').children('select').val();
-                var course1 = $('.add-mentor-course').children('select').val();
-                $.cookie("addMentorOrgan", organ1);
-                $.cookie("addMentorCourse", course1);
+                var organ = $('.add-mentor-organ').children('select').val();
+                var course = $('.add-mentor-course').children('select').val();
 
-                var email = $.cookie("email");
-                var id = $.cookie("id");
+                // append the hidden input fields here.
+                $('.col-add-mentor-excel').append("<input type='hidden' name='add-mentor-excel-course' value='" + course + "' />");
+                $('.col-add-mentor-excel').append("<input type='hidden' name='add-mentor-excel-organ' value='" + organ + "' />");
 
-                if(organ1 == "-1" || course1 == "-1") {
+                if(organ == undefined || organ == "-1" || organ == "undefined" || course == "undefined" || course == "-1" || course == undefined) {
                     popup.children('p').remove();
-                    popup.append("<p>Please select the organisation and course before uploading files. Thank You.</p>").fadeIn();
+                    popup.append("<p>looks like you have not selected the course or organization. Please do so first.</p>").fadeIn();
+                } else {
+                    showLoading();
+                    $(this).submit();
                 }
-                else if(email == "-1" || id == "-1" || email == undefined || email == "undefined" || id == "undefined" || id == undefined) {
-                    popup.children('p').remove();
-                    popup.append("<p>Looks like you have not logged in properly. Please login again and try again.</p>").fadeIn();
-                }
-                else {
-                    $(this).ajaxSubmit(optionsMentorExcel);
-                }
+
                 return false;
             });   // end of submit() of form-add-mentor-excel
 
@@ -2098,7 +1899,7 @@
                                 // reload the page for no problems afterwards.
                                 setTimeout(function() {
                                     location.reload();
-                                }, 5000);
+                                }, 1000);
                             }
                         },
                         error: function() {
@@ -2984,33 +2785,8 @@
                     popup.append("<p>Looks like you have not logged in properly. Please login and try again.</p>").fadeIn();
                 }
                 else {
-                    
-                    // for getting the organisation and course ddls.
+                    // for getting the organisation ddls.
                     showLoading();
-                    // $.ajax({
-                    //     type: "GET",
-                    //     url: "AJAXFunctions.php",
-                    //     data: {
-                    //         no: "6"
-                    //     },
-                    //     success: function(response) {
-                    //         // to show the courses drop down at appropriate place.
-                    //         if(response == "-1") {
-                    //             popup.children('p').remove();
-                    //             popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();                              
-                    //         }
-                    //         else {
-                    //             $('.add-team-course').children('select').remove();
-                    //             $('.add-team-course').append(response);
-                    //         }
-                    //     }, 
-                    //     error: function() {
-                    //         alertMsg.children('p').remove();
-                    //         alertMsg.fadeOut();
-                    //         popup.children('p').remove();
-                    //         popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
-                    //     }
-                    // });
                     $.ajax({
                         type: "GET",
                         url: "AJAXFunctions.php",
@@ -3023,29 +2799,24 @@
                                 popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
                             }
                             else {
-
                                 $('.add-team-organ').children('select').remove();
                                 $('.add-team-organ').append(response);
                             }
                         },
                         error: function() {
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
                             popup.children('p').remove();
                             popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
                         },
                         complete: function() {
                             hideLoading();
                         }
-                    });   // end of second ajax request
-
+                    });   // end of ajax request
                 }   // end of else
                 return false;
             });
 
             // for the change event of the organisation ddl
             $('.team-div').delegate('#ddl-organisation', 'change', function() { 
-                // remove the course ddl here and get a new one.
                 $('.add-team-course').children('select').remove();
                 showLoading();
                 $.ajax({
@@ -4093,11 +3864,16 @@
 					</form>
 
                     <!-- for adding the mentee through the excel sheets -->
-                    <form id="form-add-mentor-excel" action="userMentor-upload.php" method="post" enctype="multipart/form-data">
+                    <form id="form-add-mentor-excel" action="user-mentor-upload.php" method="post" enctype="multipart/form-data">
                         <h1 class="page-header">
                             Mentor Excel Upload
                         </h1>
                         <table class="table">
+                            <tr class="hidden">
+                                <td class="col-add-mentor-excel">
+
+                                </td>
+                            </tr>
                             <tr>
                                 <td>
                                     <label>Select File to Upload:</label>
@@ -4152,11 +3928,16 @@
 					</form>
 
                     <!-- for adding the mentee through the excel sheets -->
-                    <form id="form-add-mentee-excel" action="userMentee-upload.php" method="post" enctype="multipart/form-data">
+                    <form id="form-add-mentee-excel" action="user-mentee-upload.php" method="post" enctype="multipart/form-data">
                         <h1 class="page-header">
                             Mentee Excel Upload
                         </h1>
                         <table class="table">
+                            <tr class="hidden">
+                                <td class="col-add-mentee-excel">
+
+                                </td>
+                            </tr>   
                             <tr>
                                 <td>
                                     <label>Select File to Upload:</label>

@@ -8,6 +8,25 @@ include 'headers/databaseConn.php';
 // for mandrill mail sending API.
 require_once 'mandrill/Mandrill.php'; 
 
+// for adding the mentee to the MenteeCourses table.
+function AddToMenteeCoursesTable($id, $email, $course) {
+	$resp = "-1";
+	try {
+		$query = "insert into MenteeCourses(MenteeID, MenteeEmail, MenteeCourse) values('$id', '$email', '$course');";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		} else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // get the query email address from the course id.
 function GetQueryEmail($courseId) {
 	$resp = "-1";
@@ -579,7 +598,28 @@ function GetDirectorDetailsByOrgan($organ) {
 function AssignMentor($mentorId, $menteeId) {
 	$resp = "-1";
 	try {
-		$query = "update Mentee set MenteeMentor='$mentorId' where MenteeID='$menteeId'";
+		// update MenteeCourses set MentorID='$mentorId' where MenteeID='$menteeId';
+		$query = "update Mentee set MenteeMentor='$mentorId' where MenteeID='$menteeId';";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		}
+		else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
+// to assign a mentorID to the mentee passed as paramters.
+function AssignMentorInMenteeCourses($mentorId, $menteeId) {
+	$resp = "-1";
+	try {
+		$query = "update MenteeCourses set MentorID='$mentorId' where MenteeID='$menteeId';";
 		$rs = mysql_query($query);
 		if(!$rs) {
 			$resp = "-1";
@@ -635,7 +675,6 @@ function AddToUsers($email, $level) {
 		}
 		else {
 			$resp = "1";
-			SendNewUserMail($email);   // to send the mail to the user.
 		}
 		return $resp;
 	}
@@ -5672,7 +5711,8 @@ function AddToMenteeTable($organ, $course, $email, $table) {
 			$resp = "-1";
 		}
 		else {
-			$resp = "1";
+			// $resp = "1";
+			$resp = mysql_insert_id();
 		}
 		return $resp;
 	}

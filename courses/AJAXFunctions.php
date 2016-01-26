@@ -333,6 +333,9 @@ function AddToTeam($primaryUser, $secondaryUser) {
 	try {
 		$mentee = GetMenteeDetails($primaryUser);
 		$menteeEmail = $mentee["MenteeEmail"];
+
+		// start writing from here.
+
 		$query = "insert into Team(PrimaryUser, SecondaryUser) values('$menteeEmail', '$secondaryUser')";
 		$rs = mysql_query($query);
 		if(!$rs) {
@@ -1088,12 +1091,14 @@ function GetAllUsersByOrgan($organ) {
 // to assign the mentor to the mentees selected.
 function AssignMentorToMentees($mentorId, $mentees) {
 	$resp = "-1";
+	$res = "-1";
 	$i = 0;
 	try {
 		$mentee = json_decode($mentees, true);
 		foreach ($mentee as $key => $v) {
+			$res = AssignMentorInMenteeCourses($mentorId, $v);
 			$resp = AssignMentor($mentorId, $v);
-			if($resp == "1") {
+			if($res == "1" && $resp == "1") {
 				$i++;
 			} 
 		}
@@ -1523,31 +1528,54 @@ function ChangePassword($email, $oldPassword, $newPassword, $newPasswordConfirm,
 }
 
 // for adding the user to the User and the Specified table.
+// returns -1 on failure to add to user table. Returns -2 on failure to add to the particular table. -1 on error.
+// returns -3 on failure to add to the MenteeCourses table
 function AddUser($organ, $course, $email, $level) {
 	$resp = "-1";
 	$userAdd = "-1";
 	$userTable = "-1";
 	try {
-		if($level == "B") {   // for adding the director.
-			$userAdd = AddToUserTable($email, $level);
-			$userTable = AddToDirectorTable($organ, $email, "Director");
-		}
-		else if($level == "C") {
-			$userAdd = AddToUserTable($email, $level);
-			$userTable = AddToMentorTable($organ, $course, $email, "Mentor");
-		}
-		else if($level == "D") {
-			$userAdd = AddToUserTable($email, $level);
-			$userTable = AddToMenteeTable($organ, $course, $email, "Mentee");
-		}
-		else {
-			$resp = "-1";
-		}
+		$userAdd = AddToUserTable($email, $level);   // add to the user table first
 
-		if($userAdd == "1" && $userTable == "1") {   // successful insertions.
-			SendNewUserMail($email);
-			$resp = "1";
-		}
+		if($userAdd == "1") {  // adding to user table successful
+			if($level == "B") {   // for adding the director.		
+				$userTable = AddToDirectorTable($organ, $email, "Director");
+				if($userTable == "1") {
+					SendNewUserMail($email);
+					$resp = "1";
+				} else {
+					$resp = "-2";
+				}
+			}
+			else if($level == "C") {   // for adding to the mentor table
+				$userTable = AddToMentorTable($organ, $course, $email, "Mentor");
+				if($userTable == "1") {
+					SendNewUserMail($email);
+					$resp = "1";
+				} else {
+					$resp = "-2";
+				}
+			}
+			else if($level == "D") {  // for adding to the mentee table
+				$userTable = AddToMenteeTable($organ, $course, $email, "Mentee");
+				if($userTable != "-1") {
+					$res = AddToMenteeCoursesTable($userTable, $email, $course);   // add to the MenteeCourses table with the course
+					if($res == "1") {
+						SendNewUserMail($email);
+						$resp = "1";
+					} 
+					else {
+						$resp = "-3";
+					}
+				} 
+				else {
+					$resp = "-2";
+				}
+			}
+			else {
+				$resp = "-1";
+			}
+		} 
 		else {
 			$resp = "-1";
 		}

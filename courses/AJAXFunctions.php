@@ -248,7 +248,7 @@ function GetAllMenteeCourses($email) {
 				$resp[0] = "1";
 				$i = 1;
 				while ($res = mysql_fetch_array($rs)) {
-					$resp[$i] = $res["MenteeCourse"] . " ~~ " . GetCourseNameById($res["MenteeCourse"]);
+					$resp[$i] = $res["MenteeCourse"] . " ~~ " . GetCourseNameById($res["MenteeCourse"]) . " ~~ " . $res["MenteeID"];
 					$i = $i + 1;
 				}
 			}
@@ -332,11 +332,11 @@ function AddToTeam($primaryUser, $secondaryUser) {
 	$resp = "-1";
 	try {
 		$mentee = GetMenteeDetails($primaryUser);
-		$menteeEmail = $mentee["MenteeEmail"];
-
-		// start writing from here.
-
-		$query = "insert into Team(PrimaryUser, SecondaryUser) values('$menteeEmail', '$secondaryUser')";
+		$menteeId = $mentee["MenteeID"];
+		$menteeCourse = $mentee["MenteeCourse"];
+		$menteeMentor = $mentee["MenteeMentor"];
+		// $query = "insert into MenteeCourses(MenteeID, MenteeEmail, MenteeCourse, MentorID) values('$menteeId', '$secondaryUser', '$menteeCourse', '$menteeMentor');";
+		$query = "update MenteeCourses set MenteeID='$menteeId' where MenteeEmail='$secondaryUser' and MenteeCourse='$menteeCourse';";
 		$rs = mysql_query($query);
 		if(!$rs) {
 			$resp = "-1";

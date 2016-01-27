@@ -380,15 +380,13 @@
                             $('#profile-header').html(res[1] + " Profile");
 
                             // set the cookie for the menteeID.
-                            $.cookie("id", res[5], {
-                                path: '/',
-                                expires: 365
-                            });
+                            // $.cookie("id", res[5], {
+                            //     path: '/',
+                            //     expires: 365
+                            // });
                         }
                     },
                     error: function() {
-                        alertMsg.children('p').remove();
-                        alertMsg.fadeOut();
                         popup.children('p').remove();
                         popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
                     },
@@ -406,17 +404,27 @@
                     no: "54", email: email
                 },
                 success: function(response) {
+
+                    console.log(response);
+
                     if(response[0] == "1") {   // success case
+
                         for(var i = 1;i<response.length;i++) {
                             var courseInfo = response[i].split(" ~~ ");
 
-                            $('.dropdown-menu-course').append("<li><a style='color: black;' class='courses-link' href='#' data-courseid='" + courseInfo[0] + "' data-coursename='" + courseInfo[1] + "'>" + courseInfo[1] + "</a></li>");
+                            $('.dropdown-menu-course').append("<li><a style='color: black;' class='courses-link' href='#' data-id='" + courseInfo[2] + "' data-courseid='" + courseInfo[0] + "' data-coursename='" + courseInfo[1] + "'>" + courseInfo[1] + "</a></li>");
 
                             if($.cookie('course') == "" || $.cookie('course') == "undefined" || $.cookie('course') == undefined) {   // for the first time
 
                                 // ----------- for setting the course ------------
                                 $.cookie('course', response[1].split(" ~~ ")[0]);
                                 $.cookie('coursename', response[1].split(" ~~ ")[1]);
+
+                                // set the id cookie here.
+                                $.cookie("id", response[1].split(" ~~ ")[2], {
+                                    path: '/',
+                                    expires: 365
+                                });                        
 
                                 // show it in the navbar.
                                 $('.dropdown-course').html($.cookie('coursename') + "<span class='caret'></span>");
@@ -425,6 +433,10 @@
                                     popup.children('p').remove();
                                     popup.append("<p>We could not load the required courses. Please refresh the page or try logging in again. If the problem persists, please drop in a mail to us at: <code>tech@mentored-research.com</code></p>").fadeIn();
                                 } 
+                                else if($.cookie('id') == "" || $.cookie('id') == "undefined" || $.cookie('id') == undefined) {
+                                    popup.children('p').remove();
+                                    popup.append("<p>We could not authenticate this account. Please refresh the page or try logging in again. If the problem persists, please drop in a mail to us at: <code>tech@mentored-research.com</code></p>").fadeIn();
+                                }
 
                             }
 
@@ -556,6 +568,8 @@
                 var courseId = $(this).attr('data-courseid');
                 var courseName = $(this).attr('data-coursename');
 
+                var id = $(this).attr('data-id');
+
                 if(courseId == $.cookie('course')) {
                 }
                 else {
@@ -563,10 +577,16 @@
                     $.cookie('course', courseId);
                     $.cookie('coursename', courseName);
 
+                    $.cookie("id", id);
+
                     if($.cookie('course') == "" || $.cookie('course') == "undefined" || $.cookie('course') == undefined) {
                         popup.children('p').remove();
                         popup.append("<p>Course could not be changed. Please logout and try again. If problem persists, drop in a mail to <code>tech@mentored-research.com</code></p>").fadeIn();
                     } 
+                    else if($.cookie('id') == "" || $.cookie('id') == "undefined" || $.cookie('id') == undefined)  {
+                        popup.children('p').remove();
+                        popup.append("<p>The course changed, but authentication failed. Please try clicking on the other course or refresh your page. If the problem persists, contact us at: <code>tech@mentored-research.com</code></p>").fadeIn();
+                    }
                     else {
                         popup.children('p').remove();
                         popup.append("<p>Course changed successfully. Refreshing your dashboard.</p>").fadeIn();

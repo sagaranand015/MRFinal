@@ -5945,6 +5945,7 @@ function GetMenteeDetails($menteeID) {
 		}
 		else {
 			while ($res = mysql_fetch_array($rs)) {
+				$mentee["MenteeID"] = $res["MenteeID"];
 				$mentee["MenteeName"] = $res["MenteeName"];
 				$mentee["MenteeEmail"] = $res["MenteeEmail"];
 				$mentee["MenteeContact"] = $res["MenteeContact"];

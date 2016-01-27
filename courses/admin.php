@@ -1493,8 +1493,6 @@
                             }
                         },
                         error: function() {
-                            alertMsg.children('p').remove();
-                            alertMsg.fadeOut();
                             popup.children('p').remove();
                             popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
                         },
@@ -2968,7 +2966,7 @@
                                 no: "51", primaryUser: primary, secondaryUser: secondaryEmail
                             },
                             success: function(response) {
-                                alert(response);
+                                console.log(response);
                                 if(response == "-1") {
                                     popup.children('p').remove();
                                     popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();    

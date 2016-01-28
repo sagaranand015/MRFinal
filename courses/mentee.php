@@ -412,6 +412,12 @@
                         for(var i = 1;i<response.length;i++) {
                             var courseInfo = response[i].split(" ~~ ");
 
+                            // set the id cookie here.
+                            $.cookie("id", response[1].split(" ~~ ")[2], {
+                                path: '/',
+                                expires: 365
+                            });                        
+                            
                             $('.dropdown-menu-course').append("<li><a style='color: black;' class='courses-link' href='#' data-id='" + courseInfo[2] + "' data-courseid='" + courseInfo[0] + "' data-coursename='" + courseInfo[1] + "'>" + courseInfo[1] + "</a></li>");
 
                             if($.cookie('course') == "" || $.cookie('course') == "undefined" || $.cookie('course') == undefined) {   // for the first time
@@ -419,12 +425,6 @@
                                 // ----------- for setting the course ------------
                                 $.cookie('course', response[1].split(" ~~ ")[0]);
                                 $.cookie('coursename', response[1].split(" ~~ ")[1]);
-
-                                // set the id cookie here.
-                                $.cookie("id", response[1].split(" ~~ ")[2], {
-                                    path: '/',
-                                    expires: 365
-                                });                        
 
                                 // show it in the navbar.
                                 $('.dropdown-course').html($.cookie('coursename') + "<span class='caret'></span>");

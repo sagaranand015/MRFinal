@@ -19,7 +19,7 @@ else if(isset($_GET["no"]) && $_GET["no"] == "3") {  // for getting a list of or
 	GetOrganisationsDropDown();
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "4") {  // for adding the course into the database.
-	AddCourse($_GET["name"], $_GET["duration"], $_GET["edition"], $_GET["desc"]);
+	AddCourse($_GET["name"], $_GET["duration"], $_GET["edition"], $_GET["desc"], $_GET["email"]);
 }
 else if(isset($_GET["no"]) && $_GET["no"] == "5") {  // for adding the organisation/campus into the database.
 	AddOrganisation($_GET["name"], $_GET["contact"], $_GET["address"]);
@@ -2037,7 +2037,8 @@ function AddOrganisation($name, $contact, $address) {
 }
 
 // for adding the course into the database.
-function AddCourse($name, $duration, $edition, $desc) {
+// returns 1 on addition in both tables. -1 on failure on Course and -2 on failure on CourseQuery.
+function AddCourse($name, $duration, $edition, $desc, $email) {
 	$resp = "-1";
 	try {
 		$query = "insert into Course(CourseName, CourseDuration, CourseEdition, CourseDesc) values('$name', '$duration', '$edition', '$desc')";
@@ -2046,7 +2047,14 @@ function AddCourse($name, $duration, $edition, $desc) {
 			$resp ="-1";
 		}
 		else {
-			$resp = "1";
+			// now, add the course email to the CourseQuery table.
+			$id = mysql_insert_id();
+			$resp = AddCourseQuery($id, $email);
+			if($resp == "-1") {
+				$resp = "-2";
+			} else {
+				$resp = "1";
+			}
 		}
 		echo $resp;
 	}

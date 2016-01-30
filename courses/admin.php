@@ -579,19 +579,26 @@
 					var courseDur = $('#txtCourseDuration').val().trim();
 					var courseEdition = $('#txtCourseEdition').val().trim();
 					var courseDesc = $('#txtCourseDesc').val().trim();
+                    var courseEmail = $('#txtCourseEmail').val().trim();
 
 					showLoading();
 					$.ajax({
 						type: "GET",
 						url: "AJAXFunctions.php",
 						data: {
-							no: "4", name: courseName, duration: courseDur, edition: courseEdition, desc: courseDesc
+							no: "4", name: courseName, duration: courseDur, edition: courseEdition, desc: courseDesc, email: courseEmail
 						},
 						success: function(response) {
+
+                            console.log(response);
+
 							if(response == "-1") {
 								popup.children('p').remove();
 	                            popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();
-							}
+							} else if(response == "-2") {
+                                popup.children('p').remove();
+                                popup.append("<p>We added the course, but could not add the Query Email for this course. Please try again or contact the tech support at: <code>tech@mentored-research.com</code></p>").fadeIn();
+                            }
 							else {
 								popup.children('p').remove();
 	                            popup.append("<p>Course Added Successfully.</p>").fadeIn();	
@@ -4443,6 +4450,14 @@
                             <textarea class="form-control" placeholder="Course Description" id="txtCourseDesc" rows="8"></textarea>
                         </td>
 	        		</tr>
+                    <tr>
+                        <td>
+                            <label id="lblCourseEmail" for="txtCourseEmail">Course Query Email: </label>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" placeholder="Course Query Email" id="txtCourseEmail" required />
+                        </td>
+                    </tr>
 	        		<tr>
                         <td colspan="2">
                             <input type="submit" value="Add Course" id="btnAddCourse" class="btn btn-lg btn-primary btn-block" />

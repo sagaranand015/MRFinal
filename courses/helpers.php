@@ -8,6 +8,25 @@ include 'headers/databaseConn.php';
 // for mandrill mail sending API.
 require_once 'mandrill/Mandrill.php'; 
 
+// to add the query email to the CourseQuery table.
+function AddCourseQuery($courseId, $email) {
+	$resp = "-1";
+	try {
+		$query = "insert into CourseQuery(CourseID, QueryEmail) values('$courseId', '$email');";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		} else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // for adding the mentee to the MenteeCourses table.
 function AddToMenteeCoursesTable($id, $email, $course) {
 	$resp = "-1";

@@ -8,6 +8,31 @@ include 'headers/databaseConn.php';
 // for mandrill mail sending API.
 require_once 'mandrill/Mandrill.php'; 
 
+// to delete the mentee from the given table.
+function DeleteFromTable($email, $courseId, $table) {
+	$resp = "-1";
+	try {
+		if($table == "User") {
+			$query = "delete from User where UserEmail='$email';";
+		} else if($table == "Mentee") {
+			$query = "delete from Mentee where MenteeEmail='$email' and MenteeCourse='$courseId';";
+		} else if($table == "MenteeCourses") {
+			$query = "delete from MenteeCourses where MenteeEmail='$email' and MenteeCourse='$courseId';";
+		}
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		} else {
+			$resp = "1";
+		}
+		return $resp;
+	}
+	catch(Exception $e) {
+		$resp = "-1";
+		return $resp;
+	}
+}
+
 // to add the query email to the CourseQuery table.
 function AddCourseQuery($courseId, $email) {
 	$resp = "-1";

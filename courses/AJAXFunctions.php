@@ -179,6 +179,67 @@ else if(isset($_GET["no"]) && $_GET["no"] == "55") {  // to add the alternate me
 else if(isset($_GET["no"]) && $_GET["no"] == "56") {  // to get the alternate mentors based on a course.
 	GetAlternateMentors($_GET["course"]);
 }
+else if(isset($_GET["no"]) && $_GET["no"] == "57") {  // to get the mentees for deletion
+	GetMenteesForDeletion($_GET["course"]);
+}
+else if(isset($_GET["no"]) && $_GET["no"] == "58") {  // to delete the mentee from all the tables
+	DeleteMentee($_GET["menteeId"], $_GET["menteeEmail"], $_GET["course"]);
+}
+
+// to delete the mentee from all the tables
+// returns 1 if all the deleted. -1 on failure to delete from User table
+// -2 on failure to delete from Mentee table
+// -3 on failure to delete from MenteeCourses table
+function DeleteMentee($menteeId, $menteeEmail, $courseId) {
+	$resp = "-1";
+	try {
+		if(DeleteFromTable($menteeEmail, $courseId, "User") == "1") {
+			if(DeleteFromTable($menteeEmail, $courseId, "Mentee") == "1") {
+				if(DeleteFromTable($menteeEmail, $courseId, "MenteeCourses") == "1") {
+					$resp = "1";
+				} else {
+					$resp = "-3";
+				}
+			} else {
+				$resp = "-2";
+			}
+		} else {
+			$resp = "-1";
+		}
+		echo $resp;
+	}
+	catch(Exception $e) {
+		$resp ="-1";
+		echo $resp;
+	}
+}
+
+// to get the mentees for deletion
+function GetMenteesForDeletion($courseId) {
+	$resp = "-1";
+	try {
+		$query = "select * from Mentee where MenteeCourse='$courseId';";
+		$rs = mysql_query($query);
+		if(!$rs) {
+			$resp = "-1";
+		} else {
+			if(mysql_num_rows($rs) > 0) {
+				$resp = "<table class='table delete-user-table'><thead><th>Mentee Name</th><th>Mentee Email</th><th>Delete User</th></thead>";
+				while ($res = mysql_fetch_array($rs)) {
+					$resp .= "<tr><td>" . $res["MenteeName"] . "</td><td>" . $res["MenteeEmail"] . "</td><td>" . "<a href='#' class='delete-link' data-id='" . $res["MenteeID"] . "' data-email='" . $res["MenteeEmail"] . "'>Delete User</a>" . "</td></tr>";
+				}
+				$resp .= "</table>";
+			} else {
+				$resp = "0";
+			}
+		}
+		echo $resp;
+	} 
+	catch(Exception $e) {
+		$resp = "-1";
+		echo $resp;
+	}
+}
 
 // to get the alternate mentors based on a course.
 function GetAlternateMentors($course) {

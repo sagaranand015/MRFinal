@@ -837,8 +837,6 @@
             			}
             		}, 
             		error: function() {
-            			alertMsg.children('p').remove();
-				        alertMsg.fadeOut();
 				        popup.children('p').remove();
 				        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn();	
             		},
@@ -3074,6 +3072,135 @@
                 return false;
             });
 
+            // --------------- for deleteing the users from the db ----------------------
+            $('.delete-user').on('click', function() {
+                showDiv($('.delete-user-div'));
+                changeActiveState($(this).parent('li'));
+
+                $('.delete-user-table').remove();
+
+                // to get all the courses as a drop down list
+                showLoading();
+                $.ajax({
+                    type: "GET",
+                    url: "AJAXFunctions.php",
+                    data: {
+                        no: "6"
+                    },
+                    success: function(response) {
+                        // to show the courses drop down at appropriate place.
+                        if(response == "-1") {
+                            popup.children('p').remove();
+                            popup.append("<p>We could not retrieve the courses from the database. Please check your internet connection and try again.</p>").fadeIn();                              
+                        }
+                        else {
+                            $('.course-list-delete-user').children('select').remove();
+                            $('.course-list-delete-user').append(response);
+                        }
+                    }, 
+                    error: function() {
+                        popup.children('p').remove();
+                        popup.append("<p>Oops! We encountered an error while processing your Request. Please try again.</p>").fadeIn(); 
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+                return false;
+            });   // end of delete-user onclick
+
+            // on change of the course selection
+            $('.delete-user-div').delegate('.course-list-delete-user', 'change', function() {
+
+                $('.delete-user-table').remove();
+
+                var courseId = $('.course-list-delete-user').children('select').val();
+                if(courseId == "-1" || courseId == undefined  || courseId == "undefined") {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select a course before proceeding...</p>").fadeIn();
+                } 
+                else {
+                    // get the mentees in this course and show the delete button.
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "57", course: courseId
+                        },
+                        success: function(response) {
+                            if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while performing this request. Please try again.</p>").fadeIn();
+                            } else if(response == "0") {
+                                popup.children('p').remove();
+                                popup.append("<p>No mentees found for this course. Please choose a different course.</p>").fadeIn();
+                            } else {
+                                $('.delete-user-div').append(response);
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while performing this request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }   // end of else.
+                return false;
+            });
+
+            // for clicking the delete button 
+            $('.delete-user-div').delegate('.delete-link', 'click', function() {
+                var menteeId = $(this).attr('data-id');
+                var menteeEmail = $(this).attr('data-email');
+                var courseId = $('.course-list-delete-user').children('select').val();
+
+                if(menteeId == "-1" || menteeId == undefined || menteeId == "undefined" || menteeEmail == "-1" || menteeEmail == undefined || menteeEmail == "undefined") {
+                    popup.children('p').remove();
+                    popup.append("<p>Oops! Looks like the parameters for this mentee are not correct. Please refresh the page or contact the Tech support at <code>tech@mentored-research.com</code></p>").fadeIn();
+                } else if(courseId == "-1" || courseId == "undefined" || courseId == undefined) {
+                    popup.children('p').remove();
+                    popup.append("<p>Please select the course before continuing...</p>").fadeIn();
+                } else {
+                    showLoading();
+                    $.ajax({
+                        type: "GET",
+                        url: "AJAXFunctions.php",
+                        data: {
+                            no: "58", menteeId: menteeId, menteeEmail: menteeEmail, course: courseId
+                        },
+                        success: function(response) {
+                            console.log(response);
+                            if(response == "1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Deletion Successful. </p>").fadeIn();
+                                $('.delete-user').trigger('click');
+                            } else if(response == "-2") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We could not delete from the Mentee table. Please contact the tech support to delete this mentee manually.</p>").fadeIn();    
+                            } else if(response == "-3") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We could not delete from the Mentee table. Please contact the tech support to delete this mentee manually.</p>").fadeIn();    
+                            } else if(response == "-1") {
+                                popup.children('p').remove();
+                                popup.append("<p>Oops! We encountered an error while performing this request. Please try again.</p>").fadeIn();    
+                            }
+                        },
+                        error: function() {
+                            popup.children('p').remove();
+                            popup.append("<p>Oops! We encountered an error while performing this request. Please try again.</p>").fadeIn();
+                        },
+                        complete: function() {
+                            hideLoading();
+                        }
+                    });
+                }
+
+                return false;
+            });
+
             // hide all the divs on page load. Except for first div.
             $('.main-div').hide();
             $('.CRP').trigger('click');
@@ -3181,6 +3308,7 @@
                 </ul>
                 <ul class="nav nav-sidebar">
                 	<li><a href="#" class="user">Add User</a></li>
+                    <li><a href="#" class="delete-user">Delete User</a></li>
                     <li><a href="#" class="quiz">Add Quiz</a></li>
                     <li><a href="#" class="evaluate">Evaluate Quizzes</a></li>
                     <li><a href="#" class="team">Add Team(s)</a></li>
@@ -3194,6 +3322,27 @@
         <button class="btn btn-lg btn-primary btn-block menu-show" id="btnShowMenu">
         	Menu
         </button>
+
+        <!-- for deleting the users -->
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div delete-user-div">
+            <h1 class="page-header">
+                Delete Users
+            </h1>
+
+            <table class="table">
+                <tr>
+                    <td>
+                        <label>Select Course: </label>
+                    </td>
+                    <td class="course-list-delete-user">
+                        <!-- data will come from ajax -->
+                    </td>
+                </tr>
+            </table>
+
+            <!-- data will come from ajax here in table for deletion of the user -->
+
+        </div>
 
         <!-- for adding the alternate mentors -->
         <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 main-div alternate-mentor-div">

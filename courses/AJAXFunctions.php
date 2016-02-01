@@ -818,7 +818,8 @@ function GetMenteeStatusForMentor($mentorId, $mentorEmail) {
 	$feedback = "";
 	$mentee = array();
 	try {
-		$query = "select * from Mentee where MenteeMentor='$mentorId'";
+		// $query = "select * from Mentee where MenteeMentor='$mentorId'";
+		$query = "select * from MenteeCourses where MentorID='$mentorId' group by MenteeID;";
 		$rs = mysql_query($query);
 		if(!$rs) {
 			$resp = "-1";
